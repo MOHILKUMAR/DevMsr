@@ -1,0 +1,101 @@
+---
+import { actions } from 'astro:actions';
+import { Pencil, Plus, ExternalLink } from '@lucide/astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHeader from '../../components/admin/PageHeader.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import ProductStatusBadge from '../../components/ui/ProductStatusBadge.astro';
+import { listIndustries, listProducts } from '../../lib/admin/repository';
+import { draftChecked, draftValue, formAction, linesOf, noticeText, outcomeOf } from '../../lib/admin/page';
+import { PRODUCT_STATUS_META } from '../../lib/catalogue/labels';
+import { SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
+import { PRODUCT_STATUSES } from '../../types/catalogue';
+import { can } from '../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'content')) return Astro.redirect('/admin', 303);
+
+const outcome = outcomeOf([Astro.getActionResult(actions.admin.products.save), Astro.getActionResult(actions.admin.products.delete)], (r) => `/admin/products?notice=${r.notice ?? 'saved'}`);
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+
+const [products, industries] = await Promise.all([listProducts(db), listIndustries(db)]);
+const editId = Astro.url.searchParams.get('edit');
+const isNew = Astro.url.searchParams.has('new');
+const editing = editId ? products.find((product) => product.id === editId) : undefined;
+const v = outcome.failure?.values;
+const errors = outcome.failure?.fieldErrors ?? {};
+---
+
+<AdminLayout title="Products">
+  <PageHeader title="Products" description="Only mark a product “Available” when it is implemented and ready to offer. Descriptions support Markdown; raw HTML is shown as text.">
+    <a href="/admin/products?new=1" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink"><Plus size={15} aria-hidden="true" /> Add product</a>
+  </PageHeader>
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  {
+    (isNew || editing) && (
+      <section class="mb-10 rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6" aria-labelledby="product-form-title">
+        <h2 id="product-form-title" class="mb-5 text-lg font-semibold text-ink">{editing ? `Edit: ${editing.name}` : 'New product'}</h2>
+        <form method="POST" action={formAction(actions.admin.products.save.queryString, editing ? { edit: editing.id } : { new: '1' })} class="grid gap-5 md:grid-cols-2">
+          {editing && <input type="hidden" name="id" value={editing.id} />}
+          <Field id="name" label="Name" error={errors.name}><input id="name" name="name" required maxlength="120" value={draftValue(v, 'name', editing?.name)} class="field" /></Field>
+          <Field id="slug" label="Slug" error={errors.slug}><input id="slug" name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" value={draftValue(v, 'slug', editing?.slug)} class="field font-mono" /></Field>
+          <Field id="summary" label="Summary" error={errors.summary} class="md:col-span-2"><input id="summary" name="summary" required maxlength="400" value={draftValue(v, 'summary', editing?.summary)} class="field" /></Field>
+          <Field id="status" label="Status" hint={PRODUCT_STATUS_META[(draftValue(v, 'status', editing?.status ?? 'concept') as keyof typeof PRODUCT_STATUS_META)]?.explanation} error={errors.status}>
+            <select id="status" name="status" class="field">{PRODUCT_STATUSES.map((status) => <option value={status} selected={draftValue(v, 'status', editing?.status ?? 'concept') === status}>{PRODUCT_STATUS_META[status].label}</option>)}</select>
+          </Field>
+          <div class="self-end">
+            <label class="flex items-start gap-2 text-sm"><input type="checkbox" name="confirmAvailable" checked={draftChecked(v, 'confirmAvailable', editing?.status === 'available')} class="mt-0.5 size-4 accent-[var(--olive)]" /> If “Available”: I confirm it is implemented and ready to offer.</label>
+            {errors.confirmAvailable && <p class="mt-1 text-[0.8125rem] text-danger">{errors.confirmAvailable}</p>}
+          </div>
+          <Field id="industryId" label="Industry" error={errors.industryId}>
+            <select id="industryId" name="industryId" class="field"><option value="">All industries</option>{industries.map((industry) => <option value={industry.id} selected={draftValue(v, 'industryId', editing?.industry_id) === industry.id}>{industry.name}</option>)}</select>
+          </Field>
+          <Field id="serviceCategory" label="Service category" error={errors.serviceCategory}>
+            <select id="serviceCategory" name="serviceCategory" class="field"><option value="">—</option>{SERVICE_CATEGORY_CONTENT.map((category) => <option value={category.slug} selected={draftValue(v, 'serviceCategory', editing?.service_category) === category.slug}>{category.name}</option>)}</select>
+          </Field>
+          <Field id="description" label="Description (Markdown)" error={errors.description} class="md:col-span-2"><textarea id="description" name="description" rows="8" maxlength="20000" class="field font-mono text-sm">{draftValue(v, 'description', editing?.description)}</textarea></Field>
+          <Field id="features" label="Features (one per line)" error={errors.features}><textarea id="features" name="features" rows="5" class="field">{draftValue(v, 'features', linesOf(editing?.features))}</textarea></Field>
+          <Field id="technologyStack" label="Technology (one per line)" error={errors.technologyStack}><textarea id="technologyStack" name="technologyStack" rows="5" class="field">{draftValue(v, 'technologyStack', linesOf(editing?.technology_stack))}</textarea></Field>
+          <Field id="imageUrls" label="Screenshot URLs (https, one per line)" hint="Use genuine screenshots only." error={errors.imageUrls} class="md:col-span-2"><textarea id="imageUrls" name="imageUrls" rows="3" class="field font-mono text-sm">{draftValue(v, 'imageUrls', linesOf(editing?.image_urls))}</textarea></Field>
+          <Field id="demoUrl" label="Demo URL" error={errors.demoUrl}><input id="demoUrl" name="demoUrl" type="url" value={draftValue(v, 'demoUrl', editing?.demo_url)} class="field" /></Field>
+          <Field id="repositoryUrl" label="Public repository URL" error={errors.repositoryUrl}><input id="repositoryUrl" name="repositoryUrl" type="url" value={draftValue(v, 'repositoryUrl', editing?.repository_url)} class="field" /></Field>
+          <Field id="seoTitle" label="SEO title" error={errors.seoTitle}><input id="seoTitle" name="seoTitle" maxlength="120" value={draftValue(v, 'seoTitle', editing?.seo_title)} class="field" /></Field>
+          <Field id="seoDescription" label="SEO description" error={errors.seoDescription}><input id="seoDescription" name="seoDescription" maxlength="320" value={draftValue(v, 'seoDescription', editing?.seo_description)} class="field" /></Field>
+          <Field id="sortOrder" label="Sort order" error={errors.sortOrder}><input id="sortOrder" name="sortOrder" inputmode="numeric" value={draftValue(v, 'sortOrder', editing?.sort_order ?? 100)} class="field" /></Field>
+          <label class="flex items-center gap-2 self-end pb-2.5 text-sm"><input type="checkbox" name="isPublished" checked={draftChecked(v, 'isPublished', editing?.is_published ?? false)} class="size-4 accent-[var(--olive)]" /> Published</label>
+          <div class="flex gap-3 md:col-span-2">
+            <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-5 py-2.5 font-medium text-invert-ink">Save product</button>
+            <a href="/admin/products" class="px-4 py-2.5 text-ink-muted hover:text-ink">Close</a>
+          </div>
+        </form>
+        {editing && (
+          <form method="POST" action={formAction(actions.admin.products.delete.queryString)} class="mt-6 border-t border-line pt-4">
+            <input type="hidden" name="id" value={editing.id} />
+            <button type="submit" class="text-sm text-danger underline">Delete this product</button>
+          </form>
+        )}
+      </section>
+    )
+  }
+
+  <ul class="divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface">
+    {
+      products.map((product) => (
+        <li class:list={['flex flex-wrap items-center gap-3 px-4 py-3', editing?.id === product.id && 'bg-olive-wash']}>
+          <span class="min-w-0 flex-1">
+            <span class="block font-medium text-ink">{product.name}</span>
+            <span class="block truncate text-sm text-ink-muted">{product.summary}</span>
+          </span>
+          <ProductStatusBadge status={product.status} />
+          {product.is_published ? <Badge tone="success">Published</Badge> : <Badge>Hidden</Badge>}
+          {product.is_published && <a href={`/products/${product.slug}`} target="_blank" rel="noopener" class="text-ink-muted hover:text-ink" aria-label={`View ${product.name}`}><ExternalLink size={14} aria-hidden="true" /></a>}
+          <a href={`/admin/products?edit=${product.id}`} class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm text-ink hover:bg-bg-sunken"><Pencil size={14} aria-hidden="true" /> Edit</a>
+        </li>
+      ))
+    }
+  </ul>
+</AdminLayout>

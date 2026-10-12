@@ -3,6 +3,13 @@ import { defineConfig, envField, fontProviders } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+
+// The pre-paint theme script is inlined (is:inline), which Astro does not hash.
+// Hash it here from the same file the layout inlines, so the CSP stays in sync.
+const themeInit = readFileSync(new URL('./src/scripts/theme-init.js', import.meta.url), 'utf8');
+const themeInitHash = `sha256-${createHash('sha256').update(themeInit).digest('base64')}`;
 
 // Server-side configuration is read at runtime (Cloudflare secrets / vars,
 // or .dev.vars locally). Every variable is `access: 'secret'` so values are
@@ -95,6 +102,7 @@ export default defineConfig({
       ],
       scriptDirective: {
         resources: ["'self'", 'https://challenges.cloudflare.com'],
+        hashes: [/** @type {`sha256-${string}`} */ (themeInitHash)],
       },
     },
   },

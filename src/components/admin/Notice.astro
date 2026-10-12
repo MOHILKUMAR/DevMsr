@@ -1,0 +1,26 @@
+---
+import { CircleCheck, CircleAlert } from '@lucide/astro';
+
+interface Props {
+  notice?: string | null;
+  error?: string | null;
+}
+const { notice, error } = Astro.props;
+---
+
+{
+  error && (
+    <div role="alert" class="mb-6 flex items-start gap-2 rounded-[var(--radius-card)] border border-danger/30 bg-danger-soft px-4 py-3 text-ink">
+      <CircleAlert size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-danger" />
+      <p>{error}</p>
+    </div>
+  )
+}
+{
+  notice && !error && (
+    <div role="status" class="mb-6 flex items-start gap-2 rounded-[var(--radius-card)] border border-success/30 bg-success-soft px-4 py-3 text-ink">
+      <CircleCheck size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-success" />
+      <p>{notice}</p>
+    </div>
+  )
+}

@@ -1,0 +1,97 @@
+---
+import { actions } from 'astro:actions';
+import { Pencil, Plus } from '@lucide/astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHeader from '../../components/admin/PageHeader.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import { listIndustries, listPortfolio } from '../../lib/admin/repository';
+import { draftChecked, draftList, draftValue, formAction, linesOf, noticeText, outcomeOf } from '../../lib/admin/page';
+import { can } from '../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'content')) return Astro.redirect('/admin', 303);
+
+const outcome = outcomeOf([Astro.getActionResult(actions.admin.portfolio.save), Astro.getActionResult(actions.admin.portfolio.delete)], (r) => `/admin/portfolio?notice=${r.notice ?? 'saved'}`);
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+
+const [projects, industries] = await Promise.all([listPortfolio(db), listIndustries(db)]);
+const editId = Astro.url.searchParams.get('edit');
+const isNew = Astro.url.searchParams.has('new');
+const editing = editId ? projects.find((project) => project.id === editId) : undefined;
+const v = outcome.failure?.values;
+const errors = outcome.failure?.fieldErrors ?? {};
+const selected = new Set(draftList(v, 'industryIds', editing?.portfolio_industries.map((link) => link.industry_id) ?? []));
+const TYPES = { client: 'Client project', internal: 'Internal project', prototype: 'Prototype' } as const;
+---
+
+<AdminLayout title="Portfolio">
+  <PageHeader title="Portfolio" description="Publish only real work. Client projects need the client’s permission before they are listed.">
+    <a href="/admin/portfolio?new=1" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink"><Plus size={15} aria-hidden="true" /> Add project</a>
+  </PageHeader>
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  {
+    (isNew || editing) && (
+      <section class="mb-10 rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6" aria-labelledby="portfolio-form-title">
+        <h2 id="portfolio-form-title" class="mb-5 text-lg font-semibold text-ink">{editing ? `Edit: ${editing.title}` : 'New project'}</h2>
+        <form method="POST" action={formAction(actions.admin.portfolio.save.queryString, editing ? { edit: editing.id } : { new: '1' })} class="grid gap-5 md:grid-cols-2">
+          {editing && <input type="hidden" name="id" value={editing.id} />}
+          <Field id="title" label="Title" error={errors.title}><input id="title" name="title" required maxlength="160" value={draftValue(v, 'title', editing?.title)} class="field" /></Field>
+          <Field id="slug" label="Slug" error={errors.slug}><input id="slug" name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" value={draftValue(v, 'slug', editing?.slug)} class="field font-mono" /></Field>
+          <Field id="summary" label="Summary" error={errors.summary} class="md:col-span-2"><input id="summary" name="summary" required maxlength="400" value={draftValue(v, 'summary', editing?.summary)} class="field" /></Field>
+          <Field id="projectType" label="Project type" error={errors.projectType}>
+            <select id="projectType" name="projectType" class="field">{Object.entries(TYPES).map(([value, label]) => <option value={value} selected={draftValue(v, 'projectType', editing?.project_type ?? 'client') === value}>{label}</option>)}</select>
+          </Field>
+          <div class="self-end">
+            <label class="flex items-start gap-2 text-sm"><input type="checkbox" name="clientPermission" checked={draftChecked(v, 'clientPermission', Boolean(editing?.is_published && editing.project_type === 'client'))} class="mt-0.5 size-4 accent-[var(--olive)]" /> For client projects: the client has agreed to be listed.</label>
+            {errors.clientPermission && <p class="mt-1 text-[0.8125rem] text-danger">{errors.clientPermission}</p>}
+          </div>
+          <Field id="description" label="Case study (Markdown)" hint="Describe what was built and the client’s situation. Do not state results you cannot verify." error={errors.description} class="md:col-span-2"><textarea id="description" name="description" rows="10" maxlength="20000" class="field font-mono text-sm">{draftValue(v, 'description', editing?.description)}</textarea></Field>
+          <Field id="technologyStack" label="Technology (one per line)" error={errors.technologyStack}><textarea id="technologyStack" name="technologyStack" rows="4" class="field">{draftValue(v, 'technologyStack', linesOf(editing?.technology_stack))}</textarea></Field>
+          <Field id="imageUrls" label="Screenshot URLs (https, one per line)" error={errors.imageUrls}><textarea id="imageUrls" name="imageUrls" rows="4" class="field font-mono text-sm">{draftValue(v, 'imageUrls', linesOf(editing?.image_urls))}</textarea></Field>
+          <Field id="demoUrl" label="Live / demo URL" error={errors.demoUrl}><input id="demoUrl" name="demoUrl" type="url" value={draftValue(v, 'demoUrl', editing?.demo_url)} class="field" /></Field>
+          <Field id="repositoryUrl" label="Public repository URL" error={errors.repositoryUrl}><input id="repositoryUrl" name="repositoryUrl" type="url" value={draftValue(v, 'repositoryUrl', editing?.repository_url)} class="field" /></Field>
+          <fieldset class="md:col-span-2">
+            <legend class="mb-2 text-sm font-medium text-ink">Industries</legend>
+            <div class="grid gap-2 sm:grid-cols-3">{industries.map((industry) => <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="industryIds" value={industry.id} checked={selected.has(industry.id)} class="size-4 accent-[var(--olive)]" /> {industry.name}</label>)}</div>
+          </fieldset>
+          <Field id="seoTitle" label="SEO title" error={errors.seoTitle}><input id="seoTitle" name="seoTitle" maxlength="120" value={draftValue(v, 'seoTitle', editing?.seo_title)} class="field" /></Field>
+          <Field id="seoDescription" label="SEO description" error={errors.seoDescription}><input id="seoDescription" name="seoDescription" maxlength="320" value={draftValue(v, 'seoDescription', editing?.seo_description)} class="field" /></Field>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="isPublished" checked={draftChecked(v, 'isPublished', editing?.is_published ?? false)} class="size-4 accent-[var(--olive)]" /> Published</label>
+          <div class="flex gap-3 md:col-span-2">
+            <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-5 py-2.5 font-medium text-invert-ink">Save project</button>
+            <a href="/admin/portfolio" class="px-4 py-2.5 text-ink-muted hover:text-ink">Close</a>
+          </div>
+        </form>
+        {editing && (
+          <form method="POST" action={formAction(actions.admin.portfolio.delete.queryString)} class="mt-6 border-t border-line pt-4">
+            <input type="hidden" name="id" value={editing.id} />
+            <button type="submit" class="text-sm text-danger underline">Delete this project</button>
+          </form>
+        )}
+      </section>
+    )
+  }
+
+  <ul class="divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface">
+    {
+      projects.length === 0 ? (
+        <li class="px-4 py-6 text-center text-ink-muted">No projects yet.</li>
+      ) : (
+        projects.map((project) => (
+          <li class:list={['flex flex-wrap items-center gap-3 px-4 py-3', editing?.id === project.id && 'bg-olive-wash']}>
+            <span class="min-w-0 flex-1">
+              <span class="block font-medium text-ink">{project.title}</span>
+              <span class="block truncate text-sm text-ink-muted">{TYPES[project.project_type]} · {project.summary}</span>
+            </span>
+            {project.is_published ? <Badge tone="success">Published</Badge> : <Badge>Draft</Badge>}
+            <a href={`/admin/portfolio?edit=${project.id}`} class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm text-ink hover:bg-bg-sunken"><Pencil size={14} aria-hidden="true" /> Edit</a>
+          </li>
+        ))
+      )
+    }
+  </ul>
+</AdminLayout>

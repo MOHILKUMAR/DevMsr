@@ -1,0 +1,77 @@
+---
+import { actions } from 'astro:actions';
+import { Pencil, Plus } from '@lucide/astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHeader from '../../components/admin/PageHeader.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import DynamicIcon from '../../components/ui/DynamicIcon.astro';
+import { listIndustries } from '../../lib/admin/repository';
+import { draftChecked, draftValue, formAction, noticeText, outcomeOf } from '../../lib/admin/page';
+import { ICON_NAMES } from '../../lib/catalogue/icons';
+import { getIndustryContent } from '../../data/industries';
+import { can } from '../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'catalogue')) return Astro.redirect('/admin', 303);
+
+const outcome = outcomeOf([Astro.getActionResult(actions.admin.industries.save)], (r) => `/admin/industries?notice=${r.notice ?? 'saved'}`);
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+
+const industries = await listIndustries(db);
+const editId = Astro.url.searchParams.get('edit');
+const isNew = Astro.url.searchParams.has('new');
+const editing = editId ? industries.find((industry) => industry.id === editId) : undefined;
+const v = outcome.failure?.values;
+const errors = outcome.failure?.fieldErrors ?? {};
+---
+
+<AdminLayout title="Industries">
+  <PageHeader title="Industries" description="Names, descriptions, order and visibility. Each industry’s long-form page copy (problems, solution groups) lives in the codebase.">
+    <a href="/admin/industries?new=1" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink"><Plus size={15} aria-hidden="true" /> Add industry</a>
+  </PageHeader>
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  {
+    (isNew || editing) && (
+      <section class="mb-10 rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6" aria-labelledby="industry-form-title">
+        <h2 id="industry-form-title" class="mb-5 text-lg font-semibold text-ink">{editing ? `Edit: ${editing.name}` : 'New industry'}</h2>
+        {isNew && <p class="mb-5 rounded-md bg-warning-soft px-3 py-2 text-sm text-ink">A new industry appears in lists and forms straight away. Its dedicated page needs page copy added in <code class="font-mono">src/data/industries.ts</code>; until then the page returns “not found”.</p>}
+        <form method="POST" action={formAction(actions.admin.industries.save.queryString, editing ? { edit: editing.id } : { new: '1' })} class="grid gap-5 md:grid-cols-2">
+          {editing && <input type="hidden" name="id" value={editing.id} />}
+          <Field id="name" label="Name" error={errors.name}><input id="name" name="name" required maxlength="120" value={draftValue(v, 'name', editing?.name)} class="field" /></Field>
+          <Field id="slug" label="Slug" hint={editing ? 'Changing the slug changes the page URL.' : undefined} error={errors.slug}><input id="slug" name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" value={draftValue(v, 'slug', editing?.slug)} class="field font-mono" /></Field>
+          <Field id="description" label="Description" error={errors.description} class="md:col-span-2"><textarea id="description" name="description" rows="3" maxlength="1000" class="field">{draftValue(v, 'description', editing?.description)}</textarea></Field>
+          <Field id="icon" label="Icon" error={errors.icon}>
+            <select id="icon" name="icon" class="field">{ICON_NAMES.map((icon) => <option value={icon} selected={draftValue(v, 'icon', editing?.icon ?? 'building') === icon}>{icon}</option>)}</select>
+          </Field>
+          <Field id="sortOrder" label="Sort order" error={errors.sortOrder}><input id="sortOrder" name="sortOrder" inputmode="numeric" value={draftValue(v, 'sortOrder', editing?.sort_order ?? 100)} class="field" /></Field>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" checked={draftChecked(v, 'isActive', editing?.is_active ?? true)} class="size-4 accent-[var(--olive)]" /> Show on website</label>
+          <div class="flex gap-3 md:col-span-2">
+            <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-5 py-2.5 font-medium text-invert-ink">Save industry</button>
+            <a href="/admin/industries" class="px-4 py-2.5 text-ink-muted hover:text-ink">Close</a>
+          </div>
+        </form>
+      </section>
+    )
+  }
+
+  <ul class="divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface">
+    {
+      industries.map((industry) => (
+        <li class:list={['flex flex-wrap items-center gap-4 px-4 py-3', editing?.id === industry.id && 'bg-olive-wash']}>
+          <span class="flex size-9 items-center justify-center rounded-md bg-olive-wash text-olive"><DynamicIcon name={industry.icon} size={17} /></span>
+          <span class="min-w-0 flex-1">
+            <span class="block font-medium text-ink">{industry.name}</span>
+            <span class="block truncate text-sm text-ink-muted">{industry.description}</span>
+          </span>
+          {!getIndustryContent(industry.slug) && <Badge tone="warning">No page copy</Badge>}
+          {industry.is_active ? <Badge tone="success">Shown</Badge> : <Badge>Hidden</Badge>}
+          <a href={`/admin/industries?edit=${industry.id}`} class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm text-ink hover:bg-bg-sunken"><Pencil size={14} aria-hidden="true" /> Edit<span class="sr-only"> {industry.name}</span></a>
+        </li>
+      ))
+    }
+  </ul>
+</AdminLayout>

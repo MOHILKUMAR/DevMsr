@@ -1,0 +1,93 @@
+---
+import { actions } from 'astro:actions';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHeader from '../../components/admin/PageHeader.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Field from '../../components/admin/Field.astro';
+import { getSettings, listAudit } from '../../lib/admin/repository';
+import { draftValue, formAction, noticeText, outcomeOf } from '../../lib/admin/page';
+import { getServerConfig } from '../../lib/server/config';
+import { formatDateTime } from '../../lib/utils/dates';
+import { can } from '../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'settings')) return Astro.redirect('/admin', 303);
+
+const outcome = outcomeOf([Astro.getActionResult(actions.admin.settings.save)], () => '/admin/settings?notice=saved');
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+
+const [settings, audit] = await Promise.all([getSettings(db), listAudit(db, 40)]);
+const str = (key: string) => (typeof settings[key] === 'string' ? (settings[key] as string) : settings[key] === null || settings[key] === undefined ? '' : String(settings[key]));
+const v = outcome.failure?.values;
+const errors = outcome.failure?.fieldErrors ?? {};
+
+// Integration status (presence only — secret values are never displayed).
+const config = getServerConfig();
+const STATUS = [
+  { label: 'Lead intake (secret key)', ok: Boolean(config.supabaseSecretKey) },
+  { label: 'Form signing / rate limiting (APP_SECRET)', ok: Boolean(config.appSecret) },
+  { label: 'Email provider (Resend)', ok: Boolean(config.email.resendApiKey && config.email.from) },
+  { label: 'Owner notification address', ok: Boolean(config.email.ownerAddress) },
+  { label: 'Acknowledgement emails to prospects', ok: config.email.sendAcknowledgement },
+  { label: 'Cloudflare Turnstile', ok: Boolean(config.turnstile) },
+];
+const describe = (fields: Record<string, { old: unknown; new: unknown }>) =>
+  Object.keys(fields)
+    .slice(0, 6)
+    .join(', ');
+---
+
+<AdminLayout title="Settings">
+  <PageHeader title="Settings" description="Contact details and site-wide settings shown on the public website." />
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  <div class="grid gap-8 xl:grid-cols-3">
+    <form method="POST" action={formAction(actions.admin.settings.save.queryString)} class="grid gap-5 rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:grid-cols-2 sm:p-6 xl:col-span-2">
+      <Field id="contactEmail" label="Public contact email" hint="Shown in the footer and contact page. Leave empty to hide." error={errors.contactEmail}><input id="contactEmail" name="contactEmail" type="email" value={draftValue(v, 'contactEmail', str('contact_email'))} class="field" /></Field>
+      <Field id="contactPhone" label="Public phone" error={errors.contactPhone}><input id="contactPhone" name="contactPhone" value={draftValue(v, 'contactPhone', str('contact_phone'))} class="field" /></Field>
+      <Field id="whatsappNumber" label="WhatsApp number" hint="With country code, e.g. +91 98765 43210." error={errors.whatsappNumber}><input id="whatsappNumber" name="whatsappNumber" value={draftValue(v, 'whatsappNumber', str('whatsapp_number'))} class="field" /></Field>
+      <Field id="businessHours" label="Business hours" error={errors.businessHours}><input id="businessHours" name="businessHours" value={draftValue(v, 'businessHours', str('business_hours'))} placeholder="Mon–Sat, 10 am – 7 pm IST" class="field" /></Field>
+      <Field id="serviceArea" label="Service area" error={errors.serviceArea} class="sm:col-span-2"><input id="serviceArea" name="serviceArea" required value={draftValue(v, 'serviceArea', str('service_area'))} class="field" /></Field>
+      <Field id="announcement" label="Site announcement banner" hint="Optional one-line banner at the top of every public page." error={errors.announcement} class="sm:col-span-2"><input id="announcement" name="announcement" maxlength="200" value={draftValue(v, 'announcement', str('announcement'))} class="field" /></Field>
+      <Field id="leadRetentionMonths" label="Lead retention (months)" hint="Inactive, non-won leads older than this are eligible for deletion. Also stated in the privacy policy." error={errors.leadRetentionMonths}><input id="leadRetentionMonths" name="leadRetentionMonths" inputmode="numeric" value={draftValue(v, 'leadRetentionMonths', str('lead_retention_months') || '24')} class="field" /></Field>
+      <div class="flex items-end sm:col-span-2">
+        <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-5 py-2.5 font-medium text-invert-ink">Save settings</button>
+      </div>
+    </form>
+
+    <section class="rounded-[var(--radius-card)] border border-line bg-surface p-5 text-sm" aria-labelledby="integrations-title">
+      <h2 id="integrations-title" class="font-semibold text-ink">Server configuration</h2>
+      <p class="mt-1 text-ink-muted">Set as Cloudflare secrets. Values are never shown here.</p>
+      <ul class="mt-4 space-y-2">
+        {STATUS.map((item) => (
+          <li class="flex items-center justify-between gap-3">
+            <span class="text-ink">{item.label}</span>
+            <span class:list={['rounded-full px-2 py-0.5 text-[0.75rem]', item.ok ? 'bg-success-soft text-success' : 'bg-bg-sunken text-ink-muted']}>{item.ok ? 'On' : 'Off'}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+
+  <section class="mt-10" aria-labelledby="audit-title">
+    <h2 id="audit-title" class="mb-3 text-lg font-semibold text-ink">Recent changes (audit log)</h2>
+    <div class="overflow-x-auto rounded-[var(--radius-card)] border border-line bg-surface">
+      <table class="w-full min-w-[40rem] text-left text-sm">
+        <thead class="border-b border-line bg-bg-sunken text-ink-muted">
+          <tr><th scope="col" class="px-4 py-2 font-medium">When</th><th scope="col" class="px-4 py-2 font-medium">Table</th><th scope="col" class="px-4 py-2 font-medium">Action</th><th scope="col" class="px-4 py-2 font-medium">Fields</th></tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {audit.length === 0 ? <tr><td colspan="4" class="px-4 py-4 text-ink-muted">No changes recorded yet.</td></tr> : audit.map((entry) => (
+            <tr>
+              <td class="whitespace-nowrap px-4 py-2 text-ink-muted">{formatDateTime(entry.created_at)}</td>
+              <td class="px-4 py-2 font-mono text-[0.75rem] text-ink">{entry.table_name}</td>
+              <td class="px-4 py-2 text-ink">{entry.action}</td>
+              <td class="px-4 py-2 text-ink-muted">{entry.action === 'update' ? describe(entry.changed_fields) : '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</AdminLayout>

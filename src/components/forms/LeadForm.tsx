@@ -154,6 +154,8 @@ export default function LeadForm(props: LeadFormProps) {
   } = useForm<LeadFieldsInput, unknown, LeadFields>({
     resolver: zodResolver(leadFieldsSchema),
     mode: 'onTouched',
+    // Focus moves to the error summary instead (it links to each field).
+    shouldFocusError: false,
     defaultValues: {
       formType: props.formType,
       industry: props.defaults.industry ?? '',

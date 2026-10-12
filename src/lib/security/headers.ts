@@ -34,14 +34,35 @@ export function securityHeadersFor(options: HeaderOptions): Record<string, strin
   return headers;
 }
 
+/**
+ * Combines Astro's generated CSP (script/style hashes) with header-only
+ * directives. Never replaces Astro's policy: that would drop the hashes.
+ */
+export function mergeCsp(existing: string | null, extra: string): string {
+  if (!existing) return extra;
+  const present = new Set(existing.split(';').map((part) => part.trim().split(/\s+/)[0]?.toLowerCase()));
+  const additions = extra
+    .split(';')
+    .map((part) => part.trim())
+    .filter((part) => part && !present.has(part.split(/\s+/)[0]!.toLowerCase()));
+  return additions.length ? `${existing.replace(/;\s*$/, '')}; ${additions.join('; ')}` : existing;
+}
+
+function apply(target: Headers, headers: Record<string, string>) {
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() === 'content-security-policy') target.set(key, mergeCsp(target.get(key), value));
+    else target.set(key, value);
+  }
+}
+
 /** Applies headers, cloning the response if its headers are immutable (e.g. Response.redirect). */
 export function withHeaders(response: Response, headers: Record<string, string>): Response {
   try {
-    for (const [key, value] of Object.entries(headers)) response.headers.set(key, value);
+    apply(response.headers, headers);
     return response;
   } catch {
     const copy = new Response(response.body, response);
-    for (const [key, value] of Object.entries(headers)) copy.headers.set(key, value);
+    apply(copy.headers, headers);
     return copy;
   }
 }

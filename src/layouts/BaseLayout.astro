@@ -1,6 +1,7 @@
 ---
 import { Font } from 'astro:assets';
 import '../styles/global.css';
+import themeInit from '../scripts/theme-init.js?raw';
 
 export interface Props {
   /** Page title without the brand suffix. */
@@ -58,15 +59,8 @@ const jsonLdBlocks = jsonLd.map((block) => JSON.stringify(block).replace(/</g, '
     <Font cssVariable="--font-newsreader" preload />
     <Font cssVariable="--font-geist-mono" />
 
-    <script is:inline>
-      // Apply a saved theme before first paint to avoid a flash.
-      (function () {
-        try {
-          var theme = localStorage.getItem('devmsr-theme');
-          if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
-        } catch (_) {}
-      })();
-    </script>
+    <!-- Applies a saved theme before first paint. Its CSP hash is computed in astro.config.mjs. -->
+    <script is:inline set:html={themeInit} />
 
     {jsonLdBlocks.map((block) => <script type="application/ld+json" is:inline set:html={block} />)}
     <slot name="head" />

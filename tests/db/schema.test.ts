@@ -344,3 +344,53 @@ describe('retention', () => {
     expect(remaining.rows.map((r) => r.id)).toEqual([won.lead_id]);
   });
 });
+
+describe('admin helper functions', () => {
+  it('syncs service ↔ industry links atomically for admins only', async () => {
+    const { rows } = await t.db.query<{ id: string }>(`select id from public.services where slug = 'landing-page'`);
+    const serviceId = rows[0]!.id;
+    const industries = (await t.db.query<{ id: string }>(`select id from public.industries order by sort_order limit 2`)).rows.map((r) => r.id);
+
+    await t.as('authenticated', adminId, (tx) => tx.query('select public.admin_set_service_industries($1, $2::uuid[])', [serviceId, industries]), true);
+    let links = await t.db.query('select industry_id from public.service_industries where service_id = $1', [serviceId]);
+    expect(links.rows).toHaveLength(2);
+
+    await t.as('authenticated', adminId, (tx) => tx.query('select public.admin_set_service_industries($1, $2::uuid[])', [serviceId, [industries[0]]]), true);
+    links = await t.db.query('select industry_id from public.service_industries where service_id = $1', [serviceId]);
+    expect(links.rows).toHaveLength(1);
+
+    // A signed-in non-admin is limited by RLS: nothing changes.
+    await t
+      .as('authenticated', plainUserId, (tx) => tx.query('select public.admin_set_service_industries($1, $2::uuid[])', [serviceId, industries]), true)
+      .catch(() => undefined);
+    links = await t.db.query('select industry_id from public.service_industries where service_id = $1', [serviceId]);
+    expect(links.rows).toHaveLength(1);
+    await expect(t.as('anon', null, (tx) => tx.query('select public.admin_set_service_industries($1, $2::uuid[])', [serviceId, industries]))).rejects.toThrow(
+      /permission denied/,
+    );
+  });
+
+  it('records notification outcomes with an atomic attempt counter (server only)', async () => {
+    const { lead_id } = await createLeadAsServer();
+    const record = (status: string, delta: number, error: string | null) =>
+      t.as(
+        'service_role',
+        null,
+        (tx) => tx.query(`select public.record_notification_event($1, 'owner_new_lead', 'resend', $2, $3, $4, null, null)`, [lead_id, status, delta, error]),
+        true,
+      );
+    await record('failed', 1, 'Resend 500');
+    await record('failed', 1, 'Resend 500');
+    await record('sent', 1, null);
+    const { rows } = await t.db.query<{ status: string; attempt_count: number; last_error: string | null }>(
+      'select status, attempt_count, last_error from public.notification_events where lead_id = $1',
+      [lead_id],
+    );
+    expect(rows).toEqual([{ status: 'sent', attempt_count: 3, last_error: null }]);
+    await expect(
+      t.as('authenticated', adminId, (tx) =>
+        tx.query(`select public.record_notification_event($1, 'owner_new_lead', 'x', 'sent', 1, null, null, null)`, [lead_id]),
+      ),
+    ).rejects.toThrow(/permission denied/);
+  });
+});

@@ -1,0 +1,224 @@
+---
+import { actions } from 'astro:actions';
+import { ArrowLeft, Mail, Phone, MessageCircle, RotateCw, Trash, StickyNote, Activity } from '@lucide/astro';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import Notice from '../../../components/admin/Notice.astro';
+import LeadStatusBadge from '../../../components/admin/LeadStatusBadge.astro';
+import Badge from '../../../components/ui/Badge.astro';
+import { getLead, getLeadActivities, getLeadNotifications } from '../../../lib/admin/repository';
+import { formAction, noticeText, outcomeOf } from '../../../lib/admin/page';
+import { LEAD_STATUSES, LEAD_STATUS_META, FORM_TYPE_LABELS } from '../../../lib/leads/status';
+import { BUDGET_RANGES, CONTACT_METHODS, TIMELINES } from '../../../schemas/lead';
+import { getServiceCategoryContent } from '../../../data/service-categories';
+import { formatDateTime, toDateInputValue } from '../../../lib/utils/dates';
+import { can } from '../../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'leads')) return Astro.redirect('/admin', 303);
+const id = Astro.params.id ?? '';
+const self = `/admin/leads/${id}`;
+
+const outcome = outcomeOf(
+  [
+    Astro.getActionResult(actions.admin.leads.updateStatus),
+    Astro.getActionResult(actions.admin.leads.setFollowUp),
+    Astro.getActionResult(actions.admin.leads.addNote),
+    Astro.getActionResult(actions.admin.leads.updateContact),
+    Astro.getActionResult(actions.admin.leads.retryNotification),
+  ],
+  (result) => `${self}?notice=${result.notice ?? 'saved'}`,
+);
+const deleted = Astro.getActionResult(actions.admin.leads.delete);
+if (deleted?.data?.ok) return Astro.redirect('/admin/leads?notice=deleted', 303);
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+const deleteError = deleted?.data && !deleted.data.ok ? (deleted.data.fieldErrors?.confirm ?? deleted.data.message) : deleted?.error?.message;
+
+const lead = await getLead(db, id);
+if (!lead) return Astro.rewrite('/404');
+const [activities, notifications] = await Promise.all([getLeadActivities(db, id), getLeadNotifications(db, id)]);
+
+const label = (list: readonly { value: string; label: string }[], value: string | null) => (value ? (list.find((item) => item.value === value)?.label ?? value) : '—');
+const interest = lead.services?.name ?? getServiceCategoryContent(lead.service_category ?? '')?.name ?? 'Not sure yet';
+const waDigits = lead.phone?.replace(/\D/g, '') ?? '';
+const fieldErrors = outcome.failure?.fieldErrors ?? {};
+const ACTIVITY_TONE: Record<string, string> = {
+  note: 'bg-olive',
+  status_changed: 'bg-info',
+  created: 'bg-ink-faint',
+  notification_failed: 'bg-danger',
+  notification_sent: 'bg-success',
+};
+---
+
+<AdminLayout title={`${lead.name} · Lead`}>
+  <a href="/admin/leads" class="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"><ArrowLeft size={15} aria-hidden="true" /> All leads</a>
+
+  <div class="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
+    <div class="min-w-0">
+      <p class="font-mono text-[0.75rem] text-ink-muted">{lead.reference_number} · {FORM_TYPE_LABELS[lead.form_type]} request · received {formatDateTime(lead.created_at)}</p>
+      <h1 class="mt-1 font-display text-[2rem] leading-tight text-ink">{lead.name}</h1>
+      {lead.business_name && <p class="text-ink-muted">{lead.business_name}</p>}
+    </div>
+    <LeadStatusBadge status={lead.status} />
+  </div>
+
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  <div class="grid gap-8 xl:grid-cols-3">
+    <div class="space-y-8 xl:col-span-2">
+      <section aria-labelledby="project-title" class="rounded-[var(--radius-card)] border border-line bg-surface p-5">
+        <h2 id="project-title" class="text-lg font-semibold text-ink">Project</h2>
+        <p class="mt-3 whitespace-pre-line text-ink">{lead.project_description}</p>
+        <dl class="mt-6 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+          <div><dt class="text-ink-muted">Industry</dt><dd class="text-ink">{lead.industries?.name ?? 'Other / not listed'}</dd></div>
+          <div><dt class="text-ink-muted">Interested in</dt><dd class="text-ink">{interest}</dd></div>
+          <div><dt class="text-ink-muted">Budget</dt><dd class="text-ink">{label(BUDGET_RANGES, lead.budget_range)}</dd></div>
+          <div><dt class="text-ink-muted">Timeline</dt><dd class="text-ink">{label(TIMELINES, lead.timeline)}</dd></div>
+          <div><dt class="text-ink-muted">Preferred contact</dt><dd class="text-ink">{label(CONTACT_METHODS, lead.preferred_contact)}</dd></div>
+          <div><dt class="text-ink-muted">Consultation time</dt><dd class="text-ink">{lead.consultation_time ?? '—'}</dd></div>
+          <div class="sm:col-span-2">
+            <dt class="text-ink-muted">Existing website</dt>
+            <dd class="break-all text-ink">{lead.website_url ? <a class="link-olive" href={lead.website_url} rel="noopener noreferrer nofollow" target="_blank">{lead.website_url}</a> : '—'}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="activity-title">
+        <h2 id="activity-title" class="mb-3 flex items-center gap-2 text-lg font-semibold text-ink"><Activity size={18} aria-hidden="true" class="text-olive" /> Notes & activity</h2>
+        <form method="POST" action={formAction(actions.admin.leads.addNote.queryString)} class="mb-6 rounded-[var(--radius-card)] border border-line bg-surface p-4">
+          <input type="hidden" name="id" value={lead.id} />
+          <label for="note" class="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-ink"><StickyNote size={14} aria-hidden="true" /> Add an internal note</label>
+          <textarea id="note" name="note" rows="3" required minlength="2" maxlength="5000" class="field" aria-invalid={fieldErrors.note ? 'true' : undefined} aria-describedby={fieldErrors.note ? 'note-error' : undefined}></textarea>
+          {fieldErrors.note && <p id="note-error" class="mt-1 text-sm text-danger">{fieldErrors.note}</p>}
+          <div class="mt-3 flex justify-end">
+            <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink">Save note</button>
+          </div>
+        </form>
+        <ol class="relative space-y-4 border-l border-line pl-5">
+          {
+            activities.map((item) => (
+              <li class="relative">
+                <span aria-hidden="true" class:list={['absolute -left-[1.6rem] top-1.5 size-2.5 rounded-full ring-4 ring-bg', ACTIVITY_TONE[item.activity_type] ?? 'bg-line-strong']} />
+                <p class:list={['text-sm', item.activity_type === 'note' ? 'whitespace-pre-line rounded-lg bg-surface px-3 py-2 text-ink ring-1 ring-line' : 'text-ink']}>{item.description}</p>
+                <p class="mt-0.5 text-[0.75rem] text-ink-muted">{item.admin_profiles?.display_name ?? 'System'} · {formatDateTime(item.created_at)}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+    </div>
+
+    <aside class="space-y-6" aria-label="Lead actions">
+      <section class="rounded-[var(--radius-card)] border border-line bg-surface p-5" aria-labelledby="status-title">
+        <h2 id="status-title" class="font-semibold text-ink">Status</h2>
+        <form method="POST" action={formAction(actions.admin.leads.updateStatus.queryString)} class="mt-3 flex gap-2">
+          <input type="hidden" name="id" value={lead.id} />
+          <label for="status" class="sr-only">Lead status</label>
+          <select id="status" name="status" class="field">
+            {LEAD_STATUSES.map((status) => <option value={status} selected={lead.status === status}>{LEAD_STATUS_META[status].label}</option>)}
+          </select>
+          <button type="submit" class="shrink-0 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink">Update</button>
+        </form>
+      </section>
+
+      <section class="rounded-[var(--radius-card)] border border-line bg-surface p-5" aria-labelledby="followup-title">
+        <h2 id="followup-title" class="font-semibold text-ink">Follow-up</h2>
+        <p class="mt-1 text-sm text-ink-muted">{lead.follow_up_at ? `Scheduled for ${formatDateTime(lead.follow_up_at)}` : 'No follow-up scheduled.'}</p>
+        <form method="POST" action={formAction(actions.admin.leads.setFollowUp.queryString)} class="mt-3 flex flex-wrap gap-2">
+          <input type="hidden" name="id" value={lead.id} />
+          <label for="followUpDate" class="sr-only">Follow-up date</label>
+          <input id="followUpDate" name="followUpDate" type="date" value={toDateInputValue(lead.follow_up_at)} class="field w-auto flex-1" />
+          <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink">Save</button>
+        </form>
+        {
+          lead.follow_up_at && (
+            <form method="POST" action={formAction(actions.admin.leads.setFollowUp.queryString)} class="mt-2">
+              <input type="hidden" name="id" value={lead.id} />
+              <input type="hidden" name="followUpDate" value="" />
+              <button type="submit" class="text-sm text-ink-muted underline hover:text-ink">Clear follow-up</button>
+            </form>
+          )
+        }
+      </section>
+
+      <section class="rounded-[var(--radius-card)] border border-line bg-surface p-5" aria-labelledby="contact-title">
+        <h2 id="contact-title" class="font-semibold text-ink">Contact</h2>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li class="flex items-center gap-2"><Mail size={15} aria-hidden="true" class="text-ink-muted" /><a class="link-olive break-all" href={`mailto:${lead.email}?subject=${encodeURIComponent(`Your enquiry ${lead.reference_number}`)}`}>{lead.email}</a></li>
+          {lead.phone && <li class="flex items-center gap-2"><Phone size={15} aria-hidden="true" class="text-ink-muted" /><a class="link-olive" href={`tel:${lead.phone}`}>{lead.phone}</a></li>}
+          {waDigits && <li class="flex items-center gap-2"><MessageCircle size={15} aria-hidden="true" class="text-ink-muted" /><a class="link-olive" href={`https://wa.me/${waDigits}`} target="_blank" rel="noopener noreferrer">WhatsApp</a></li>}
+        </ul>
+        <details class="mt-4 text-sm" open={Object.keys(fieldErrors).some((key) => ['name', 'email', 'phone', 'businessName'].includes(key))}>
+          <summary class="cursor-pointer text-ink-muted hover:text-ink">Edit contact details</summary>
+          <form method="POST" action={formAction(actions.admin.leads.updateContact.queryString)} class="mt-3 space-y-3">
+            <input type="hidden" name="id" value={lead.id} />
+            <div><label for="c-name" class="mb-1 block font-medium">Name</label><input id="c-name" name="name" value={lead.name} required class="field" />{fieldErrors.name && <p class="mt-1 text-danger">{fieldErrors.name}</p>}</div>
+            <div><label for="c-email" class="mb-1 block font-medium">Email</label><input id="c-email" name="email" type="email" value={lead.email} required class="field" />{fieldErrors.email && <p class="mt-1 text-danger">{fieldErrors.email}</p>}</div>
+            <div><label for="c-phone" class="mb-1 block font-medium">Phone</label><input id="c-phone" name="phone" type="tel" value={lead.phone ?? ''} class="field" />{fieldErrors.phone && <p class="mt-1 text-danger">{fieldErrors.phone}</p>}</div>
+            <div><label for="c-business" class="mb-1 block font-medium">Business</label><input id="c-business" name="businessName" value={lead.business_name ?? ''} class="field" /></div>
+            <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-4 py-2 font-medium text-invert-ink">Save contact</button>
+          </form>
+        </details>
+      </section>
+
+      <section class="rounded-[var(--radius-card)] border border-line bg-surface p-5" aria-labelledby="notif-title">
+        <h2 id="notif-title" class="font-semibold text-ink">Email notifications</h2>
+        {
+          notifications.length === 0 ? (
+            <p class="mt-2 text-sm text-ink-muted">No notification recorded yet.</p>
+          ) : (
+            <ul class="mt-3 space-y-3 text-sm">
+              {notifications.map((event) => (
+                <li class="rounded-lg bg-bg px-3 py-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-ink">{event.event_type === 'owner_new_lead' ? 'Owner alert' : 'Acknowledgement'}</span>
+                    <Badge tone={event.status === 'sent' ? 'success' : event.status === 'skipped' ? 'neutral' : 'danger'}>{event.status}</Badge>
+                  </div>
+                  <p class="mt-1 text-[0.75rem] text-ink-muted">{event.attempt_count} attempt(s){event.sent_at ? ` · sent ${formatDateTime(event.sent_at)}` : ''}</p>
+                  {event.last_error && <p class="mt-1 break-words text-[0.75rem] text-danger">{event.last_error}</p>}
+                  {event.status !== 'sent' && (
+                    <form method="POST" action={formAction(actions.admin.leads.retryNotification.queryString)} class="mt-2">
+                      <input type="hidden" name="id" value={lead.id} />
+                      <input type="hidden" name="eventType" value={event.event_type} />
+                      <button type="submit" class="inline-flex items-center gap-1.5 rounded-md border border-line-strong px-2.5 py-1 text-[0.8125rem] text-ink hover:border-ink-muted">
+                        <RotateCw size={13} aria-hidden="true" /> Retry now
+                      </button>
+                    </form>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </section>
+
+      <section class="rounded-[var(--radius-card)] border border-line bg-surface p-5 text-sm" aria-labelledby="source-title">
+        <h2 id="source-title" class="font-semibold text-ink">Source</h2>
+        <dl class="mt-3 space-y-1.5">
+          <div class="flex gap-2"><dt class="w-24 shrink-0 text-ink-muted">Form</dt><dd class="text-ink">{lead.source}{lead.source_path ? ` (${lead.source_path})` : ''}</dd></div>
+          <div class="flex gap-2"><dt class="w-24 shrink-0 text-ink-muted">Referrer</dt><dd class="break-all text-ink">{lead.referrer ?? '—'}</dd></div>
+          <div class="flex gap-2"><dt class="w-24 shrink-0 text-ink-muted">Campaign</dt><dd class="text-ink">{[lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(' / ') || '—'}</dd></div>
+          <div class="flex gap-2"><dt class="w-24 shrink-0 text-ink-muted">Consent</dt><dd class="text-ink">{formatDateTime(lead.privacy_acknowledged_at)}</dd></div>
+          <div class="flex gap-2"><dt class="w-24 shrink-0 text-ink-muted">Updated</dt><dd class="text-ink">{formatDateTime(lead.updated_at)}</dd></div>
+        </dl>
+      </section>
+
+      {
+        admin.role === 'owner' && (
+          <section class="rounded-[var(--radius-card)] border border-danger/30 p-5 text-sm" aria-labelledby="danger-title">
+            <h2 id="danger-title" class="flex items-center gap-2 font-semibold text-danger"><Trash size={15} aria-hidden="true" /> Delete permanently</h2>
+            <p class="mt-1 text-ink-muted">Use for spam or when a person asks for their data to be erased. This cannot be undone.</p>
+            <form method="POST" action={formAction(actions.admin.leads.delete.queryString)} class="mt-3 flex flex-wrap gap-2">
+              <input type="hidden" name="id" value={lead.id} />
+              <label for="confirm-delete" class="sr-only">Type DELETE to confirm</label>
+              <input id="confirm-delete" name="confirm" placeholder="Type DELETE" autocomplete="off" class="field w-auto flex-1" aria-describedby={deleteError ? 'delete-error' : undefined} />
+              <button type="submit" class="rounded-[var(--radius-control)] border border-danger px-3 py-2 font-medium text-danger hover:bg-danger-soft">Delete</button>
+            </form>
+            {deleteError && <p id="delete-error" class="mt-2 text-danger">{deleteError}</p>}
+          </section>
+        )
+      }
+    </aside>
+  </div>
+</AdminLayout>
