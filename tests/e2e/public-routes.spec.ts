@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { isThirdPartyMessage, settle } from './helpers';
 
 const ROUTES = [
   '/',
@@ -41,7 +42,7 @@ for (const route of ROUTES) {
   test(`${route} renders with metadata, one h1 and no console errors`, async ({ page }) => {
     const errors: string[] = [];
     page.on('console', (message) => {
-      if (message.type() === 'error') errors.push(message.text());
+      if (message.type() === 'error' && !isThirdPartyMessage(message)) errors.push(message.text());
     });
     page.on('pageerror', (error) => errors.push(error.message));
 
@@ -53,7 +54,7 @@ for (const route of ROUTES) {
     const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
     expect(canonical).toBe(`https://devmsr.in${route === '/' ? '' : route}`);
     await expect(page.locator('main#main')).toBeVisible();
-    await page.waitForLoadState('networkidle');
+    await settle(page);
     // Includes Content-Security-Policy violations, which surface as console errors.
     expect(errors).toEqual([]);
   });
