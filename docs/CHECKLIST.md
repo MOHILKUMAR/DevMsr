@@ -26,7 +26,7 @@ Legend: ✅ implemented and verified here · 🟡 implemented, needs verificatio
 - ✅ RLS and functions tested on PGlite with Supabase roles (`tests/db`)
 - ✅ Lead pipeline: validation, honeypot, signed token, Turnstile, rate limits, idempotent save, reference numbers, notifications with failure logging (`tests/unit/lead-submit.test.ts`)
 - ✅ Forms: accessible labels, inline errors + summary, loading, success and failure states; no-JS fallback
-- 🟡 Saving a real lead in your Supabase project and receiving the Resend email
+- ✅ Verified live on 12 Oct 2026: a lead saved through the form with its reference and activity, and the owner alert accepted by Resend (after fixing a Workers-only "Illegal invocation" bug in the Resend client)
 
 ## Phase 4 — Admin
 - ✅ Sign-in/out, server-side session + admin profile checks, role capabilities, rate-limited login
@@ -34,7 +34,7 @@ Legend: ✅ implemented and verified here · 🟡 implemented, needs verificatio
 - ✅ Lead inbox: search, status/industry/follow-up filters, pagination; lead detail: status, follow-up, notes, contact edits, activity history, source/UTM, owner-only delete
 - ✅ Services (industries, features, visibility), pricing (all pricing models, exact amounts), industries, FAQs, products, portfolio, blog (Markdown preview), settings, audit log
 - ✅ Unauthenticated access to admin pages and actions rejected (Playwright)
-- 🟡 Admin flows against your live Supabase project (sign-in, edits appearing on the public site)
+- ✅ Verified live on 12 Oct 2026: admin sign-in, non-admin refusal, dashboard counts, search, status/note/follow-up with actor in history, price edit visible on /pricing, audit log, sign-out
 
 ## Phase 5 — Quality and launch
 - ✅ `astro check`: 0 errors · Vitest: unit + database tests passing · Playwright: public routes, navigation, forms, security headers, CSP, auth guards, no-JS, responsive, axe (light + dark)
@@ -45,8 +45,8 @@ Legend: ✅ implemented and verified here · 🟡 implemented, needs verificatio
 - ⏳ Domain cut-over — only after your approval
 
 ## Before launch (your actions)
-- [ ] Create Supabase project, run migrations + seed, create owner profile, disable sign-ups (docs/SETUP.md)
-- [ ] Verify Resend domain; set email variables
+- [x] Create Supabase project, run migrations + seed, create owner profile, disable sign-ups (docs/SETUP.md) — `npm run verify:supabase` passes 24/24
+- [x] Verify Resend domain; set email variables
 - [ ] Create Turnstile widget (recommended)
 - [ ] Set Worker secrets; deploy to workers.dev; run the preview checklist (docs/DEPLOYMENT.md)
 - [ ] Review all copy, especially service timelines, the seeded blog post, product concepts, privacy policy and terms

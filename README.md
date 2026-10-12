@@ -41,6 +41,7 @@ Without Supabase configured the public site runs from the bundled seed data in `
 | `npm run test:e2e` | Playwright end-to-end and accessibility tests (needs a build) |
 | `npm run seed:generate` | Regenerate `supabase/seed.sql` from `src/data/` |
 | `npm run check:secrets` | Scan browser assets for secrets; remove copied `.dev.vars` |
+| `npm run verify:supabase` | Read-only checks of a live Supabase project (schema, seed, RLS) |
 | `npm run deploy:preview` | Build, scan, upload a preview version to Cloudflare |
 | `npm run deploy` | Build, scan, deploy to Cloudflare |
 
