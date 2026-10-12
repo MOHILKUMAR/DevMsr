@@ -1,0 +1,35 @@
+# build output
+dist/
+.astro/
+.wrangler/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+*.log
+
+# environment variables — never commit real secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# test output
+playwright-report/
+test-results/
+coverage/
+
+# editor / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+Thumbs.db
+
+# supabase local state
+supabase/.temp/
+supabase/.branches/

@@ -1,0 +1,18 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<a href="/" class:list={['group inline-flex shrink-0 items-center gap-2.5 text-ink', className]} aria-label="DevMsr.in home">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" class="shrink-0">
+    <rect x="2" y="2" width="9" height="9" rx="1.5" fill="currentColor"></rect>
+    <rect x="13" y="2" width="9" height="9" rx="1.5" fill="currentColor" opacity="0.22"></rect>
+    <rect x="2" y="13" width="9" height="9" rx="1.5" fill="currentColor" opacity="0.22"></rect>
+    <rect x="13" y="13" width="9" height="9" rx="1.5" class="fill-clay"></rect>
+  </svg>
+  <span class="font-display text-[1.375rem] font-[520] leading-none tracking-[-0.02em]"
+    >DevMsr<span class="text-ink-muted">.in</span></span
+  >
+</a>

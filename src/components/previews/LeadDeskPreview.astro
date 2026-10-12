@@ -1,0 +1,69 @@
+---
+import PreviewFrame from './PreviewFrame.astro';
+
+const rows = [
+  { ref: 'DM-261012-4F2A', who: 'Clinic', need: 'OPD tokens + booking', status: 'New', tone: 'bg-info-soft text-info' },
+  { ref: 'DM-261011-9C07', who: 'Hotel', need: 'Direct booking site', status: 'Contacted', tone: 'bg-warning-soft text-warning' },
+  { ref: 'DM-261010-1B3E', who: 'Footwear store', need: 'POS + size stock', status: 'Qualified', tone: 'bg-olive-wash text-olive' },
+  { ref: 'DM-261009-77D1', who: 'School', need: 'Admission CRM', status: 'Proposal sent', tone: 'bg-clay-soft text-clay-ink' },
+];
+const pipeline = [
+  { label: 'New', count: 3, width: 'w-[18%]', tone: 'bg-info' },
+  { label: 'Contacted', count: 5, width: 'w-[30%]', tone: 'bg-warning' },
+  { label: 'Qualified', count: 4, width: 'w-[24%]', tone: 'bg-olive' },
+  { label: 'Proposal', count: 2, width: 'w-[16%]', tone: 'bg-clay' },
+  { label: 'Won', count: 2, width: 'w-[12%]', tone: 'bg-success' },
+];
+---
+
+<div class="relative" aria-label="Illustration: the Lead Desk dashboard with sample enquiries" role="img">
+  <PreviewFrame title="Lead Desk" meta="Enquiries this week" class="relative z-10">
+    <div class="mb-4 flex items-baseline justify-between gap-4">
+      <div>
+        <p class="text-ink-muted">Open enquiries</p>
+        <p class="font-display text-[2rem] leading-none text-ink">14</p>
+      </div>
+      <p class="rounded-md border border-line px-2 py-1 font-mono text-[0.6875rem] text-ink-muted">Follow-ups due · 3</p>
+    </div>
+    <div class="mb-4 flex h-2 gap-0.5 overflow-hidden rounded-full" aria-hidden="true">
+      {pipeline.map((stage) => <span class:list={[stage.width, stage.tone, 'h-full']} />)}
+    </div>
+    <ul class="divide-y divide-line border-t border-line" aria-hidden="true">
+      {
+        rows.map((row) => (
+          <li class="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-0.5 py-2.5 sm:grid-cols-[8.5rem_1fr_auto]">
+            <span class="font-mono text-[0.6875rem] text-ink-muted">{row.ref}</span>
+            <span class="col-start-1 row-start-2 min-w-0 truncate text-ink sm:col-start-2 sm:row-start-1">
+              <span class="font-medium">{row.who}</span>
+              <span class="text-ink-muted"> · {row.need}</span>
+            </span>
+            <span class:list={['row-span-2 rounded-full px-2 py-0.5 text-[0.6875rem] font-medium sm:row-span-1', row.tone]}>{row.status}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </PreviewFrame>
+
+  <div
+    aria-hidden="true"
+    class="absolute -bottom-10 -left-6 z-20 hidden w-52 rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-lift sm:block lg:-left-12"
+  >
+    <p class="font-mono text-[0.625rem] uppercase tracking-[0.08em] text-ink-muted">General OPD</p>
+    <p class="mt-1 text-[0.8125rem] text-ink-muted">Now serving</p>
+    <p class="font-display text-[2.25rem] leading-none text-ink">A-14</p>
+    <p class="mt-2 text-[0.75rem] text-ink-muted">Next: A-15, A-16 · 9 waiting</p>
+  </div>
+
+  <div
+    aria-hidden="true"
+    class="absolute -right-4 -top-8 z-20 hidden w-48 rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-soft md:block lg:-right-8"
+  >
+    <p class="font-mono text-[0.625rem] uppercase tracking-[0.08em] text-ink-muted">GST invoice</p>
+    <dl class="mt-2 space-y-1 text-[0.75rem]">
+      <div class="flex justify-between"><dt class="text-ink-muted">Taxable</dt><dd class="tabular text-ink">₹2,000.00</dd></div>
+      <div class="flex justify-between"><dt class="text-ink-muted">CGST 9%</dt><dd class="tabular text-ink">₹180.00</dd></div>
+      <div class="flex justify-between"><dt class="text-ink-muted">SGST 9%</dt><dd class="tabular text-ink">₹180.00</dd></div>
+      <div class="flex justify-between border-t border-line pt-1 font-medium"><dt>Total</dt><dd class="tabular">₹2,360.00</dd></div>
+    </dl>
+  </div>
+</div>

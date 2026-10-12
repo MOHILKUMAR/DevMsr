@@ -1,0 +1,300 @@
+---
+import { ChevronDown, Menu, X, ArrowUpRight } from '@lucide/astro';
+import Wordmark from './Wordmark.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import DynamicIcon from '../ui/DynamicIcon.astro';
+import { SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
+import type { Industry } from '../../types/catalogue';
+
+interface Props {
+  industries: Industry[];
+}
+
+const { industries } = Astro.props;
+const path = Astro.url.pathname;
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+const primaryLinks = [
+  { href: '/products', label: 'Products' },
+  { href: '/portfolio', label: 'Portfolio' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+];
+---
+
+<header class="sticky top-0 z-40 border-b border-line bg-bg/92 backdrop-blur-sm supports-[backdrop-filter]:bg-bg/80" data-site-header>
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-md focus:bg-invert focus:px-4 focus:py-2 focus:text-invert-ink"
+    >Skip to content</a
+  >
+  <div class="page-container flex h-16 items-center gap-6">
+    <Wordmark />
+
+    <nav aria-label="Main" class="hidden flex-1 items-center lg:flex">
+      <ul class="flex items-center gap-1 text-[0.9375rem]">
+        <li class="relative" data-disclosure>
+          <button
+            type="button"
+            class:list={[
+              'inline-flex items-center gap-1 rounded-md px-3 py-2 text-ink-muted transition-colors hover:text-ink aria-expanded:text-ink',
+              isActive('/industries') && 'text-ink',
+            ]}
+            aria-expanded="false"
+            aria-controls="menu-industries"
+            data-disclosure-button
+          >
+            Industries <ChevronDown size={15} aria-hidden="true" class="transition-transform [[aria-expanded=true]>&]:rotate-180" />
+          </button>
+          <div
+            id="menu-industries"
+            hidden
+            data-disclosure-panel
+            class="absolute left-0 top-full mt-2 w-[min(40rem,calc(100vw-2rem))] rounded-[var(--radius-card)] border border-line bg-surface-raised p-3 shadow-lift"
+          >
+            <ul class="grid gap-1 sm:grid-cols-2">
+              {
+                industries.map((industry) => (
+                  <li>
+                    <a
+                      href={`/industries/${industry.slug}`}
+                      class="group flex gap-3 rounded-lg p-3 transition-colors hover:bg-bg-sunken"
+                      aria-current={isActive(`/industries/${industry.slug}`) ? 'page' : undefined}
+                    >
+                      <span class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-olive-wash text-olive">
+                        <DynamicIcon name={industry.icon} size={17} />
+                      </span>
+                      <span>
+                        <span class="block font-medium text-ink">{industry.name}</span>
+                        <span class="mt-0.5 line-clamp-2 block text-sm leading-snug text-ink-muted">{industry.description}</span>
+                      </span>
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+            <div class="mt-2 flex items-center justify-between border-t border-line px-3 pt-3 text-sm">
+              <span class="text-ink-muted">Not listed? We build for other sectors too.</span>
+              <a href="/industries" class="inline-flex items-center gap-1 font-medium text-ink hover:underline">
+                All industries <ArrowUpRight size={14} aria-hidden="true" />
+              </a>
+            </div>
+          </div>
+        </li>
+        <li class="relative" data-disclosure>
+          <button
+            type="button"
+            class:list={[
+              'inline-flex items-center gap-1 rounded-md px-3 py-2 text-ink-muted transition-colors hover:text-ink aria-expanded:text-ink',
+              isActive('/services') && 'text-ink',
+            ]}
+            aria-expanded="false"
+            aria-controls="menu-services"
+            data-disclosure-button
+          >
+            Services <ChevronDown size={15} aria-hidden="true" class="transition-transform [[aria-expanded=true]>&]:rotate-180" />
+          </button>
+          <div
+            id="menu-services"
+            hidden
+            data-disclosure-panel
+            class="absolute left-0 top-full mt-2 w-[min(44rem,calc(100vw-2rem))] rounded-[var(--radius-card)] border border-line bg-surface-raised p-3 shadow-lift"
+          >
+            <ul class="grid gap-x-2 gap-y-0.5 sm:grid-cols-2">
+              {
+                SERVICE_CATEGORY_CONTENT.map((category) => (
+                  <li>
+                    <a
+                      href={`/services/${category.slug}`}
+                      class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-bg-sunken"
+                      aria-current={isActive(`/services/${category.slug}`) ? 'page' : undefined}
+                    >
+                      <span class="text-olive">
+                        <DynamicIcon name={category.icon} size={17} />
+                      </span>
+                      <span class="font-medium text-ink">{category.name}</span>
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+            <div class="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-line px-3 pt-3 text-sm">
+              <a href="/services" class="inline-flex items-center gap-1 font-medium text-ink hover:underline">
+                All services <ArrowUpRight size={14} aria-hidden="true" />
+              </a>
+              <a href="/pricing" class="inline-flex items-center gap-1 font-medium text-ink hover:underline">
+                Indicative pricing <ArrowUpRight size={14} aria-hidden="true" />
+              </a>
+            </div>
+          </div>
+        </li>
+        {
+          primaryLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={['rounded-md px-3 py-2 transition-colors hover:text-ink', isActive(link.href) ? 'text-ink' : 'text-ink-muted']}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="ml-auto flex items-center gap-2">
+      <ThemeToggle />
+      <a
+        href="/request-quote"
+        class="hidden items-center rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink transition-opacity hover:opacity-90 sm:inline-flex"
+      >
+        Request a Quote
+      </a>
+      <button
+        type="button"
+        class="inline-flex size-10 items-center justify-center rounded-md text-ink hover:bg-bg-sunken lg:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        aria-label="Open menu"
+        data-mobile-toggle
+      >
+        <Menu size={22} aria-hidden="true" data-icon-open />
+        <X size={22} aria-hidden="true" data-icon-close class="hidden" />
+      </button>
+    </div>
+  </div>
+
+  <nav
+    id="mobile-nav"
+    aria-label="Main"
+    hidden
+    class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line bg-bg lg:hidden"
+    data-mobile-nav
+  >
+    <div class="page-container py-6">
+      <a href="/request-quote" class="mb-6 flex items-center justify-center rounded-[var(--radius-control)] bg-invert px-4 py-3 font-medium text-invert-ink">
+        Request a Quote
+      </a>
+      <div class="grid gap-8 sm:grid-cols-2">
+        <section>
+          <h2 class="text-eyebrow mb-3">Industries</h2>
+          <ul class="space-y-1">
+            {
+              industries.map((industry) => (
+                <li>
+                  <a href={`/industries/${industry.slug}`} class="flex items-center gap-3 rounded-md py-2 text-ink">
+                    <span class="text-olive">
+                      <DynamicIcon name={industry.icon} size={17} />
+                    </span>
+                    {industry.name}
+                  </a>
+                </li>
+              ))
+            }
+            <li><a href="/industries" class="block py-2 text-sm font-medium text-olive underline">All industries</a></li>
+          </ul>
+        </section>
+        <section>
+          <h2 class="text-eyebrow mb-3">Services</h2>
+          <ul class="space-y-1">
+            {
+              SERVICE_CATEGORY_CONTENT.map((category) => (
+                <li>
+                  <a href={`/services/${category.slug}`} class="block rounded-md py-2 text-ink">
+                    {category.name}
+                  </a>
+                </li>
+              ))
+            }
+            <li><a href="/services" class="block py-2 text-sm font-medium text-olive underline">All services</a></li>
+          </ul>
+        </section>
+      </div>
+      <ul class="mt-8 grid grid-cols-2 gap-2 border-t border-line pt-6">
+        {
+          primaryLinks.map((link) => (
+            <li>
+              <a href={link.href} class="block rounded-md py-2 text-lg text-ink" aria-current={isActive(link.href) ? 'page' : undefined}>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+        <li><a href="/book-a-demo" class="block rounded-md py-2 text-lg text-ink">Book a demo</a></li>
+        <li><a href="/blog" class="block rounded-md py-2 text-lg text-ink">Blog</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<script>
+  // Desktop dropdowns: disclosure pattern (button + panel), one open at a time.
+  const disclosures = Array.from(document.querySelectorAll<HTMLElement>('[data-disclosure]'));
+
+  function closeAll(except?: HTMLElement) {
+    for (const item of disclosures) {
+      if (item === except) continue;
+      item.querySelector('[data-disclosure-button]')?.setAttribute('aria-expanded', 'false');
+      item.querySelector<HTMLElement>('[data-disclosure-panel]')?.setAttribute('hidden', '');
+    }
+  }
+
+  for (const item of disclosures) {
+    const button = item.querySelector<HTMLButtonElement>('[data-disclosure-button]');
+    const panel = item.querySelector<HTMLElement>('[data-disclosure-panel]');
+    if (!button || !panel) continue;
+
+    button.addEventListener('click', () => {
+      const open = button.getAttribute('aria-expanded') === 'true';
+      closeAll(item);
+      button.setAttribute('aria-expanded', String(!open));
+      panel.toggleAttribute('hidden', open);
+    });
+
+    item.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+        closeAll();
+        button.focus();
+      }
+    });
+
+    item.addEventListener('focusout', (event) => {
+      const next = event.relatedTarget as Node | null;
+      if (next && !item.contains(next)) {
+        button.setAttribute('aria-expanded', 'false');
+        panel.setAttribute('hidden', '');
+      }
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as Node;
+    if (!disclosures.some((item) => item.contains(target))) closeAll();
+  });
+
+  // Mobile navigation.
+  const toggle = document.querySelector<HTMLButtonElement>('[data-mobile-toggle]');
+  const mobileNav = document.querySelector<HTMLElement>('[data-mobile-nav]');
+  if (toggle && mobileNav) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      toggle.querySelector('[data-icon-open]')?.classList.toggle('hidden', open);
+      toggle.querySelector('[data-icon-close]')?.classList.toggle('hidden', !open);
+      mobileNav.toggleAttribute('hidden', !open);
+      document.documentElement.classList.toggle('overflow-hidden', open);
+    };
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    window.matchMedia('(min-width: 64rem)').addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+</script>

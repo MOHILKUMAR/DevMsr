@@ -1,0 +1,29 @@
+---
+import BaseLayout, { type Props as BaseProps } from './BaseLayout.astro';
+import SiteHeader from '../components/layout/SiteHeader.astro';
+import SiteFooter from '../components/layout/SiteFooter.astro';
+import { loadCatalogue } from '../lib/catalogue/repository';
+
+type Props = BaseProps;
+
+const catalogue = await loadCatalogue(Astro.locals);
+const industries = [...catalogue.industries].sort((a, b) => a.sortOrder - b.sortOrder);
+---
+
+<BaseLayout {...Astro.props}>
+  <slot name="head" slot="head" />
+  <div class="flex min-h-dvh flex-col">
+    {
+      catalogue.settings.announcement && (
+        <div class="bg-invert px-4 py-2 text-center text-sm text-invert-ink" role="note">
+          {catalogue.settings.announcement}
+        </div>
+      )
+    }
+    <SiteHeader industries={industries} />
+    <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
+      <slot />
+    </main>
+    <SiteFooter industries={industries} settings={catalogue.settings} />
+  </div>
+</BaseLayout>

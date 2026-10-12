@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "devmsr",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // Custom domains are attached only after the preview deployment is approved.
+  // See docs/DEPLOYMENT.md. Do not uncomment before DNS cut-over.
+  // "routes": [
+  //   { "pattern": "devmsr.in", "custom_domain": true },
+  //   { "pattern": "www.devmsr.in", "custom_domain": true }
+  // ],
+  "vars": {
+    "SEND_LEAD_ACKNOWLEDGEMENT": "false"
+  }
+}

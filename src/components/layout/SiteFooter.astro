@@ -1,0 +1,115 @@
+---
+import Wordmark from './Wordmark.astro';
+import { SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
+import type { Industry, SiteSettings } from '../../types/catalogue';
+
+interface Props {
+  industries: Industry[];
+  settings: SiteSettings;
+}
+
+const { industries, settings } = Astro.props;
+const year = new Date().getFullYear();
+const companyLinks = [
+  { href: '/about', label: 'About' },
+  { href: '/products', label: 'Products' },
+  { href: '/portfolio', label: 'Portfolio' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/blog', label: 'Blog' },
+];
+const contactLinks = [
+  { href: '/contact', label: 'Contact' },
+  { href: '/request-quote', label: 'Request a quote' },
+  { href: '/book-a-demo', label: 'Book a demo' },
+];
+---
+
+<footer class="mt-auto border-t border-line bg-bg-sunken">
+  <div class="page-container grid gap-12 py-14 lg:grid-cols-12">
+    <div class="lg:col-span-4">
+      <Wordmark />
+      <p class="text-small mt-4 max-w-sm text-ink-muted">
+        Websites, business software and automation for hospitals, hotels, restaurants, retailers, travel companies and schools.
+      </p>
+      <p class="text-small mt-4 text-ink-muted">{settings.serviceArea}</p>
+      {
+        settings.contactEmail && (
+          <p class="text-small mt-2">
+            <a class="link-ink" href={`mailto:${settings.contactEmail}`}>
+              {settings.contactEmail}
+            </a>
+          </p>
+        )
+      }
+    </div>
+    <nav aria-label="Footer" class="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-8">
+      <div>
+        <h2 class="text-eyebrow">Industries</h2>
+        <ul class="text-small mt-4 space-y-2.5">
+          {
+            industries.map((industry) => (
+              <li>
+                <a class="text-ink-muted hover:text-ink" href={`/industries/${industry.slug}`}>
+                  {industry.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-eyebrow">Services</h2>
+        <ul class="text-small mt-4 space-y-2.5">
+          {
+            SERVICE_CATEGORY_CONTENT.slice(0, 7).map((category) => (
+              <li>
+                <a class="text-ink-muted hover:text-ink" href={`/services/${category.slug}`}>
+                  {category.navLabel}
+                </a>
+              </li>
+            ))
+          }
+          <li><a class="text-ink-muted hover:text-ink" href="/services">All services</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-eyebrow">Company</h2>
+        <ul class="text-small mt-4 space-y-2.5">
+          {
+            companyLinks.map((link) => (
+              <li>
+                <a class="text-ink-muted hover:text-ink" href={link.href}>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-eyebrow">Get in touch</h2>
+        <ul class="text-small mt-4 space-y-2.5">
+          {
+            contactLinks.map((link) => (
+              <li>
+                <a class="text-ink-muted hover:text-ink" href={link.href}>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="border-t border-line">
+    <div class="page-container flex flex-col gap-3 py-6 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between">
+      <p>© {year} DevMsr.in. Prices are indicative and exclude GST unless stated.</p>
+      <ul class="flex gap-5">
+        <li><a class="hover:text-ink" href="/privacy">Privacy</a></li>
+        <li><a class="hover:text-ink" href="/terms">Terms</a></li>
+        <li><a class="hover:text-ink" href="/sitemap.xml">Sitemap</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>

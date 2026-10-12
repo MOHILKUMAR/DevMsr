@@ -1,0 +1,77 @@
+---
+import { formatPrice, BILLING_INTERVAL_LABELS } from '../../lib/catalogue/pricing';
+import { priceLabel, serviceMap } from '../../lib/catalogue/queries';
+import type { Catalogue, ServicePrice } from '../../types/catalogue';
+
+/**
+ * Typeset price list. Each row expands to show inclusions, exclusions and
+ * notes when `detailed` is set.
+ */
+interface Props {
+  catalogue: Catalogue;
+  prices: ServicePrice[];
+  detailed?: boolean;
+}
+const { catalogue, prices, detailed = false } = Astro.props;
+const services = serviceMap(catalogue);
+---
+
+{
+  prices.length === 0 ? (
+    <p class="text-ink-muted">Pricing for these services is quoted after a short scoping call.</p>
+  ) : (
+    <ul class="border-t border-line">
+      {prices.map((price) => {
+        const label = priceLabel(price, services);
+        const formatted = formatPrice(price);
+        const hasDetail = detailed && (price.includedFeatures.length > 0 || price.excludedFeatures.length > 0 || price.priceNote || price.estimatedDelivery);
+        return (
+          <li class="border-b border-line">
+            {hasDetail ? (
+              <details class="group">
+                <summary class="flex cursor-pointer list-none flex-wrap items-baseline gap-x-4 gap-y-1 py-4 [&::-webkit-details-marker]:hidden">
+                  <span class="font-medium text-ink">{label}</span>
+                  <span aria-hidden="true" class="hidden flex-1 border-b border-dotted border-line-strong sm:block" />
+                  <span class="tabular ml-auto font-mono text-[0.875rem] text-ink">{formatted}</span>
+                  <span class="w-full text-[0.8125rem] text-olive underline decoration-olive/40 group-open:hidden">What's included</span>
+                  <span class="hidden w-full text-[0.8125rem] text-olive underline decoration-olive/40 group-open:block">Hide details</span>
+                </summary>
+                <div class="grid gap-6 pb-6 text-small sm:grid-cols-2">
+                  {price.includedFeatures.length > 0 && (
+                    <div>
+                      <p class="text-eyebrow mb-2">Included</p>
+                      <ul class="space-y-1.5 text-ink">
+                        {price.includedFeatures.map((item) => <li class="flex gap-2"><span aria-hidden="true" class="text-olive">+</span>{item}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {price.excludedFeatures.length > 0 && (
+                    <div>
+                      <p class="text-eyebrow mb-2">Not included</p>
+                      <ul class="space-y-1.5 text-ink-muted">
+                        {price.excludedFeatures.map((item) => <li class="flex gap-2"><span aria-hidden="true">–</span>{item}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  <div class="space-y-1 text-ink-muted sm:col-span-2">
+                    {price.priceNote && <p>{price.priceNote}</p>}
+                    <p>
+                      {BILLING_INTERVAL_LABELS[price.billingInterval]} fee · {price.taxInclusive ? 'Includes GST' : 'GST extra where applicable'}
+                      {price.estimatedDelivery ? ` · Typical delivery: ${price.estimatedDelivery}` : ' · Timeline confirmed in your quote'}
+                    </p>
+                  </div>
+                </div>
+              </details>
+            ) : (
+              <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 py-4">
+                <span class="font-medium text-ink">{label}</span>
+                <span aria-hidden="true" class="hidden flex-1 border-b border-dotted border-line-strong sm:block" />
+                <span class="tabular ml-auto font-mono text-[0.875rem] text-ink">{formatted}</span>
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  )
+}
