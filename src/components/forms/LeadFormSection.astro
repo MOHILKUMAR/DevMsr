@@ -1,0 +1,71 @@
+---
+import { actions } from 'astro:actions';
+import LeadForm from './LeadForm';
+import { loadCatalogue } from '../../lib/catalogue/repository';
+import { getServerConfig } from '../../lib/server/config';
+import { issueFormToken } from '../../lib/security/tokens';
+import { SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
+import type { LeadFormType } from '../../schemas/lead';
+
+/**
+ * Server-side setup for a lead form: per-render idempotency key, signed
+ * form token, Turnstile site key and validated pre-selections from the URL
+ * (e.g. /request-quote?industry=healthcare&service=opd-token-management).
+ */
+interface Props {
+  formType: LeadFormType;
+}
+const { formType } = Astro.props;
+
+const config = getServerConfig();
+const catalogue = await loadCatalogue(Astro.locals);
+const params = Astro.url.searchParams;
+
+const industries = [...catalogue.industries].sort((a, b) => a.sortOrder - b.sortOrder).map((i) => ({ value: i.slug, label: i.name }));
+const requestedIndustry = params.get('industry') ?? '';
+const requestedCategory = params.get('category') ?? '';
+const requestedService = params.get('service') ?? '';
+const requestedProduct = params.get('product') ?? '';
+
+const service = catalogue.services.find((s) => s.slug === requestedService);
+const product = catalogue.products.find((p) => p.slug === requestedProduct);
+const categorySlug = SERVICE_CATEGORY_CONTENT.some((c) => c.slug === requestedCategory)
+  ? requestedCategory
+  : (product?.serviceCategory ?? null);
+
+const interests = [
+  ...(service ? [{ label: 'Selected service', options: [{ value: `service:${service.slug}`, label: service.name }] }] : []),
+  { label: 'Service type', options: SERVICE_CATEGORY_CONTENT.map((c) => ({ value: `category:${c.slug}`, label: c.name })) },
+];
+const defaultInterest = service ? `service:${service.slug}` : categorySlug ? `category:${categorySlug}` : '';
+const defaultIndustry = industries.some((i) => i.value === requestedIndustry)
+  ? requestedIndustry
+  : (product?.industrySlug ?? (service?.industrySlugs.length === 1 ? service.industrySlugs[0] : undefined) ?? '');
+
+const actionResult = Astro.getActionResult(actions.leads.submit);
+const initialOutcome = actionResult?.data ?? (actionResult?.error ? { status: 'unavailable' as const, message: 'Something went wrong. Please try again.' } : null);
+
+const formToken = config.appSecret ? await issueFormToken(config.appSecret) : '';
+---
+
+{
+  product && (
+    <p class="mb-6 rounded-lg border border-line bg-surface px-4 py-3 text-small text-ink">
+      You are asking about <strong>{product.name}</strong>. Mention anything specific you would like to see in the description.
+    </p>
+  )
+}
+<LeadForm
+  client:load
+  formType={formType}
+  industries={industries}
+  interests={interests}
+  defaults={{ industry: defaultIndustry, interest: defaultInterest }}
+  submissionId={crypto.randomUUID()}
+  formToken={formToken}
+  turnstileSiteKey={config.turnstile?.siteKey ?? null}
+  actionUrl={actions.leads.submit.queryString}
+  sourcePath={Astro.url.pathname}
+  initialOutcome={initialOutcome}
+  fallbackEmail={catalogue.settings.contactEmail}
+/>

@@ -1,0 +1,247 @@
+---
+import { ArrowRight, Plug, TriangleAlert } from '@lucide/astro';
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import Button from '../../components/ui/Button.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
+import FaqList from '../../components/ui/FaqList.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Badge from '../../components/ui/Badge.astro';
+import DynamicIcon from '../../components/ui/DynamicIcon.astro';
+import IndustryPreview from '../../components/previews/IndustryPreview.astro';
+import PriceList from '../../components/services/PriceList.astro';
+import ProductList from '../../components/services/ProductList.astro';
+import ProcessSteps from '../../components/home/ProcessSteps.astro';
+import { getIndustryContent } from '../../data/industries';
+import { loadCatalogue } from '../../lib/catalogue/repository';
+import {
+  faqsFor,
+  pricesForService,
+  pricesForServices,
+  productsForIndustry,
+  resolveServices,
+  serviceMap,
+  servicesForIndustry,
+} from '../../lib/catalogue/queries';
+import { formatFromPrice, lowestPrice } from '../../lib/catalogue/pricing';
+import { SERVICE_STATUS_LABELS } from '../../lib/catalogue/labels';
+import { breadcrumbJsonLd, compact, faqJsonLd, serviceJsonLd } from '../../lib/seo';
+
+const slug = Astro.params.slug ?? '';
+const catalogue = await loadCatalogue(Astro.locals);
+const industry = catalogue.industries.find((item) => item.slug === slug);
+const content = getIndustryContent(slug);
+
+if (!industry || !content) {
+  return Astro.rewrite('/404');
+}
+
+const services = serviceMap(catalogue);
+const industryServices = servicesForIndustry(catalogue, slug);
+const groups = content.solutionGroups
+  .map((group) => ({ ...group, services: resolveServices(services, group.serviceSlugs) }))
+  .filter((group) => group.services.length > 0);
+// Services linked to the industry in the database but not placed in a group.
+const grouped = new Set(groups.flatMap((group) => group.services.map((service) => service.slug)));
+const otherServices = industryServices.filter((service) => !grouped.has(service.slug));
+const prices = pricesForServices(catalogue, industryServices);
+const lowest = lowestPrice(prices);
+const products = productsForIndustry(catalogue, slug);
+const faqs = faqsFor(catalogue, 'industry', slug);
+const path = `/industries/${slug}`;
+---
+
+<MarketingLayout
+  title={content.seoTitle}
+  description={content.seoDescription}
+  jsonLd={compact([
+    breadcrumbJsonLd([
+      { name: 'Industries', path: '/industries' },
+      { name: industry.name, path },
+    ]),
+    serviceJsonLd({
+      name: `${industry.name} software and websites`,
+      description: industry.description,
+      path,
+      prices: prices.map((price) => ({ label: price.label ?? services.get(price.serviceSlug)?.name ?? '', price })),
+    }),
+    faqJsonLd(faqs),
+  ])}
+>
+  <section class="page-container pb-16 pt-8 sm:pt-10 lg:pb-24">
+    <Breadcrumbs items={[{ label: 'Industries', href: '/industries' }, { label: industry.name }]} />
+    <div class="mt-10 grid items-center gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-7">
+        <p class="text-eyebrow flex items-center gap-2">
+          <span class="text-olive"><DynamicIcon name={industry.icon} size={16} /></span>
+          {industry.name}
+        </p>
+        <h1 class="text-h1 mt-5">{content.heroTitle}</h1>
+        <p class="text-lede mt-5 max-w-2xl">{content.heroIntro}</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <Button href={`/request-quote?industry=${slug}`} size="lg">Get a quote <ArrowRight size={17} aria-hidden="true" /></Button>
+          <Button href={`/book-a-demo?industry=${slug}`} size="lg" variant="secondary">Book a demo</Button>
+        </div>
+        <p class="text-small mt-6 text-ink-muted">
+          {industryServices.length} services · {lowest ? `${formatFromPrice(lowest)}, GST extra` : 'Quoted after a short scoping call'}
+        </p>
+      </div>
+      <div class="lg:col-span-5">
+        <IndustryPreview kind={content.preview} />
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-line bg-surface" aria-labelledby="problems-title">
+    <div class="page-container section-space grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader id="problems-title" eyebrow="Problems we solve" title="What usually goes wrong." />
+        <p class="text-small mt-6 text-ink-muted">Who this is for:</p>
+        <ul class="text-small mt-2 space-y-1.5">
+          {content.audience.map((item) => <li class="text-ink">{item}</li>)}
+        </ul>
+      </div>
+      <ul class="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:col-span-8">
+        {
+          content.problems.map((problem) => (
+            <li class="border-t border-line-strong pt-5">
+              <h3 class="text-h3">{problem.title}</h3>
+              <p class="mt-2 text-ink-muted">{problem.detail}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="page-container section-space" aria-labelledby="solutions-title">
+    <SectionHeader
+      class="mb-12"
+      id="solutions-title"
+      eyebrow="Solutions"
+      title="What we build for you."
+      intro="Start with the module that hurts most today. Each one can grow into a full system later."
+    />
+    <div class="space-y-14">
+      {
+        groups.map((group) => (
+          <div class="grid gap-6 lg:grid-cols-12">
+            <div class="lg:col-span-4">
+              <h3 class="text-h3">{group.title}</h3>
+              <p class="mt-2 text-ink-muted">{group.summary}</p>
+            </div>
+            <ul class="grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-2 lg:col-span-8">
+              {group.services.map((service) => {
+                const servicePrice = lowestPrice(pricesForService(catalogue, service.slug));
+                return (
+                  <li class="flex flex-col bg-surface p-5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h4 class="font-medium text-ink">{service.name}</h4>
+                      {service.status === 'on_request' && <Badge tone="clay">{SERVICE_STATUS_LABELS.on_request}</Badge>}
+                    </div>
+                    <p class="text-small mt-1.5 flex-1 text-ink-muted">{service.shortDescription}</p>
+                    {service.features.length > 0 && (
+                      <ul class="mt-3 flex flex-wrap gap-1.5">
+                        {service.features.slice(0, 4).map((feature) => (
+                          <li class="rounded-md bg-bg-sunken px-2 py-0.5 text-[0.75rem] text-ink-muted">{feature}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <p class="mt-4 font-mono text-[0.8125rem] text-ink">{servicePrice ? formatFromPrice(servicePrice) : 'Quoted per scope'}</p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))
+      }
+      {
+        otherServices.length > 0 && (
+          <div class="grid gap-6 lg:grid-cols-12">
+            <div class="lg:col-span-4">
+              <h3 class="text-h3">Also available</h3>
+            </div>
+            <ul class="text-small grid gap-2 sm:grid-cols-2 lg:col-span-8">
+              {otherServices.map((service) => (
+                <li class="text-ink">{service.name}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="bg-bg-sunken" aria-labelledby="integrations-title">
+    <div class="page-container section-space grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <SectionHeader id="integrations-title" eyebrow="Integrations" title="Connects to what you already use." />
+        <ul class="mt-8 space-y-3">
+          {
+            content.integrations.map((item) => (
+              <li class="flex gap-3">
+                <Plug size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="text-small mt-6 text-ink-muted">
+          Integration providers charge their own fees (transactions, messages, devices). We list them separately in your quote.
+        </p>
+        {
+          content.caution && (
+            <div class="mt-8 flex gap-3 rounded-[var(--radius-card)] border border-warning/30 bg-warning-soft p-4 text-small">
+              <TriangleAlert size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-warning" />
+              <p class="text-ink">{content.caution}</p>
+            </div>
+          )
+        }
+      </div>
+      <div class="lg:col-span-7">
+        <h2 class="text-h3 mb-4">Indicative pricing</h2>
+        <PriceList catalogue={catalogue} prices={prices} detailed />
+        <p class="text-small mt-4 text-ink-muted">
+          Starting estimates, not final quotes. GST extra. <a href="/pricing" class="link-olive">See the full price list</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {
+    products.length > 0 && (
+      <section class="page-container section-space" aria-labelledby="products-title">
+        <SectionHeader
+          class="mb-8"
+          id="products-title"
+          eyebrow="Products"
+          title="Related products and prototypes"
+          intro="Status labels tell you exactly how finished each one is."
+        />
+        <ProductList products={products} />
+      </section>
+    )
+  }
+
+  <section class="page-container section-space border-t border-line" aria-labelledby="process-title">
+    <SectionHeader class="mb-10" id="process-title" eyebrow="Implementation" title="How a project runs." />
+    <ProcessSteps />
+  </section>
+
+  <section class="border-t border-line" aria-labelledby="faq-title">
+    <div class="page-container section-space grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader id="faq-title" eyebrow="Questions" title={`${content.shortName}: common questions`} />
+      </div>
+      <div class="lg:col-span-8">
+        <FaqList faqs={faqs} />
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Tell us how your team works today."
+    primaryHref={`/request-quote?industry=${slug}`}
+    secondaryHref={`/book-a-demo?industry=${slug}`}
+  />
+</MarketingLayout>

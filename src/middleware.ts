@@ -7,6 +7,9 @@ function isAdminPath(pathname: string): boolean {
   return pathname === '/admin' || pathname.startsWith('/admin/');
 }
 
+/** Pages that embed a per-render form token and idempotency key must never be cached. */
+const NO_STORE_PATHS = new Set(['/contact', '/request-quote', '/book-a-demo']);
+
 /**
  * 1. Assigns a request id for log correlation.
  * 2. For /admin pages, admin actions and /api/admin endpoints: verifies the
@@ -43,12 +46,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   const response = await next();
-  return withHeaders(
-    response,
-    securityHeadersFor({
-      private: adminRequest || pathname.startsWith('/api/'),
-      https: context.url.protocol === 'https:',
-      requestId: context.locals.requestId,
-    }),
-  );
+  const headers = securityHeadersFor({
+    private: adminRequest || pathname.startsWith('/api/'),
+    https: context.url.protocol === 'https:',
+    requestId: context.locals.requestId,
+  });
+  if (NO_STORE_PATHS.has(pathname) || pathname.startsWith('/_actions/')) headers['Cache-Control'] = 'private, no-store';
+  return withHeaders(response, headers);
 });

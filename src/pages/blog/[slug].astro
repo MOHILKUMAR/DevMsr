@@ -1,0 +1,43 @@
+---
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import { loadBlogPost } from '../../lib/catalogue/repository';
+import { readingMinutes, renderMarkdown } from '../../lib/content/markdown';
+import { formatDate } from '../../lib/utils/dates';
+import { articleJsonLd, breadcrumbJsonLd } from '../../lib/seo';
+
+const slug = Astro.params.slug ?? '';
+const post = await loadBlogPost(Astro.locals, slug);
+if (!post) {
+  return Astro.rewrite('/404');
+}
+const html = renderMarkdown(post.content);
+const path = `/blog/${post.slug}`;
+---
+
+<MarketingLayout
+  title={post.seoTitle ?? post.title}
+  description={post.seoDescription ?? post.excerpt}
+  ogType="article"
+  jsonLd={[breadcrumbJsonLd([{ name: 'Blog', path: '/blog' }, { name: post.title, path }]), articleJsonLd(post)]}
+>
+  <article class="narrow-container pb-16 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Blog', href: '/blog' }, { label: post.title }]} />
+    <header class="mt-10">
+      <p class="font-mono text-[0.75rem] text-ink-muted">
+        {post.publishedAt && <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>}
+        · {readingMinutes(post.content)} min read
+      </p>
+      <h1 class="text-h1 mt-4">{post.title}</h1>
+      <p class="text-lede mt-5">{post.excerpt}</p>
+    </header>
+    {
+      post.coverImage && (
+        <img src={post.coverImage} alt="" loading="eager" decoding="async" referrerpolicy="no-referrer" class="mt-10 w-full rounded-[var(--radius-card)] border border-line" />
+      )
+    }
+    <div class="prose-devmsr mt-10" set:html={html} />
+  </article>
+  <CtaBand />
+</MarketingLayout>

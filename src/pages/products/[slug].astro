@@ -1,0 +1,101 @@
+---
+import { ArrowRight, Check, ExternalLink } from '@lucide/astro';
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import Button from '../../components/ui/Button.astro';
+import ProductStatusBadge from '../../components/ui/ProductStatusBadge.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import { loadCatalogue } from '../../lib/catalogue/repository';
+import { PRODUCT_STATUS_META } from '../../lib/catalogue/labels';
+import { renderMarkdown } from '../../lib/content/markdown';
+import { getServiceCategoryContent } from '../../data/service-categories';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const slug = Astro.params.slug ?? '';
+const catalogue = await loadCatalogue(Astro.locals);
+const product = catalogue.products.find((item) => item.slug === slug);
+if (!product) {
+  return Astro.rewrite('/404');
+}
+const industry = product.industrySlug ? catalogue.industries.find((item) => item.slug === product.industrySlug) : undefined;
+const category = product.serviceCategory ? getServiceCategoryContent(product.serviceCategory) : undefined;
+const meta = PRODUCT_STATUS_META[product.status];
+const html = renderMarkdown(product.description);
+const path = `/products/${product.slug}`;
+---
+
+<MarketingLayout
+  title={product.seoTitle ?? `${product.name} (${meta.label})`}
+  description={product.seoDescription ?? product.summary}
+  jsonLd={[breadcrumbJsonLd([{ name: 'Products', path: '/products' }, { name: product.name, path }])]}
+>
+  <article class="page-container pb-16 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Products', href: '/products' }, { label: product.name }]} />
+    <div class="mt-10 grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-7">
+        <ProductStatusBadge status={product.status} />
+        <h1 class="text-h1 mt-5">{product.name}</h1>
+        <p class="text-lede mt-5">{product.summary}</p>
+        <div class="prose-devmsr mt-10" set:html={html} />
+      </div>
+      <aside class="space-y-6 lg:col-span-5">
+        <div class="rounded-[var(--radius-card)] border border-line bg-surface p-6">
+          <p class="text-eyebrow">Status: {meta.label}</p>
+          <p class="mt-2 text-ink-muted">{meta.explanation}</p>
+          {
+            product.features.length > 0 && (
+              <>
+                <h2 class="mt-6 font-semibold text-ink">{product.status === 'available' ? 'Features' : 'Planned features'}</h2>
+                <ul class="mt-3 space-y-2">
+                  {product.features.map((feature) => (
+                    <li class="flex gap-2.5 text-ink-muted">
+                      <Check size={16} aria-hidden="true" class="mt-1 shrink-0 text-olive" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )
+          }
+          {
+            product.technologyStack.length > 0 && (
+              <>
+                <h2 class="mt-6 font-semibold text-ink">Built with</h2>
+                <ul class="mt-3 flex flex-wrap gap-1.5">
+                  {product.technologyStack.map((tech) => (
+                    <li class="rounded-md border border-line bg-bg px-2 py-0.5 font-mono text-[0.6875rem] text-ink-muted">{tech}</li>
+                  ))}
+                </ul>
+              </>
+            )
+          }
+          <div class="mt-8 flex flex-wrap gap-3">
+            <Button href={`/book-a-demo?product=${product.slug}`}>Ask about this <ArrowRight size={16} aria-hidden="true" /></Button>
+            {
+              product.demoUrl && (
+                <Button href={product.demoUrl} variant="secondary" rel="noopener noreferrer" target="_blank">
+                  Open demo <ExternalLink size={15} aria-hidden="true" />
+                </Button>
+              )
+            }
+          </div>
+        </div>
+        <dl class="text-small space-y-2 px-1">
+          {industry && <div class="flex gap-2"><dt class="text-ink-muted">Industry:</dt><dd><a class="link-ink" href={`/industries/${industry.slug}`}>{industry.name}</a></dd></div>}
+          {category && <div class="flex gap-2"><dt class="text-ink-muted">Service type:</dt><dd><a class="link-ink" href={`/services/${category.slug}`}>{category.name}</a></dd></div>}
+          {product.repositoryUrl && <div class="flex gap-2"><dt class="text-ink-muted">Source:</dt><dd><a class="link-ink" href={product.repositoryUrl} rel="noopener noreferrer" target="_blank">Public repository</a></dd></div>}
+        </dl>
+        {
+          product.imageUrls.length > 0 && (
+            <div class="grid gap-3">
+              {product.imageUrls.map((url, index) => (
+                <img src={url} alt={`${product.name} screenshot ${index + 1}`} loading="lazy" decoding="async" referrerpolicy="no-referrer" class="w-full rounded-[var(--radius-card)] border border-line" />
+              ))}
+            </div>
+          )
+        }
+      </aside>
+    </div>
+  </article>
+  <CtaBand />
+</MarketingLayout>

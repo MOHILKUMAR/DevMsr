@@ -1,0 +1,34 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
+import LeadFormSection from '../components/forms/LeadFormSection.astro';
+import { breadcrumbJsonLd } from '../lib/seo';
+---
+
+<MarketingLayout
+  title="Book a Demo"
+  description="Book a walkthrough of a system for your clinic, hotel, restaurant, store, travel agency or school. We show what exists and are clear about what would be built for you."
+  jsonLd={[breadcrumbJsonLd([{ name: 'Book a demo', path: '/book-a-demo' }])]}
+>
+  <section class="page-container pb-20 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Book a demo' }]} />
+    <div class="mt-10 grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <div class="lg:sticky lg:top-24">
+          <h1 class="text-h1">Book a demo</h1>
+          <p class="text-lede mt-4">Tell us what you would like to see and when suits you. We will confirm a time by your preferred contact method.</p>
+          <div class="mt-10 rounded-[var(--radius-card)] border border-line bg-surface p-5 text-small">
+            <h2 class="font-semibold text-ink">What a demo includes</h2>
+            <p class="mt-2 text-ink-muted">
+              A screen-share walkthrough of relevant work. For products marked Concept or In development, we show what exists today and explain exactly
+              what would be built for you — we will not present unfinished work as finished.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-[1.25rem] border border-line bg-surface p-5 sm:p-8 lg:col-span-8">
+        <LeadFormSection formType="demo" />
+      </div>
+    </div>
+  </section>
+</MarketingLayout>

@@ -1,0 +1,84 @@
+---
+import { ExternalLink } from '@lucide/astro';
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import Badge from '../../components/ui/Badge.astro';
+import Button from '../../components/ui/Button.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import { loadCatalogue, loadPortfolioProject } from '../../lib/catalogue/repository';
+import { renderMarkdown } from '../../lib/content/markdown';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const slug = Astro.params.slug ?? '';
+const project = await loadPortfolioProject(Astro.locals, slug);
+if (!project) {
+  return Astro.rewrite('/404');
+}
+const catalogue = await loadCatalogue(Astro.locals);
+const industries = catalogue.industries.filter((industry) => project.industrySlugs.includes(industry.slug));
+const html = renderMarkdown(project.description);
+const TYPE_LABEL = { client: 'Client project', internal: 'Internal project', prototype: 'Prototype' } as const;
+const path = `/portfolio/${project.slug}`;
+---
+
+<MarketingLayout
+  title={project.seoTitle ?? project.title}
+  description={project.seoDescription ?? project.summary}
+  jsonLd={[breadcrumbJsonLd([{ name: 'Portfolio', path: '/portfolio' }, { name: project.title, path }])]}
+>
+  <article class="page-container pb-16 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Portfolio', href: '/portfolio' }, { label: project.title }]} />
+    <header class="mt-10 max-w-3xl">
+      <Badge tone={project.projectType === 'client' ? 'olive' : 'neutral'}>{TYPE_LABEL[project.projectType]}</Badge>
+      <h1 class="text-h1 mt-5">{project.title}</h1>
+      <p class="text-lede mt-5">{project.summary}</p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        {
+          project.demoUrl && (
+            <Button href={project.demoUrl} variant="secondary" rel="noopener noreferrer" target={project.demoUrl.startsWith('https://devmsr.in') ? undefined : '_blank'}>
+              Visit <ExternalLink size={15} aria-hidden="true" />
+            </Button>
+          )
+        }
+        {
+          project.repositoryUrl && (
+            <Button href={project.repositoryUrl} variant="ghost" rel="noopener noreferrer" target="_blank">
+              Source code <ExternalLink size={15} aria-hidden="true" />
+            </Button>
+          )
+        }
+      </div>
+    </header>
+    <div class="mt-12 grid gap-12 lg:grid-cols-12">
+      <div class="prose-devmsr lg:col-span-8" set:html={html} />
+      <aside class="lg:col-span-4">
+        <dl class="space-y-6 rounded-[var(--radius-card)] border border-line bg-surface p-6 text-small">
+          <div>
+            <dt class="text-eyebrow">Technology</dt>
+            <dd class="mt-2 flex flex-wrap gap-1.5">
+              {project.technologyStack.map((tech) => <span class="rounded-md border border-line bg-bg px-2 py-0.5 font-mono text-[0.6875rem] text-ink-muted">{tech}</span>)}
+            </dd>
+          </div>
+          {
+            industries.length > 0 && (
+              <div>
+                <dt class="text-eyebrow">Industry</dt>
+                <dd class="mt-2 space-y-1">{industries.map((industry) => <a class="link-ink block" href={`/industries/${industry.slug}`}>{industry.name}</a>)}</dd>
+              </div>
+            )
+          }
+        </dl>
+      </aside>
+    </div>
+    {
+      project.imageUrls.length > 0 && (
+        <div class="mt-12 grid gap-6 md:grid-cols-2">
+          {project.imageUrls.map((url, index) => (
+            <img src={url} alt={`${project.title} screenshot ${index + 1}`} loading="lazy" decoding="async" referrerpolicy="no-referrer" class="w-full rounded-[var(--radius-card)] border border-line" />
+          ))}
+        </div>
+      )
+    }
+  </article>
+  <CtaBand />
+</MarketingLayout>

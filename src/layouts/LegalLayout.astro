@@ -1,0 +1,25 @@
+---
+import MarketingLayout from './MarketingLayout.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
+import { formatDate } from '../lib/utils/dates';
+import { breadcrumbJsonLd } from '../lib/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  updated: string;
+}
+const { title, description, path, updated } = Astro.props;
+---
+
+<MarketingLayout title={title} description={description} jsonLd={[breadcrumbJsonLd([{ name: title, path }])]}>
+  <article class="narrow-container pb-20 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: title }]} />
+    <h1 class="text-h1 mt-10">{title}</h1>
+    <p class="mt-3 font-mono text-[0.75rem] text-ink-muted">Last updated <time datetime={updated}>{formatDate(updated)}</time></p>
+    <div class="prose-devmsr mt-10">
+      <slot />
+    </div>
+  </article>
+</MarketingLayout>

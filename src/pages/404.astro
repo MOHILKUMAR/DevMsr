@@ -1,0 +1,21 @@
+---
+import { ArrowRight } from '@lucide/astro';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Button from '../components/ui/Button.astro';
+
+Astro.response.status = 404;
+---
+
+<MarketingLayout title="Page not found" description="This page does not exist." noindex>
+  <section class="page-container py-24 sm:py-32">
+    <p class="font-mono text-sm text-clay-ink">404</p>
+    <h1 class="text-h1 mt-4 max-w-2xl">This page does not exist.</h1>
+    <p class="text-lede mt-4 max-w-xl">The link may be old, or the page may have moved. These are good places to start:</p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <Button href="/">Home</Button>
+      <Button href="/services" variant="secondary">Services</Button>
+      <Button href="/pricing" variant="secondary">Pricing</Button>
+      <Button href="/contact" variant="ghost">Contact <ArrowRight size={16} aria-hidden="true" /></Button>
+    </div>
+  </section>
+</MarketingLayout>

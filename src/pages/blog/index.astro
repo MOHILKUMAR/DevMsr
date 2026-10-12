@@ -1,0 +1,67 @@
+---
+import { ArrowRight } from '@lucide/astro';
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import { loadBlogPosts } from '../../lib/catalogue/repository';
+import { readingMinutes } from '../../lib/content/markdown';
+import { formatDate } from '../../lib/utils/dates';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const PAGE_SIZE = 12;
+const posts = await loadBlogPosts(Astro.locals);
+const requestedPage = Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10);
+const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+const page = Number.isFinite(requestedPage) ? Math.min(Math.max(requestedPage, 1), totalPages) : 1;
+const visible = posts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+---
+
+<MarketingLayout
+  title={page > 1 ? `Blog — page ${page}` : 'Blog'}
+  description="Practical notes on websites, business software, pricing and automation for small and growing businesses."
+  canonicalPath={page > 1 ? `/blog?page=${page}` : '/blog'}
+  jsonLd={[breadcrumbJsonLd([{ name: 'Blog', path: '/blog' }])]}
+>
+  <Fragment slot="head">
+    {page > 1 && <link rel="prev" href={page === 2 ? '/blog' : `/blog?page=${page - 1}`} />}
+    {page < totalPages && <link rel="next" href={`/blog?page=${page + 1}`} />}
+  </Fragment>
+  <section class="page-container pb-16 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Blog' }]} />
+    <div class="mt-10 max-w-2xl">
+      <h1 class="text-h1">Notes</h1>
+      <p class="text-lede mt-5">Practical writing on what software costs, how projects run and what to prepare before you start.</p>
+    </div>
+    {
+      visible.length === 0 ? (
+        <p class="mt-12 rounded-[var(--radius-card)] border border-dashed border-line-strong p-10 text-center text-ink-muted">No posts published yet.</p>
+      ) : (
+        <ul class="mt-12 border-t border-line">
+          {visible.map((post) => (
+            <li class="border-b border-line">
+              <a href={`/blog/${post.slug}`} class="group grid gap-3 py-8 md:grid-cols-[10rem_minmax(0,1fr)_auto] md:gap-8">
+                <p class="font-mono text-[0.75rem] text-ink-muted">
+                  {post.publishedAt ? formatDate(post.publishedAt) : ''}
+                  <span class="block">{readingMinutes(post.content)} min read</span>
+                </p>
+                <div>
+                  <h2 class="text-h3 group-hover:underline">{post.title}</h2>
+                  <p class="mt-2 text-ink-muted">{post.excerpt}</p>
+                </div>
+                <ArrowRight size={20} aria-hidden="true" class="hidden text-ink-muted transition-transform group-hover:translate-x-1 md:block" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    {
+      totalPages > 1 && (
+        <nav aria-label="Blog pages" class="mt-10 flex items-center justify-between text-sm">
+          {page > 1 ? <a class="link-ink" href={page === 2 ? '/blog' : `/blog?page=${page - 1}`}>Newer posts</a> : <span />}
+          <span class="text-ink-muted">Page {page} of {totalPages}</span>
+          {page < totalPages ? <a class="link-ink" href={`/blog?page=${page + 1}`}>Older posts</a> : <span />}
+        </nav>
+      )
+    }
+  </section>
+</MarketingLayout>
