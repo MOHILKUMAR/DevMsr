@@ -1,0 +1,105 @@
+---
+import { Info } from '@lucide/astro';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import FaqList from '../components/ui/FaqList.astro';
+import CtaBand from '../components/ui/CtaBand.astro';
+import CatalogueExplorer from '../components/services/CatalogueExplorer';
+import { loadCatalogue } from '../lib/catalogue/repository';
+import { buildExplorerPrices, explorerOptions, readExplorerFilters } from '../lib/catalogue/explorer';
+import { faqsFor } from '../lib/catalogue/queries';
+import { breadcrumbJsonLd, compact, faqJsonLd } from '../lib/seo';
+
+const catalogue = await loadCatalogue(Astro.locals);
+const options = explorerOptions(catalogue);
+const initialFilters = readExplorerFilters(Astro.url, catalogue);
+const faqs = [...faqsFor(catalogue, 'pricing'), ...faqsFor(catalogue, 'general').slice(0, 2)];
+
+const SEPARATE_COSTS = [
+  { item: 'Hosting', note: 'Paid to the hosting provider. Many small sites fit free tiers; apps may need a paid plan.' },
+  { item: 'Domain renewal', note: 'Paid yearly to your registrar.' },
+  { item: 'Maintenance', note: 'Optional monthly plan for updates, backups and fixes.' },
+  { item: 'Payment gateway fees', note: 'A percentage per transaction, charged by the gateway.' },
+  { item: 'SMS / WhatsApp charges', note: 'Per message or conversation, charged by the provider.' },
+  { item: 'AI usage', note: 'Charged by the AI provider based on usage; estimated before launch.' },
+];
+---
+
+<MarketingLayout
+  title="Pricing — Indicative Costs in INR"
+  description="Indicative price ranges for websites, e-commerce, hospital, hotel, restaurant, retail, travel and school systems, automation, chatbots, integrations and maintenance. GST extra."
+  jsonLd={compact([breadcrumbJsonLd([{ name: 'Pricing', path: '/pricing' }]), faqJsonLd(faqs)])}
+>
+  <section class="page-container pb-12 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Pricing' }]} />
+    <div class="mt-10 grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-7">
+        <h1 class="text-h1">Indicative pricing, in rupees.</h1>
+        <p class="text-lede mt-5">
+          Starting estimates for {catalogue.pricing.length} services. These are not final quotes: the final cost depends on scope, integrations,
+          data migration, testing and deployment requirements.
+        </p>
+      </div>
+      <aside class="self-end rounded-[var(--radius-card)] border border-line bg-surface p-5 text-small lg:col-span-5" aria-label="How to read these prices">
+        <p class="flex items-center gap-2 font-semibold text-ink"><Info size={16} aria-hidden="true" class="text-olive" />How to read these prices</p>
+        <ul class="mt-3 space-y-1.5 text-ink-muted">
+          <li><strong class="font-medium text-ink">GST is not included</strong> unless a price explicitly says so.</li>
+          <li>A <strong class="font-medium text-ink">“+”</strong> means larger projects in that category can cost more.</li>
+          <li><strong class="font-medium text-ink">/month</strong> prices are recurring; everything else is one-time.</li>
+          <li>Third-party charges are billed by those providers, separately.</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="page-container pb-16" aria-label="Price list">
+    <CatalogueExplorer
+      client:load
+      mode="pricing"
+      action="/pricing"
+      prices={buildExplorerPrices(catalogue)}
+      groups={options.groups}
+      industries={options.industries}
+      categories={options.categories}
+      initialFilters={initialFilters}
+    />
+  </section>
+
+  <section class="border-y border-line bg-surface" aria-labelledby="separate-title">
+    <div class="page-container section-space grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader
+          id="separate-title"
+          eyebrow="Billed separately"
+          title="Costs that are not part of development fees."
+          intro="We list these in every quote so you know your running cost before you start."
+        />
+      </div>
+      <dl class="grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-2 lg:col-span-8">
+        {
+          SEPARATE_COSTS.map((cost) => (
+            <div class="bg-surface p-5">
+              <dt class="font-medium text-ink">{cost.item}</dt>
+              <dd class="text-small mt-1 text-ink-muted">{cost.note}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="page-container section-space" aria-labelledby="pricing-faq-title">
+    <div class="grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader id="pricing-faq-title" eyebrow="Questions" title="About pricing" />
+        <p class="mt-4 text-ink-muted">
+          Online package purchase is planned for a later release. For now, every project starts with a <a class="link-olive" href="/request-quote">quote request</a>.
+        </p>
+      </div>
+      <div class="lg:col-span-8"><FaqList faqs={faqs} /></div>
+    </div>
+  </section>
+
+  <CtaBand title="Want a figure for your project?" body="Send a short description. We reply with questions and then a written quote with one figure." primaryLabel="Request a quote" />
+</MarketingLayout>

@@ -1,0 +1,87 @@
+---
+import { actions } from 'astro:actions';
+import { Pencil, Plus } from '@lucide/astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHeader from '../../components/admin/PageHeader.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import { listFaqs, listIndustries } from '../../lib/admin/repository';
+import { draftChecked, draftValue, formAction, noticeText, outcomeOf } from '../../lib/admin/page';
+import { SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
+import { can } from '../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'catalogue')) return Astro.redirect('/admin', 303);
+
+const outcome = outcomeOf([Astro.getActionResult(actions.admin.faqs.save), Astro.getActionResult(actions.admin.faqs.delete)], (r) => `/admin/faqs?notice=${r.notice ?? 'saved'}`);
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+
+const [faqs, industries] = await Promise.all([listFaqs(db), listIndustries(db)]);
+const editId = Astro.url.searchParams.get('edit');
+const isNew = Astro.url.searchParams.has('new');
+const editing = editId ? faqs.find((faq) => faq.id === editId) : undefined;
+const v = outcome.failure?.values;
+const errors = outcome.failure?.fieldErrors ?? {};
+const SCOPES = { general: 'General (home page)', pricing: 'Pricing page', industry: 'Industry page', service_category: 'Service category page' } as const;
+const categoryName = new Map<string, string>(SERVICE_CATEGORY_CONTENT.map((c) => [c.slug, c.name]));
+---
+
+<AdminLayout title="FAQs">
+  <PageHeader title="FAQs" description="Questions shown on the home, pricing, industry and service pages. Keep answers factual — they are also published as structured data.">
+    <a href="/admin/faqs?new=1" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink"><Plus size={15} aria-hidden="true" /> Add FAQ</a>
+  </PageHeader>
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  {
+    (isNew || editing) && (
+      <section class="mb-10 rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6" aria-labelledby="faq-form-title">
+        <h2 id="faq-form-title" class="mb-5 text-lg font-semibold text-ink">{editing ? 'Edit FAQ' : 'New FAQ'}</h2>
+        <form method="POST" action={formAction(actions.admin.faqs.save.queryString, editing ? { edit: editing.id } : { new: '1' })} class="grid gap-5 md:grid-cols-3">
+          {editing && <input type="hidden" name="id" value={editing.id} />}
+          <Field id="scope" label="Shown on" error={errors.scope}>
+            <select id="scope" name="scope" class="field">{Object.entries(SCOPES).map(([value, label]) => <option value={value} selected={draftValue(v, 'scope', editing?.scope ?? 'general') === value}>{label}</option>)}</select>
+          </Field>
+          <Field id="industryId" label="Industry (for industry pages)" error={errors.industryId}>
+            <select id="industryId" name="industryId" class="field"><option value="">—</option>{industries.map((industry) => <option value={industry.id} selected={draftValue(v, 'industryId', editing?.industry_id) === industry.id}>{industry.name}</option>)}</select>
+          </Field>
+          <Field id="serviceCategory" label="Category (for service pages)" error={errors.serviceCategory}>
+            <select id="serviceCategory" name="serviceCategory" class="field"><option value="">—</option>{SERVICE_CATEGORY_CONTENT.map((category) => <option value={category.slug} selected={draftValue(v, 'serviceCategory', editing?.service_category) === category.slug}>{category.name}</option>)}</select>
+          </Field>
+          <Field id="question" label="Question" error={errors.question} class="md:col-span-3"><input id="question" name="question" required maxlength="300" value={draftValue(v, 'question', editing?.question)} class="field" /></Field>
+          <Field id="answer" label="Answer" error={errors.answer} class="md:col-span-3"><textarea id="answer" name="answer" rows="4" required maxlength="3000" class="field">{draftValue(v, 'answer', editing?.answer)}</textarea></Field>
+          <Field id="sortOrder" label="Sort order" error={errors.sortOrder}><input id="sortOrder" name="sortOrder" inputmode="numeric" value={draftValue(v, 'sortOrder', editing?.sort_order ?? 1000)} class="field" /></Field>
+          <label class="flex items-center gap-2 self-end pb-2.5 text-sm"><input type="checkbox" name="isActive" checked={draftChecked(v, 'isActive', editing?.is_active ?? true)} class="size-4 accent-[var(--olive)]" /> Show on website</label>
+          <div class="flex gap-3 md:col-span-3">
+            <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-5 py-2.5 font-medium text-invert-ink">Save FAQ</button>
+            <a href="/admin/faqs" class="px-4 py-2.5 text-ink-muted hover:text-ink">Close</a>
+          </div>
+        </form>
+        {editing && (
+          <form method="POST" action={formAction(actions.admin.faqs.delete.queryString)} class="mt-6 border-t border-line pt-4">
+            <input type="hidden" name="id" value={editing.id} />
+            <button type="submit" class="text-sm text-danger underline">Delete this FAQ</button>
+          </form>
+        )}
+      </section>
+    )
+  }
+
+  <ul class="divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface">
+    {
+      faqs.map((faq) => (
+        <li class:list={['flex flex-wrap items-start gap-3 px-4 py-3', editing?.id === faq.id && 'bg-olive-wash']}>
+          <span class="min-w-0 flex-1">
+            <span class="block font-medium text-ink">{faq.question}</span>
+            <span class="block text-sm text-ink-muted">
+              {SCOPES[faq.scope]}{faq.industries ? ` · ${faq.industries.name}` : ''}{faq.service_category ? ` · ${categoryName.get(faq.service_category)}` : ''}
+            </span>
+          </span>
+          {faq.is_active ? <Badge tone="success">Shown</Badge> : <Badge>Hidden</Badge>}
+          <a href={`/admin/faqs?edit=${faq.id}`} class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm text-ink hover:bg-bg-sunken"><Pencil size={14} aria-hidden="true" /> Edit</a>
+        </li>
+      ))
+    }
+  </ul>
+</AdminLayout>

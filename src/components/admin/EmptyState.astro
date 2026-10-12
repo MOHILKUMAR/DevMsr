@@ -1,0 +1,13 @@
+---
+interface Props {
+  title: string;
+  body?: string;
+}
+const { title, body } = Astro.props;
+---
+
+<div class="rounded-[var(--radius-card)] border border-dashed border-line-strong px-6 py-12 text-center">
+  <p class="font-medium text-ink">{title}</p>
+  {body && <p class="mt-1 text-sm text-ink-muted">{body}</p>}
+  <slot />
+</div>

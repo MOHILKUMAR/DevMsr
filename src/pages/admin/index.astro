@@ -1,0 +1,142 @@
+---
+import { actions } from 'astro:actions';
+import { ArrowRight, CalendarClock, MailWarning, RotateCw } from '@lucide/astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHeader from '../../components/admin/PageHeader.astro';
+import Notice from '../../components/admin/Notice.astro';
+import LeadStatusBadge from '../../components/admin/LeadStatusBadge.astro';
+import EmptyState from '../../components/admin/EmptyState.astro';
+import { getDashboardStats, listProblemNotifications, searchLeads } from '../../lib/admin/repository';
+import { formAction, noticeText, outcomeOf } from '../../lib/admin/page';
+import { LEAD_STATUSES, LEAD_STATUS_META } from '../../lib/leads/status';
+import { formatDate, formatDateTime } from '../../lib/utils/dates';
+import { can } from '../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'leads')) return Astro.redirect(can(admin, 'content') ? '/admin/blog' : '/admin/login', 303);
+
+const outcome = outcomeOf([Astro.getActionResult(actions.admin.leads.retryNotification)], () => '/admin?notice=sent');
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+
+const [stats, recent, due, problems] = await Promise.all([
+  getDashboardStats(db),
+  searchLeads(db, { q: '', status: '', industry: '', followUp: '', page: 1 }, 8),
+  searchLeads(db, { q: '', status: '', industry: '', followUp: 'due', page: 1 }, 8),
+  listProblemNotifications(db),
+]);
+
+const metric = (status: string) => stats.by_status[status] ?? 0;
+const CARDS = [
+  { label: 'Total leads', value: stats.total, href: '/admin/leads' },
+  ...LEAD_STATUSES.map((status) => ({ label: LEAD_STATUS_META[status].label, value: metric(status), href: `/admin/leads?status=${status}` })),
+];
+---
+
+<AdminLayout title="Dashboard">
+  <PageHeader title={`Hello, ${admin.displayName}`} description={`${stats.new_last_7_days} new enquiries in the last 7 days. All figures are live counts from the database.`}>
+    <a href="/admin/leads" class="inline-flex items-center gap-2 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink">Open lead inbox <ArrowRight size={15} aria-hidden="true" /></a>
+  </PageHeader>
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  <section aria-labelledby="metrics-title">
+    <h2 id="metrics-title" class="sr-only">Lead counts</h2>
+    <ul class="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-4 xl:grid-cols-7">
+      {
+        CARDS.map((card) => (
+          <li class="bg-surface">
+            <a href={card.href} class="block p-4 hover:bg-bg">
+              <p class="text-[0.8125rem] text-ink-muted">{card.label}</p>
+              <p class="tabular mt-1 font-display text-[2rem] leading-none text-ink">{card.value}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <div class="mt-8 grid gap-8 xl:grid-cols-5">
+    <section class="xl:col-span-3" aria-labelledby="recent-title">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 id="recent-title" class="text-lg font-semibold text-ink">Recent enquiries</h2>
+        <a href="/admin/leads" class="text-sm text-olive underline">View all</a>
+      </div>
+      {
+        recent.rows.length === 0 ? (
+          <EmptyState title="No enquiries yet" body="New contact, quote and demo requests will appear here." />
+        ) : (
+          <ul class="divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface">
+            {recent.rows.map((lead) => (
+              <li>
+                <a href={`/admin/leads/${lead.id}`} class="grid gap-1 px-4 py-3 hover:bg-bg sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4">
+                  <span class="min-w-0">
+                    <span class="block truncate font-medium text-ink">{lead.name}{lead.business_name ? ` · ${lead.business_name}` : ''}</span>
+                    <span class="block truncate text-sm text-ink-muted">
+                      <span class="font-mono text-[0.75rem]">{lead.reference_number}</span> · {lead.service_label ?? 'Not sure'} · {formatDateTime(lead.created_at)}
+                    </span>
+                  </span>
+                  <LeadStatusBadge status={lead.status} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </section>
+
+    <div class="space-y-8 xl:col-span-2">
+      <section aria-labelledby="due-title">
+        <h2 id="due-title" class="mb-3 flex items-center gap-2 text-lg font-semibold text-ink">
+          <CalendarClock size={18} aria-hidden="true" class="text-olive" /> Follow-ups due
+          <span class="rounded-full bg-bg-sunken px-2 text-sm font-normal text-ink-muted">{stats.follow_ups_due}</span>
+        </h2>
+        {
+          due.rows.length === 0 ? (
+            <p class="rounded-[var(--radius-card)] border border-line bg-surface px-4 py-3 text-sm text-ink-muted">Nothing due today or tomorrow.</p>
+          ) : (
+            <ul class="divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface">
+              {due.rows.map((lead) => (
+                <li>
+                  <a href={`/admin/leads/${lead.id}`} class="flex items-center justify-between gap-3 px-4 py-3 hover:bg-bg">
+                    <span class="min-w-0 truncate text-ink">{lead.name}</span>
+                    <span class="shrink-0 text-sm text-warning">{lead.follow_up_at ? formatDate(lead.follow_up_at) : ''}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </section>
+
+      <section aria-labelledby="problems-title">
+        <h2 id="problems-title" class="mb-3 flex items-center gap-2 text-lg font-semibold text-ink">
+          <MailWarning size={18} aria-hidden="true" class="text-clay-ink" /> Notification problems
+          <span class="rounded-full bg-bg-sunken px-2 text-sm font-normal text-ink-muted">{stats.failed_notifications}</span>
+        </h2>
+        {
+          problems.length === 0 ? (
+            <p class="rounded-[var(--radius-card)] border border-line bg-surface px-4 py-3 text-sm text-ink-muted">All notification emails were delivered or skipped intentionally.</p>
+          ) : (
+            <ul class="divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface">
+              {problems.map((event) => (
+                <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                  <span class="min-w-0">
+                    <a href={`/admin/leads/${event.lead_id}`} class="block truncate font-medium text-ink underline">{event.leads?.reference_number ?? 'Lead'}</a>
+                    <span class="block truncate text-sm text-ink-muted">{event.event_type === 'owner_new_lead' ? 'Owner alert' : 'Acknowledgement'} · {event.status} · {event.attempt_count} attempt(s)</span>
+                  </span>
+                  <form method="POST" action={formAction(actions.admin.leads.retryNotification.queryString)}>
+                    <input type="hidden" name="id" value={event.lead_id} />
+                    <input type="hidden" name="eventType" value={event.event_type} />
+                    <button type="submit" class="inline-flex items-center gap-1.5 rounded-md border border-line-strong px-3 py-1.5 text-sm text-ink hover:border-ink-muted">
+                      <RotateCw size={14} aria-hidden="true" /> Retry
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </section>
+    </div>
+  </div>
+</AdminLayout>

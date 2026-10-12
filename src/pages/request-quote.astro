@@ -1,0 +1,50 @@
+---
+import { Check } from '@lucide/astro';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
+import LeadFormSection from '../components/forms/LeadFormSection.astro';
+import { breadcrumbJsonLd } from '../lib/seo';
+
+const NEXT = [
+  'You get a reference number as soon as you submit.',
+  'We read your request and reply with questions if anything is unclear.',
+  'You receive a written scope with one figure for development, and running costs listed separately.',
+  'Nothing is billed until you approve the scope.',
+];
+---
+
+<MarketingLayout
+  title="Request a Quote"
+  description="Describe your website, software or automation project and get a written scope and quote. Indicative prices in INR; GST extra."
+  jsonLd={[breadcrumbJsonLd([{ name: 'Request a quote', path: '/request-quote' }])]}
+>
+  <section class="page-container pb-20 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Request a quote' }]} />
+    <div class="mt-10 grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <div class="lg:sticky lg:top-24">
+          <h1 class="text-h1">Request a quote</h1>
+          <p class="text-lede mt-4">A rough description is enough to start. The more you tell us about how your business runs, the more accurate the quote.</p>
+          <h2 class="mt-10 font-semibold text-ink">What happens next</h2>
+          <ol class="mt-3 space-y-3">
+            {
+              NEXT.map((item, index) => (
+                <li class="flex gap-3 text-small text-ink-muted">
+                  <span class="font-mono text-[0.75rem] text-clay-ink">{String(index + 1).padStart(2, '0')}</span>
+                  {item}
+                </li>
+              ))
+            }
+          </ol>
+          <p class="mt-8 flex gap-2 text-small text-ink-muted">
+            <Check size={16} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />
+            <span>See <a class="link-olive" href="/pricing">indicative pricing</a> if you want a ballpark first.</span>
+          </p>
+        </div>
+      </div>
+      <div class="rounded-[1.25rem] border border-line bg-surface p-5 sm:p-8 lg:col-span-8">
+        <LeadFormSection formType="quote" />
+      </div>
+    </div>
+  </section>
+</MarketingLayout>

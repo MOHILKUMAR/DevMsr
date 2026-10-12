@@ -1,0 +1,35 @@
+---
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import IndustryIndex from '../../components/industries/IndustryIndex.astro';
+import { loadCatalogue } from '../../lib/catalogue/repository';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const catalogue = await loadCatalogue(Astro.locals);
+---
+
+<MarketingLayout
+  title="Industries We Build For"
+  description="Software and websites for hospitals and clinics, hotels, restaurants, retail, footwear and jewellery stores, travel agencies and schools."
+  jsonLd={[breadcrumbJsonLd([{ name: 'Industries', path: '/industries' }])]}
+>
+  <section class="page-container pb-10 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Industries' }]} />
+    <div class="mt-10 grid gap-8 lg:grid-cols-12 lg:items-end">
+      <h1 class="text-h1 lg:col-span-7">Six industries, each with its own way of working.</h1>
+      <p class="text-lede lg:col-span-5">
+        A clinic’s queue, a hotel’s room board and a shoe store’s size grid are different problems. Pick yours to see the systems, prices and
+        questions that apply.
+      </p>
+    </div>
+  </section>
+  <section class="page-container pb-16" aria-label="Industries">
+    <IndustryIndex catalogue={catalogue} headingLevel="h2" />
+    <p class="text-small mt-8 max-w-2xl text-ink-muted">
+      Not in this list? Most of what we build — websites, CRMs, billing, inventory and automation — applies to any business.
+      <a class="link-olive" href="/services">Browse services by type</a>.
+    </p>
+  </section>
+  <CtaBand />
+</MarketingLayout>

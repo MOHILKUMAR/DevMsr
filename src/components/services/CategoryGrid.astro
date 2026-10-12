@@ -1,0 +1,55 @@
+---
+import { ArrowRight, MessageCircleQuestionMark } from '@lucide/astro';
+import DynamicIcon from '../ui/DynamicIcon.astro';
+import { SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
+import { pricesForServices, servicesForCategory } from '../../lib/catalogue/queries';
+import { formatFromPrice, lowestPrice } from '../../lib/catalogue/pricing';
+import type { Catalogue } from '../../types/catalogue';
+
+interface Props {
+  catalogue: Catalogue;
+  headingLevel?: 'h2' | 'h3';
+}
+const { catalogue, headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+
+const cells = SERVICE_CATEGORY_CONTENT.map((category) => {
+  const services = servicesForCategory(catalogue, category.slug);
+  const lowest = lowestPrice(pricesForServices(catalogue, services));
+  return { category, count: services.length, lowest };
+});
+---
+
+<ul class="grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+  {
+    cells.map(({ category, count, lowest }) => (
+      <li class="bg-surface">
+        <a href={`/services/${category.slug}`} class="group flex h-full flex-col p-6 transition-colors hover:bg-bg">
+          <span class="flex items-center justify-between">
+            <span class="text-olive">
+              <DynamicIcon name={category.icon} size={20} />
+            </span>
+            <span class="font-mono text-[0.6875rem] text-ink-muted">{count} services</span>
+          </span>
+          <Heading class="mt-5 font-display text-[1.375rem] leading-tight text-ink">{category.name}</Heading>
+          <p class="text-small mt-2 flex-1 text-ink-muted">{category.tagline}</p>
+          <span class="mt-5 flex items-center justify-between border-t border-line pt-4 text-sm">
+            <span class="font-mono text-[0.8125rem] text-ink">{lowest ? formatFromPrice(lowest) : 'Quote on request'}</span>
+            <ArrowRight size={16} aria-hidden="true" class="text-ink-muted transition-transform group-hover:translate-x-1 group-hover:text-ink" />
+          </span>
+        </a>
+      </li>
+    ))
+  }
+  <li class="bg-olive-wash">
+    <a href="/request-quote" class="group flex h-full flex-col p-6 transition-colors hover:bg-olive-soft">
+      <span class="text-olive"><MessageCircleQuestionMark size={20} aria-hidden="true" /></span>
+      <span class="mt-5 font-display text-[1.375rem] leading-tight text-ink">Not sure what you need?</span>
+      <span class="text-small mt-2 flex-1 text-ink-muted">Describe the problem in plain words. We will suggest the smallest system that solves it.</span>
+      <span class="mt-5 flex items-center justify-between border-t border-olive-soft pt-4 text-sm font-medium text-ink">
+        Describe your problem
+        <ArrowRight size={16} aria-hidden="true" class="transition-transform group-hover:translate-x-1" />
+      </span>
+    </a>
+  </li>
+</ul>

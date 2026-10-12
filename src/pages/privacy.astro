@@ -1,0 +1,86 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { loadCatalogue } from '../lib/catalogue/repository';
+
+const catalogue = await loadCatalogue(Astro.locals);
+const { contactEmail, leadRetentionMonths } = catalogue.settings;
+---
+
+<LegalLayout
+  title="Privacy Policy"
+  description="What personal data DevMsr.in collects through this website, why, who processes it, how long it is kept and how to ask for it to be corrected or deleted."
+  path="/privacy"
+  updated="2026-10-12"
+>
+  <p>
+    This policy explains what information DevMsr.in (“we”) collects when you use this website, why we collect it, and the choices you have. It
+    describes how this website actually works; if that changes, we will update this page.
+  </p>
+
+  <h2>What we collect</h2>
+  <p>When you send a contact, quote or demo request, we collect what you type into the form:</p>
+  <ul>
+    <li>Your name and email address (required)</li>
+    <li>Your industry, the service you are interested in and a description of your project (required)</li>
+    <li>Optionally: business name, phone or WhatsApp number, budget range, timeline, preferred contact method, existing website and preferred consultation time</li>
+  </ul>
+  <p>We also record a small amount of technical information with each request:</p>
+  <ul>
+    <li>The time of submission and the page or campaign link you came from (referrer and UTM parameters), if available</li>
+    <li>
+      A one-way hashed form of your IP address, used only to limit repeated or automated submissions. We do not store your IP address
+      itself.
+    </li>
+  </ul>
+  <p>We do not use advertising cookies or third-party analytics trackers on this website.</p>
+
+  <h2>Why we use it</h2>
+  <ul>
+    <li>To reply to your enquiry, understand your requirements and prepare a quote</li>
+    <li>To follow up about the same enquiry using the contact method you prefer</li>
+    <li>To protect the website and our inbox from spam and abuse</li>
+  </ul>
+  <p>We do not sell your information, and we do not add you to marketing lists without asking.</p>
+
+  <h2>Who processes it</h2>
+  <p>We use a small number of service providers to run this website. They process data on our behalf:</p>
+  <ul>
+    <li><strong>Supabase</strong> — database hosting for enquiries and website content</li>
+    <li><strong>Cloudflare</strong> — website hosting, security, and the Turnstile check that tells people and bots apart</li>
+    <li><strong>Resend</strong> — delivery of notification and acknowledgement emails</li>
+  </ul>
+  <p>These providers may process data on servers outside India.</p>
+
+  <h2>Cookies and local storage</h2>
+  <ul>
+    <li>If you choose a light or dark theme, that preference is stored in your browser’s local storage. It is not sent to us.</li>
+    <li>The Cloudflare Turnstile check may set cookies that are necessary for it to work.</li>
+    <li>Staff who sign in to the private admin area receive secure session cookies. Visitors do not.</li>
+  </ul>
+
+  <h2>How long we keep it</h2>
+  <p>
+    Enquiries are kept for up to {leadRetentionMonths} months after our last contact with you and then deleted, unless you become a client — in
+    which case we keep project records for as long as the engagement and applicable legal obligations require.
+  </p>
+
+  <h2>Your choices and rights</h2>
+  <p>
+    You can ask us to show you the information we hold about you, correct it, or delete it, and you can withdraw your consent to further contact
+    at any time. Use the <a href="/contact">contact form</a>{contactEmail ? <> or email <a href={`mailto:${contactEmail}`}>{contactEmail}</a></> : null}
+    and mention your enquiry reference number if you have one. We will respond within a reasonable time.
+  </p>
+
+  <h2>Security</h2>
+  <p>
+    Enquiries are validated and stored on the server. Database access is restricted with row-level security, and only authorised staff can sign
+    in to view enquiries. No method of storage or transmission is completely secure, but we work to protect your information and to limit what we
+    collect.
+  </p>
+
+  <h2>Children</h2>
+  <p>This website is intended for businesses and is not directed at children.</p>
+
+  <h2>Changes</h2>
+  <p>We will post any changes to this policy on this page and update the date above.</p>
+</LegalLayout>

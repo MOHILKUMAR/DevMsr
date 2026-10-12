@@ -1,0 +1,74 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+import themeInit from '../scripts/theme-init.js?raw';
+
+export interface Props {
+  /** Page title without the brand suffix. */
+  title: string;
+  description: string;
+  /** Override the canonical path (defaults to the current path). */
+  canonicalPath?: string;
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+  /** JSON-LD objects; only describe information that genuinely exists. */
+  jsonLd?: Record<string, unknown>[];
+  /** Use the title as-is (home page). */
+  bareTitle?: boolean;
+}
+
+const { title, description, canonicalPath, ogType = 'website', noindex = false, jsonLd = [], bareTitle = false } = Astro.props;
+const site = Astro.site ?? new URL('https://devmsr.in');
+const canonical = new URL(canonicalPath ?? Astro.url.pathname, site).toString().replace(/\/$/, '') || site.toString();
+const fullTitle = bareTitle ? title : `${title} · DevMsr.in`;
+const ogImage = new URL('/og-default.png', site).toString();
+// `</script>` cannot appear inside JSON-LD; escape "<" defensively.
+const jsonLdBlocks = jsonLd.map((block) => JSON.stringify(block).replace(/</g, '\\u003c'));
+---
+
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#F7F7F4" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161815" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <meta property="og:site_name" content="DevMsr.in" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_IN" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <Font cssVariable="--font-geist" preload />
+    <Font cssVariable="--font-newsreader" preload />
+    <Font cssVariable="--font-geist-mono" />
+
+    <!-- Applies a saved theme before first paint. Its CSP hash is computed in astro.config.mjs. -->
+    <script is:inline set:html={themeInit} />
+
+    {jsonLdBlocks.map((block) => <script type="application/ld+json" is:inline set:html={block} />)}
+    <slot name="head" />
+  </head>
+  <body class="min-h-dvh">
+    <slot />
+    <script>
+      import '../scripts/attribution';
+    </script>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+---
+import { Search, ChevronLeft, ChevronRight } from '@lucide/astro';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHeader from '../../../components/admin/PageHeader.astro';
+import LeadStatusBadge from '../../../components/admin/LeadStatusBadge.astro';
+import EmptyState from '../../../components/admin/EmptyState.astro';
+import { LEADS_PAGE_SIZE, listIndustries, readLeadFilters, searchLeads } from '../../../lib/admin/repository';
+import { LEAD_STATUSES, LEAD_STATUS_META, FORM_TYPE_LABELS } from '../../../lib/leads/status';
+import { formatDate, formatDateTime } from '../../../lib/utils/dates';
+import { can } from '../../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'leads')) return Astro.redirect('/admin', 303);
+
+const filters = readLeadFilters(Astro.url);
+const [{ rows, total }, industries] = await Promise.all([searchLeads(db, filters), listIndustries(db)]);
+const pages = Math.max(1, Math.ceil(total / LEADS_PAGE_SIZE));
+const pageUrl = (page: number) => {
+  const url = new URL(Astro.url);
+  url.searchParams.set('page', String(page));
+  return `${url.pathname}${url.search}`;
+};
+const active = Boolean(filters.q || filters.status || filters.industry || filters.followUp);
+const now = Date.now();
+---
+
+<AdminLayout title="Leads">
+  <PageHeader title="Leads" description={`${total} ${active ? 'matching' : 'total'} enquiries.`} />
+
+  <form method="GET" role="search" aria-label="Filter leads" class="mb-6 grid gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]">
+    <div>
+      <label for="q" class="mb-1 block text-sm font-medium text-ink">Search</label>
+      <div class="relative">
+        <Search size={15} aria-hidden="true" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
+        <input id="q" name="q" type="search" value={filters.q} placeholder="Name, email, phone, business or reference" class="field pl-9" />
+      </div>
+    </div>
+    <div>
+      <label for="status" class="mb-1 block text-sm font-medium text-ink">Status</label>
+      <select id="status" name="status" class="field">
+        <option value="">All statuses</option>
+        {LEAD_STATUSES.map((status) => <option value={status} selected={filters.status === status}>{LEAD_STATUS_META[status].label}</option>)}
+      </select>
+    </div>
+    <div>
+      <label for="industry" class="mb-1 block text-sm font-medium text-ink">Industry</label>
+      <select id="industry" name="industry" class="field">
+        <option value="">All industries</option>
+        {industries.map((industry) => <option value={industry.id} selected={filters.industry === industry.id}>{industry.name}</option>)}
+      </select>
+    </div>
+    <div>
+      <label for="follow_up" class="mb-1 block text-sm font-medium text-ink">Follow-up</label>
+      <select id="follow_up" name="follow_up" class="field">
+        <option value="">Any</option>
+        <option value="due" selected={filters.followUp === 'due'}>Due (today / tomorrow)</option>
+        <option value="scheduled" selected={filters.followUp === 'scheduled'}>Scheduled</option>
+        <option value="none" selected={filters.followUp === 'none'}>Not set</option>
+      </select>
+    </div>
+    <div class="flex items-end gap-2">
+      <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-4 py-2.5 text-sm font-medium text-invert-ink">Apply</button>
+      {active && <a href="/admin/leads" class="rounded-[var(--radius-control)] px-3 py-2.5 text-sm text-ink-muted hover:text-ink">Clear</a>}
+    </div>
+  </form>
+
+  {
+    rows.length === 0 ? (
+      <EmptyState title={active ? 'No leads match these filters' : 'No leads yet'} body={active ? 'Try clearing a filter.' : 'Website enquiries will appear here as they arrive.'} />
+    ) : (
+      <div class="overflow-x-auto rounded-[var(--radius-card)] border border-line bg-surface">
+        <table class="w-full min-w-[56rem] text-left text-sm">
+          <caption class="sr-only">Leads, newest first</caption>
+          <thead class="border-b border-line bg-bg-sunken text-ink-muted">
+            <tr>
+              <th scope="col" class="px-4 py-2.5 font-medium">Lead</th>
+              <th scope="col" class="px-4 py-2.5 font-medium">Interest</th>
+              <th scope="col" class="px-4 py-2.5 font-medium">Industry</th>
+              <th scope="col" class="px-4 py-2.5 font-medium">Status</th>
+              <th scope="col" class="px-4 py-2.5 font-medium">Follow-up</th>
+              <th scope="col" class="px-4 py-2.5 font-medium">Received</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            {rows.map((lead) => {
+              const overdue = lead.follow_up_at && new Date(lead.follow_up_at).getTime() < now && lead.status !== 'won' && lead.status !== 'lost';
+              return (
+                <tr class="hover:bg-bg">
+                  <td class="px-4 py-3">
+                    <a href={`/admin/leads/${lead.id}`} class="font-medium text-ink underline decoration-line-strong hover:decoration-ink">{lead.name}</a>
+                    <span class="block text-ink-muted">{lead.business_name ?? lead.email}</span>
+                    <span class="block font-mono text-[0.6875rem] text-ink-muted">{lead.reference_number} · {FORM_TYPE_LABELS[lead.form_type]}</span>
+                  </td>
+                  <td class="px-4 py-3 text-ink">{lead.service_label ?? 'Not sure'}</td>
+                  <td class="px-4 py-3 text-ink-muted">{lead.industry_name ?? 'Other'}</td>
+                  <td class="px-4 py-3"><LeadStatusBadge status={lead.status} /></td>
+                  <td class:list={['px-4 py-3', overdue ? 'font-medium text-danger' : 'text-ink-muted']}>{lead.follow_up_at ? formatDate(lead.follow_up_at) : '—'}</td>
+                  <td class="whitespace-nowrap px-4 py-3 text-ink-muted">{formatDateTime(lead.created_at)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  {
+    pages > 1 && (
+      <nav aria-label="Pagination" class="mt-6 flex items-center justify-between text-sm">
+        {filters.page > 1 ? (
+          <a href={pageUrl(filters.page - 1)} class="inline-flex items-center gap-1 rounded-md border border-line px-3 py-1.5 text-ink hover:bg-bg-sunken"><ChevronLeft size={15} aria-hidden="true" /> Newer</a>
+        ) : <span />}
+        <span class="text-ink-muted">Page {filters.page} of {pages}</span>
+        {filters.page < pages ? (
+          <a href={pageUrl(filters.page + 1)} class="inline-flex items-center gap-1 rounded-md border border-line px-3 py-1.5 text-ink hover:bg-bg-sunken">Older <ChevronRight size={15} aria-hidden="true" /></a>
+        ) : <span />}
+      </nav>
+    )
+  }
+</AdminLayout>

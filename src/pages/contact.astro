@@ -1,0 +1,71 @@
+---
+import { Mail, Phone, MessageCircle, Clock, MapPin } from '@lucide/astro';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
+import LeadFormSection from '../components/forms/LeadFormSection.astro';
+import { loadCatalogue } from '../lib/catalogue/repository';
+import { breadcrumbJsonLd } from '../lib/seo';
+
+const { settings } = await loadCatalogue(Astro.locals);
+const whatsappDigits = settings.whatsappNumber?.replace(/\D/g, '') ?? '';
+---
+
+<MarketingLayout
+  title="Contact"
+  description="Contact DevMsr.in about a website, business software or automation project."
+  jsonLd={[breadcrumbJsonLd([{ name: 'Contact', path: '/contact' }])]}
+>
+  <section class="page-container pb-20 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Contact' }]} />
+    <div class="mt-10 grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <h1 class="text-h1">Contact</h1>
+        <p class="text-lede mt-4">
+          Questions, ideas or a problem you want solved — send a message. For a priced proposal, the <a class="link-olive" href="/request-quote">quote form</a>
+          asks a few more useful questions.
+        </p>
+        <ul class="mt-10 space-y-4 text-small">
+          {
+            settings.contactEmail && (
+              <li class="flex gap-3">
+                <Mail size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />
+                <a class="link-ink" href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>
+              </li>
+            )
+          }
+          {
+            settings.contactPhone && (
+              <li class="flex gap-3">
+                <Phone size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />
+                <a class="link-ink" href={`tel:${settings.contactPhone.replace(/[^\d+]/g, '')}`}>{settings.contactPhone}</a>
+              </li>
+            )
+          }
+          {
+            whatsappDigits && (
+              <li class="flex gap-3">
+                <MessageCircle size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />
+                <a class="link-ink" href={`https://wa.me/${whatsappDigits}`} rel="noopener noreferrer" target="_blank">WhatsApp</a>
+              </li>
+            )
+          }
+          {
+            settings.businessHours && (
+              <li class="flex gap-3">
+                <Clock size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />
+                <span class="text-ink">{settings.businessHours}</span>
+              </li>
+            )
+          }
+          <li class="flex gap-3">
+            <MapPin size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />
+            <span class="text-ink">{settings.serviceArea}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="rounded-[1.25rem] border border-line bg-surface p-5 sm:p-8 lg:col-span-8">
+        <LeadFormSection formType="contact" />
+      </div>
+    </div>
+  </section>
+</MarketingLayout>

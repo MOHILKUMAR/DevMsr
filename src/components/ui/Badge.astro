@@ -1,0 +1,27 @@
+---
+type Tone = 'neutral' | 'olive' | 'clay' | 'success' | 'warning' | 'danger' | 'info';
+interface Props {
+  tone?: Tone;
+  class?: string;
+}
+const TONES: Record<Tone, string> = {
+  neutral: 'bg-bg-sunken text-ink-muted border-line',
+  olive: 'bg-olive-wash text-olive border-olive-soft',
+  clay: 'bg-clay-soft text-clay-ink border-transparent',
+  success: 'bg-success-soft text-success border-transparent',
+  warning: 'bg-warning-soft text-warning border-transparent',
+  danger: 'bg-danger-soft text-danger border-transparent',
+  info: 'bg-info-soft text-info border-transparent',
+};
+const { tone = 'neutral', class: className } = Astro.props;
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.06em]',
+    TONES[tone],
+    className,
+  ]}
+>
+  <slot />
+</span>

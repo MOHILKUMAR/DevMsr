@@ -1,0 +1,80 @@
+---
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import ProductStatusBadge from '../../components/ui/ProductStatusBadge.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import { loadCatalogue } from '../../lib/catalogue/repository';
+import { PRODUCT_STATUS_META } from '../../lib/catalogue/labels';
+import { breadcrumbJsonLd } from '../../lib/seo';
+import { PRODUCT_STATUSES } from '../../types/catalogue';
+
+const catalogue = await loadCatalogue(Astro.locals);
+const products = [...catalogue.products].sort((a, b) => a.sortOrder - b.sortOrder);
+const industryNames = new Map(catalogue.industries.map((industry) => [industry.slug, industry.name]));
+const byStatus = PRODUCT_STATUSES.map((status) => ({ status, items: products.filter((product) => product.status === status) })).filter(
+  (group) => group.items.length > 0,
+);
+---
+
+<MarketingLayout
+  title="Products and Systems"
+  description="Reusable systems from DevMsr.in for clinics, hotels, restaurants, retail, travel and schools — each clearly labelled Available, Demo, In development or Concept."
+  jsonLd={[breadcrumbJsonLd([{ name: 'Products', path: '/products' }])]}
+>
+  <section class="page-container pb-12 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Products' }]} />
+    <div class="mt-10 grid gap-8 lg:grid-cols-12 lg:items-end">
+      <h1 class="text-h1 lg:col-span-7">Products and systems, with honest labels.</h1>
+      <p class="text-lede lg:col-span-5">
+        These are systems we plan to offer as ready-made products. Each one shows exactly how finished it is today.
+      </p>
+    </div>
+    <dl class="mt-10 grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+      {
+        PRODUCT_STATUSES.map((status) => (
+          <div class="bg-surface p-4">
+            <dt><ProductStatusBadge status={status} /></dt>
+            <dd class="text-small mt-2 text-ink-muted">{PRODUCT_STATUS_META[status].explanation}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="page-container pb-16" aria-label="Products">
+    {
+      products.length === 0 ? (
+        <p class="rounded-[var(--radius-card)] border border-dashed border-line-strong p-10 text-center text-ink-muted">
+          No products are listed yet. Everything on our services pages is available as a custom project today.
+        </p>
+      ) : (
+        <div class="space-y-14">
+          {byStatus.map((group) => (
+            <section aria-labelledby={`status-${group.status}`}>
+              <h2 id={`status-${group.status}`} class="text-eyebrow mb-4">
+                {PRODUCT_STATUS_META[group.status].label} · {group.items.length}
+              </h2>
+              <ul class="grid gap-4 md:grid-cols-2">
+                {group.items.map((product) => (
+                  <li>
+                    <a href={`/products/${product.slug}`} class="group flex h-full flex-col rounded-[var(--radius-card)] border border-line bg-surface p-6 transition-colors hover:border-line-strong">
+                      <div class="flex items-start justify-between gap-4">
+                        <h3 class="text-h3 group-hover:underline">{product.name}</h3>
+                        <ProductStatusBadge status={product.status} />
+                      </div>
+                      <p class="mt-2 flex-1 text-ink-muted">{product.summary}</p>
+                      <p class="mt-5 text-[0.8125rem] text-ink-muted">
+                        {product.industrySlug ? industryNames.get(product.industrySlug) : 'All industries'}
+                      </p>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      )
+    }
+  </section>
+  <CtaBand title="Need one of these now?" body="Every product here can be built as a custom project for your business today. Tell us what you need." />
+</MarketingLayout>

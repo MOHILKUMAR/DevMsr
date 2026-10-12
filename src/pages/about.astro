@@ -1,0 +1,82 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import ProcessSteps from '../components/home/ProcessSteps.astro';
+import CtaBand from '../components/ui/CtaBand.astro';
+import { loadCatalogue } from '../lib/catalogue/repository';
+import { breadcrumbJsonLd } from '../lib/seo';
+
+const catalogue = await loadCatalogue(Astro.locals);
+
+const PRINCIPLES = [
+  { title: 'Start with the work, not the software', body: 'We spend the first conversation on how your team works today: who does what, which documents exist, where things get stuck.' },
+  { title: 'Publish the numbers', body: 'Indicative prices are on this website. A written quote separates development from hosting, maintenance and third-party charges.' },
+  { title: 'Say what is finished', body: 'Products are labelled Available, Demo, In development or Concept. Sample screens say “sample data”. Client work is listed only with permission.' },
+  { title: 'Keep people in the loop', body: 'Automation and AI handle routine steps. Anything consequential — money, medical, legal or bulk messages — keeps a human approval step.' },
+  { title: 'Build small, then extend', body: 'A focused first version that your staff actually use beats a large system nobody opens. We add modules once the first one works.' },
+  { title: 'Use dependable, open tools', body: 'Modern open-source frameworks and PostgreSQL, deployed on mainstream cloud platforms, so your system is not tied to a niche vendor.' },
+];
+const DONT = [
+  'Invent testimonials, client logos or results',
+  'Quote a final price before understanding the scope',
+  'Hide third-party costs inside development fees',
+  'Claim regulatory compliance or certification we have not been through',
+  'Put AI in charge of decisions that need a person',
+];
+---
+
+<MarketingLayout
+  title="About DevMsr.in"
+  description="DevMsr.in builds websites, custom business software and automation for Indian businesses — with published prices, written scopes and honest labels."
+  jsonLd={[breadcrumbJsonLd([{ name: 'About', path: '/about' }])]}
+>
+  <section class="page-container pb-14 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'About' }]} />
+    <div class="mt-10 grid gap-10 lg:grid-cols-12">
+      <h1 class="text-h1 lg:col-span-7">We build the software small and growing businesses run on.</h1>
+      <div class="space-y-4 text-lede lg:col-span-5 lg:pt-3">
+        <p>
+          DevMsr.in designs and builds websites, management systems, billing and CRM software, and workflow automation for hospitals, hotels,
+          restaurants, retailers, travel companies and schools.
+        </p>
+        <p>We work mainly with businesses in India and take on international projects by arrangement.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-line bg-surface" aria-labelledby="principles-title">
+    <div class="page-container section-space">
+      <SectionHeader class="mb-12" id="principles-title" eyebrow="How we work" title="Six working principles." />
+      <ol class="grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          PRINCIPLES.map((principle, index) => (
+            <li class="border-t border-line-strong pt-5">
+              <span class="font-mono text-[0.75rem] text-clay-ink">{String(index + 1).padStart(2, '0')}</span>
+              <h3 class="text-h3 mt-3">{principle.title}</h3>
+              <p class="mt-2 text-ink-muted">{principle.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="page-container section-space grid gap-12 lg:grid-cols-12" aria-labelledby="dont-title">
+    <div class="lg:col-span-5">
+      <SectionHeader id="dont-title" eyebrow="And what we don’t do" title="Things you will not find here." />
+    </div>
+    <ul class="divide-y divide-line border-y border-line lg:col-span-7">
+      {DONT.map((item) => <li class="py-4 text-lg text-ink">{item}</li>)}
+    </ul>
+  </section>
+
+  <section class="page-container pb-16" aria-labelledby="process-title">
+    <SectionHeader class="mb-10" id="process-title" eyebrow="Process" title="From enquiry to launch." />
+    <ProcessSteps />
+    <p class="text-small mt-6 text-ink-muted">
+      Currently offering {catalogue.services.length} services across {catalogue.industries.length} industries. Service area: {catalogue.settings.serviceArea}.
+    </p>
+  </section>
+  <CtaBand />
+</MarketingLayout>

@@ -1,0 +1,45 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'accent';
+type Size = 'sm' | 'md' | 'lg';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'type'> {
+  href?: string;
+  variant?: Variant;
+  size?: Size;
+  type?: 'button' | 'submit' | 'reset';
+}
+
+const VARIANTS: Record<Variant, string> = {
+  primary: 'bg-invert text-invert-ink hover:opacity-90',
+  accent: 'bg-olive text-surface hover:bg-olive-strong',
+  secondary: 'border border-line-strong bg-surface text-ink hover:border-ink-muted',
+  ghost: 'text-ink hover:bg-bg-sunken',
+};
+const SIZES: Record<Size, string> = {
+  sm: 'px-3 py-1.5 text-sm',
+  md: 'px-4 py-2.5 text-[0.9375rem]',
+  lg: 'px-5 py-3 text-base',
+};
+
+const { href, variant = 'primary', size = 'md', type = 'button', class: className, ...rest } = Astro.props;
+const classes = [
+  'inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] font-medium transition-[opacity,background-color,border-color] duration-150 disabled:pointer-events-none disabled:opacity-50',
+  VARIANTS[variant],
+  SIZES[size],
+  className,
+];
+---
+
+{
+  href !== undefined ? (
+    <a href={href} class:list={classes} {...rest}>
+      <slot />
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...(rest as HTMLAttributes<'button'>)}>
+      <slot />
+    </button>
+  )
+}

@@ -1,0 +1,11 @@
+---
+import Badge from '../ui/Badge.astro';
+import { LEAD_STATUS_META, type LeadStatus } from '../../lib/leads/status';
+
+interface Props {
+  status: LeadStatus;
+}
+const meta = LEAD_STATUS_META[Astro.props.status];
+---
+
+<Badge tone={meta.tone}>{meta.label}</Badge>

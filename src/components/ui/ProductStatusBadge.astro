@@ -1,0 +1,15 @@
+---
+import Badge from './Badge.astro';
+import { PRODUCT_STATUS_META } from '../../lib/catalogue/labels';
+import type { ProductStatus } from '../../types/catalogue';
+
+interface Props {
+  status: ProductStatus;
+}
+const meta = PRODUCT_STATUS_META[Astro.props.status];
+---
+
+<Badge tone={meta.tone} class="shrink-0">
+  <span aria-hidden="true" class="size-1.5 rounded-full bg-current"></span>
+  {meta.label}
+</Badge>

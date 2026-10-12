@@ -1,0 +1,27 @@
+---
+/**
+ * Window frame for illustrative interface previews. Every preview is
+ * labelled "Sample data" so it is never mistaken for a client screenshot.
+ */
+interface Props {
+  title: string;
+  meta?: string;
+  class?: string;
+}
+const { title, meta, class: className } = Astro.props;
+---
+
+<figure class:list={['overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-lift', className]}>
+  <div class="flex items-center justify-between gap-3 border-b border-line bg-bg-sunken/60 px-4 py-2.5">
+    <div class="flex min-w-0 items-center gap-2">
+      <span aria-hidden="true" class="size-2 shrink-0 rounded-[3px] bg-clay"></span>
+      <span class="truncate text-[0.8125rem] font-medium text-ink">{title}</span>
+      {meta && <span class="hidden truncate text-[0.75rem] text-ink-muted sm:inline">· {meta}</span>}
+    </div>
+    <span class="shrink-0 font-mono text-[0.625rem] uppercase tracking-[0.08em] text-ink-muted">Sample data</span>
+  </div>
+  <div class="p-4 text-[0.8125rem] leading-snug">
+    <slot />
+  </div>
+  <slot name="caption" />
+</figure>

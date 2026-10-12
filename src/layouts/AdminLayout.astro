@@ -1,0 +1,128 @@
+---
+import { actions } from 'astro:actions';
+import {
+  LayoutDashboard,
+  Inbox,
+  Layers,
+  IndianRupee,
+  Building,
+  Package,
+  FolderKanban,
+  Newspaper,
+  MessageCircleQuestionMark,
+  Settings,
+  LogOut,
+  ExternalLink,
+  Menu,
+} from '@lucide/astro';
+import BaseLayout from './BaseLayout.astro';
+import Wordmark from '../components/layout/Wordmark.astro';
+import ThemeToggle from '../components/layout/ThemeToggle.astro';
+import { can } from '../lib/auth/types';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+const admin = Astro.locals.admin;
+const path = Astro.url.pathname;
+
+const NAV = [
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, show: can(admin, 'leads') },
+  { href: '/admin/leads', label: 'Leads', icon: Inbox, show: can(admin, 'leads') },
+  { href: '/admin/services', label: 'Services', icon: Layers, show: can(admin, 'catalogue') },
+  { href: '/admin/pricing', label: 'Pricing', icon: IndianRupee, show: can(admin, 'catalogue') },
+  { href: '/admin/industries', label: 'Industries', icon: Building, show: can(admin, 'catalogue') },
+  { href: '/admin/faqs', label: 'FAQs', icon: MessageCircleQuestionMark, show: can(admin, 'catalogue') },
+  { href: '/admin/products', label: 'Products', icon: Package, show: can(admin, 'content') },
+  { href: '/admin/portfolio', label: 'Portfolio', icon: FolderKanban, show: can(admin, 'content') },
+  { href: '/admin/blog', label: 'Blog', icon: Newspaper, show: can(admin, 'content') },
+  { href: '/admin/settings', label: 'Settings', icon: Settings, show: can(admin, 'settings') },
+].filter((item) => item.show);
+
+const isActive = (href: string) => (href === '/admin' ? path === '/admin' : path === href || path.startsWith(`${href}/`));
+---
+
+<BaseLayout title={`${title} · Admin`} description="DevMsr.in admin" noindex>
+  <a
+    href="#admin-main"
+    class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-md focus:bg-invert focus:px-4 focus:py-2 focus:text-invert-ink"
+    >Skip to content</a
+  >
+  <div class="min-h-dvh lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]">
+    <aside class="hidden border-r border-line bg-surface lg:flex lg:flex-col" aria-label="Admin">
+      <div class="flex h-16 items-center gap-2 border-b border-line px-5">
+        <Wordmark />
+        <span class="rounded bg-bg-sunken px-1.5 py-0.5 font-mono text-[0.625rem] uppercase tracking-[0.08em] text-ink-muted">Admin</span>
+      </div>
+      <nav class="flex-1 overflow-y-auto p-3" aria-label="Admin sections">
+        <ul class="space-y-0.5">
+          {
+            NAV.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                  class:list={[
+                    'flex items-center gap-3 rounded-md px-3 py-2 text-[0.9375rem] transition-colors',
+                    isActive(item.href) ? 'bg-olive-wash font-medium text-ink' : 'text-ink-muted hover:bg-bg-sunken hover:text-ink',
+                  ]}
+                >
+                  <item.icon size={17} aria-hidden="true" />
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <div class="border-t border-line p-4 text-sm">
+        <p class="font-medium text-ink">{admin?.displayName}</p>
+        <p class="text-ink-muted">{admin?.email} · <span class="capitalize">{admin?.role}</span></p>
+        <div class="mt-3 flex items-center gap-2">
+          <a href="/" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-ink-muted hover:bg-bg-sunken hover:text-ink" target="_blank" rel="noopener">
+            <ExternalLink size={14} aria-hidden="true" /> Site
+          </a>
+          <form method="POST" action={`/admin/login${actions.auth.logout.queryString}`}>
+            <button type="submit" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-ink-muted hover:bg-bg-sunken hover:text-ink">
+              <LogOut size={14} aria-hidden="true" /> Sign out
+            </button>
+          </form>
+          <ThemeToggle />
+        </div>
+      </div>
+    </aside>
+
+    <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-surface px-4 lg:hidden">
+      <Wordmark />
+      <details class="group relative">
+        <summary class="flex cursor-pointer list-none items-center gap-2 rounded-md border border-line px-3 py-1.5 text-sm [&::-webkit-details-marker]:hidden">
+          <Menu size={16} aria-hidden="true" /> Menu
+        </summary>
+        <nav class="absolute right-0 top-full mt-2 w-64 rounded-[var(--radius-card)] border border-line bg-surface-raised p-2 shadow-lift" aria-label="Admin sections">
+          <ul>
+            {
+              NAV.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} class="flex items-center gap-3 rounded-md px-3 py-2 text-ink hover:bg-bg-sunken">
+                    <item.icon size={16} aria-hidden="true" />
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+          <form method="POST" action={`/admin/login${actions.auth.logout.queryString}`} class="mt-1 border-t border-line pt-1">
+            <button type="submit" class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-ink hover:bg-bg-sunken">
+              <LogOut size={16} aria-hidden="true" /> Sign out
+            </button>
+          </form>
+        </nav>
+      </details>
+    </header>
+
+    <main id="admin-main" tabindex="-1" class="min-w-0 px-4 py-6 focus:outline-none sm:px-6 lg:px-10 lg:py-8">
+      <slot />
+    </main>
+  </div>
+</BaseLayout>

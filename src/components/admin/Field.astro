@@ -1,0 +1,18 @@
+---
+/** Label + control + hint/error for admin forms. The control goes in the default slot and must use `id`. */
+interface Props {
+  id: string;
+  label: string;
+  hint?: string;
+  error?: string | undefined;
+  class?: string;
+}
+const { id, label, hint, error, class: className } = Astro.props;
+---
+
+<div class={className}>
+  <label for={id} class="mb-1.5 block text-sm font-medium text-ink">{label}</label>
+  <slot />
+  {hint && !error && <p id={`${id}-hint`} class="mt-1 text-[0.8125rem] text-ink-muted">{hint}</p>}
+  {error && <p id={`${id}-error`} class="mt-1 text-[0.8125rem] text-danger">{error}</p>}
+</div>

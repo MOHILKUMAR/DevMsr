@@ -1,0 +1,173 @@
+---
+import { actions } from 'astro:actions';
+import { Plus, Pencil, ExternalLink } from '@lucide/astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHeader from '../../components/admin/PageHeader.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import { listPricing, listServices } from '../../lib/admin/repository';
+import { draftChecked, draftValue, formAction, linesOf, noticeText, outcomeOf } from '../../lib/admin/page';
+import { formatPrice, BILLING_INTERVAL_LABELS, PRICING_MODEL_LABELS } from '../../lib/catalogue/pricing';
+import { PRICING_GROUP_LABELS } from '../../data/seed/pricing';
+import { BILLING_INTERVALS, PRICING_GROUPS, PRICING_MODELS, type BillingInterval, type PricingModel } from '../../types/catalogue';
+import { can } from '../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'catalogue')) return Astro.redirect('/admin', 303);
+
+const editId = Astro.url.searchParams.get('edit');
+const isNew = Astro.url.searchParams.has('new');
+
+const outcome = outcomeOf([Astro.getActionResult(actions.admin.pricing.save), Astro.getActionResult(actions.admin.pricing.delete)], (r) => `/admin/pricing?notice=${r.notice ?? 'saved'}#group-list`);
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+
+const [prices, services] = await Promise.all([listPricing(db), listServices(db)]);
+const editing = editId ? prices.find((price) => price.id === editId) : undefined;
+const showForm = isNew || Boolean(editing);
+const v = outcome.failure?.values;
+const errors = outcome.failure?.fieldErrors ?? {};
+const presetService = Astro.url.searchParams.get('service') ?? '';
+
+const grouped = PRICING_GROUPS.map((group) => ({ group, rows: prices.filter((price) => price.display_group === group) }));
+const priceText = (row: (typeof prices)[number]) =>
+  formatPrice({
+    pricingModel: row.pricing_model as PricingModel,
+    minimumAmount: row.minimum_amount,
+    maximumAmount: row.maximum_amount,
+    maxOpenEnded: row.max_open_ended,
+    currency: row.currency,
+    billingInterval: row.billing_interval as BillingInterval,
+  });
+---
+
+<AdminLayout title="Pricing">
+  <PageHeader title="Pricing" description="Indicative prices shown on the public website. Changes appear immediately. Amounts are stored as exact decimals.">
+    <a href="/admin/pricing?new=1" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink"><Plus size={15} aria-hidden="true" /> Add price</a>
+    <a href="/pricing" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] border border-line-strong px-4 py-2 text-sm text-ink"><ExternalLink size={14} aria-hidden="true" /> View public page</a>
+  </PageHeader>
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  {
+    showForm && (
+      <section class="mb-10 rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6" aria-labelledby="price-form-title">
+        <h2 id="price-form-title" class="mb-5 text-lg font-semibold text-ink">{editing ? `Edit: ${editing.label ?? editing.services?.name}` : 'New price'}</h2>
+        <form method="POST" action={formAction(actions.admin.pricing.save.queryString, editing ? { edit: editing.id } : { new: '1' })} class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {editing && <input type="hidden" name="id" value={editing.id} />}
+          <Field id="serviceId" label="Service" error={errors.serviceId} class="md:col-span-2 xl:col-span-1">
+            <select id="serviceId" name="serviceId" required class="field">
+              <option value="">Choose a service</option>
+              {services.map((service) => (
+                <option value={service.id} selected={draftValue(v, 'serviceId', editing?.service_id ?? presetService) === service.id}>
+                  {service.name}{service.is_active ? '' : ' (hidden)'}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field id="label" label="Display label" hint="Optional. Defaults to the service name, e.g. “Hospital Management MVP”." error={errors.label}>
+            <input id="label" name="label" value={draftValue(v, 'label', editing?.label)} maxlength="160" class="field" />
+          </Field>
+          <Field id="displayGroup" label="Group on pricing page" error={errors.displayGroup}>
+            <select id="displayGroup" name="displayGroup" class="field">
+              {PRICING_GROUPS.map((group) => <option value={group} selected={draftValue(v, 'displayGroup', editing?.display_group) === group}>{PRICING_GROUP_LABELS[group].label}</option>)}
+            </select>
+          </Field>
+          <Field id="pricingModel" label="Pricing model" error={errors.pricingModel}>
+            <select id="pricingModel" name="pricingModel" class="field">
+              {PRICING_MODELS.map((model) => <option value={model} selected={draftValue(v, 'pricingModel', editing?.pricing_model ?? 'range') === model}>{PRICING_MODEL_LABELS[model]}</option>)}
+            </select>
+          </Field>
+          <Field id="minimumAmount" label="Minimum amount" hint="Digits only, e.g. 25000 or 25000.50." error={errors.minimumAmount}>
+            <input id="minimumAmount" name="minimumAmount" inputmode="decimal" value={draftValue(v, 'minimumAmount', editing?.minimum_amount?.replace(/\.00$/, ''))} class="field tabular" />
+          </Field>
+          <Field id="maximumAmount" label="Maximum amount" hint="Leave empty for “from” prices." error={errors.maximumAmount}>
+            <input id="maximumAmount" name="maximumAmount" inputmode="decimal" value={draftValue(v, 'maximumAmount', editing?.maximum_amount?.replace(/\.00$/, ''))} class="field tabular" />
+          </Field>
+          <Field id="currency" label="Currency" error={errors.currency}>
+            <input id="currency" name="currency" value={draftValue(v, 'currency', editing?.currency ?? 'INR')} maxlength="3" class="field uppercase" />
+          </Field>
+          <Field id="billingInterval" label="Billing" error={errors.billingInterval}>
+            <select id="billingInterval" name="billingInterval" class="field">
+              {BILLING_INTERVALS.map((interval) => <option value={interval} selected={draftValue(v, 'billingInterval', editing?.billing_interval ?? 'one_time') === interval}>{BILLING_INTERVAL_LABELS[interval]}</option>)}
+            </select>
+          </Field>
+          <Field id="estimatedDelivery" label="Estimated delivery" hint="Optional, e.g. “2–4 weeks”." error={errors.estimatedDelivery}>
+            <input id="estimatedDelivery" name="estimatedDelivery" value={draftValue(v, 'estimatedDelivery', editing?.estimated_delivery)} maxlength="120" class="field" />
+          </Field>
+          <Field id="priceNote" label="Pricing note" error={errors.priceNote} class="md:col-span-2 xl:col-span-3">
+            <input id="priceNote" name="priceNote" value={draftValue(v, 'priceNote', editing?.price_note)} maxlength="500" class="field" />
+          </Field>
+          <Field id="includedFeatures" label="Included (one per line)" error={errors.includedFeatures}>
+            <textarea id="includedFeatures" name="includedFeatures" rows="5" class="field">{draftValue(v, 'includedFeatures', linesOf(editing?.included_features))}</textarea>
+          </Field>
+          <Field id="excludedFeatures" label="Not included (one per line)" error={errors.excludedFeatures}>
+            <textarea id="excludedFeatures" name="excludedFeatures" rows="5" class="field">{draftValue(v, 'excludedFeatures', linesOf(editing?.excluded_features))}</textarea>
+          </Field>
+          <div class="space-y-3">
+            <Field id="sortOrder" label="Sort order" error={errors.sortOrder}>
+              <input id="sortOrder" name="sortOrder" inputmode="numeric" value={draftValue(v, 'sortOrder', editing?.sort_order ?? 1000)} class="field" />
+            </Field>
+            <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="maxOpenEnded" checked={draftChecked(v, 'maxOpenEnded', editing?.max_open_ended ?? false)} class="size-4 accent-[var(--olive)]" /> Show “+” after maximum</label>
+            <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="taxInclusive" checked={draftChecked(v, 'taxInclusive', editing?.tax_inclusive ?? false)} class="size-4 accent-[var(--olive)]" /> Price includes GST</label>
+            <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" checked={draftChecked(v, 'isActive', editing?.is_active ?? true)} class="size-4 accent-[var(--olive)]" /> Show on website</label>
+          </div>
+          <div class="flex flex-wrap gap-3 md:col-span-2 xl:col-span-3">
+            <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-5 py-2.5 font-medium text-invert-ink">Save price</button>
+            <a href="/admin/pricing" class="rounded-[var(--radius-control)] px-4 py-2.5 text-ink-muted hover:text-ink">Cancel</a>
+          </div>
+        </form>
+        {editing && (
+          <form method="POST" action={formAction(actions.admin.pricing.delete.queryString)} class="mt-6 border-t border-line pt-4">
+            <input type="hidden" name="id" value={editing.id} />
+            <button type="submit" class="text-sm text-danger underline">Delete this price</button>
+            <span class="ml-2 text-sm text-ink-muted">To hide it temporarily, untick “Show on website” instead.</span>
+          </form>
+        )}
+      </section>
+    )
+  }
+
+  <div id="group-list" class="space-y-10">
+    {
+      grouped.map(({ group, rows }) => (
+        <section aria-labelledby={`g-${group}`}>
+          <h2 id={`g-${group}`} class="mb-3 text-lg font-semibold text-ink">{PRICING_GROUP_LABELS[group].label} <span class="text-sm font-normal text-ink-muted">({rows.length})</span></h2>
+          {rows.length === 0 ? (
+            <p class="text-sm text-ink-muted">No prices in this group.</p>
+          ) : (
+            <div class="overflow-x-auto rounded-[var(--radius-card)] border border-line bg-surface">
+              <table class="w-full min-w-[42rem] text-left text-sm">
+                <thead class="border-b border-line bg-bg-sunken text-ink-muted">
+                  <tr>
+                    <th scope="col" class="px-4 py-2 font-medium">Label / service</th>
+                    <th scope="col" class="px-4 py-2 font-medium">Price</th>
+                    <th scope="col" class="px-4 py-2 font-medium">Model</th>
+                    <th scope="col" class="px-4 py-2 font-medium">Visible</th>
+                    <th scope="col" class="px-4 py-2"><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                  {rows.map((row) => (
+                    <tr class:list={['hover:bg-bg', editing?.id === row.id && 'bg-olive-wash']}>
+                      <td class="px-4 py-2.5">
+                        <span class="font-medium text-ink">{row.label ?? row.services?.name}</span>
+                        {row.label && <span class="block text-[0.75rem] text-ink-muted">{row.services?.name}</span>}
+                      </td>
+                      <td class="tabular whitespace-nowrap px-4 py-2.5 font-mono text-[0.8125rem] text-ink">{priceText(row)}</td>
+                      <td class="px-4 py-2.5 text-ink-muted">{PRICING_MODEL_LABELS[row.pricing_model as PricingModel]}{row.tax_inclusive ? ' · incl. GST' : ''}</td>
+                      <td class="px-4 py-2.5">{row.is_active && row.services?.is_active ? <Badge tone="success">Shown</Badge> : <Badge>Hidden</Badge>}</td>
+                      <td class="px-4 py-2.5 text-right">
+                        <a href={`/admin/pricing?edit=${row.id}`} class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-ink hover:bg-bg-sunken"><Pencil size={14} aria-hidden="true" /> Edit<span class="sr-only"> {row.label ?? row.services?.name}</span></a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ))
+    }
+  </div>
+</AdminLayout>

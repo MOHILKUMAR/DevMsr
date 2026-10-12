@@ -1,0 +1,56 @@
+---
+import { Sun, Moon, Monitor } from '@lucide/astro';
+---
+
+<button
+  type="button"
+  class="inline-flex size-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-bg-sunken hover:text-ink"
+  data-theme-toggle
+  aria-label="Colour theme: system"
+  title="Colour theme"
+>
+  <Monitor size={18} aria-hidden="true" data-theme-icon="system" />
+  <Sun size={18} aria-hidden="true" data-theme-icon="light" class="hidden" />
+  <Moon size={18} aria-hidden="true" data-theme-icon="dark" class="hidden" />
+</button>
+
+<script>
+  type Theme = 'system' | 'light' | 'dark';
+  const ORDER: Theme[] = ['system', 'light', 'dark'];
+  const KEY = 'devmsr-theme';
+
+  function readTheme(): Theme {
+    try {
+      const saved = localStorage.getItem(KEY);
+      return saved === 'light' || saved === 'dark' ? saved : 'system';
+    } catch {
+      return 'system';
+    }
+  }
+
+  function apply(theme: Theme) {
+    const root = document.documentElement;
+    if (theme === 'system') delete root.dataset.theme;
+    else root.dataset.theme = theme;
+    try {
+      if (theme === 'system') localStorage.removeItem(KEY);
+      else localStorage.setItem(KEY, theme);
+    } catch {
+      /* storage unavailable: theme still applies for this page */
+    }
+    for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+      button.setAttribute('aria-label', `Colour theme: ${theme}. Activate to change.`);
+      for (const icon of button.querySelectorAll<SVGElement>('[data-theme-icon]')) {
+        icon.classList.toggle('hidden', icon.dataset.themeIcon !== theme);
+      }
+    }
+  }
+
+  apply(readTheme());
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+    button.addEventListener('click', () => {
+      const current = readTheme();
+      apply(ORDER[(ORDER.indexOf(current) + 1) % ORDER.length] ?? 'system');
+    });
+  }
+</script>

@@ -1,0 +1,46 @@
+---
+import { ArrowRight } from '@lucide/astro';
+
+interface Props {
+  title?: string;
+  body?: string;
+  primaryHref?: string;
+  primaryLabel?: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
+}
+const {
+  title = 'Tell us what slows your business down.',
+  body = 'Describe the problem in your own words. We reply with questions, a suggested scope and an indicative cost — no obligation.',
+  primaryHref = '/request-quote',
+  primaryLabel = 'Start your project',
+  secondaryHref = '/book-a-demo',
+  secondaryLabel = 'Book a demo',
+} = Astro.props;
+---
+
+<section class="page-container py-16 sm:py-20" aria-labelledby="cta-title">
+  <div class="relative overflow-hidden rounded-[1.25rem] bg-invert px-6 py-12 text-invert-ink sm:px-12 sm:py-16">
+    <div aria-hidden="true" class="absolute -right-10 -top-10 size-48 rounded-[2.5rem] border border-invert-muted/30 sm:size-72"></div>
+    <div aria-hidden="true" class="absolute -right-2 top-16 size-24 rounded-2xl bg-clay/90 sm:right-16 sm:top-24 sm:size-28"></div>
+    <div class="relative max-w-2xl">
+      <h2 id="cta-title" class="text-h2 text-invert-ink">{title}</h2>
+      <p class="mt-4 text-lg text-invert-muted">{body}</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          href={primaryHref}
+          class="inline-flex items-center gap-2 rounded-[var(--radius-control)] bg-bg px-5 py-3 font-medium text-ink transition-opacity hover:opacity-90"
+        >
+          {primaryLabel}
+          <ArrowRight size={17} aria-hidden="true" />
+        </a>
+        <a
+          href={secondaryHref}
+          class="inline-flex items-center gap-2 rounded-[var(--radius-control)] border border-invert-muted/50 px-5 py-3 font-medium text-invert-ink transition-colors hover:border-invert-ink"
+        >
+          {secondaryLabel}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

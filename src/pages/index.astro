@@ -1,0 +1,310 @@
+---
+import { ArrowRight, ArrowUpRight, Check } from '@lucide/astro';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Button from '../components/ui/Button.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import FaqList from '../components/ui/FaqList.astro';
+import CtaBand from '../components/ui/CtaBand.astro';
+import DynamicIcon from '../components/ui/DynamicIcon.astro';
+import LeadDeskPreview from '../components/previews/LeadDeskPreview.astro';
+import IndustryIndex from '../components/industries/IndustryIndex.astro';
+import CategoryGrid from '../components/services/CategoryGrid.astro';
+import PriceList from '../components/services/PriceList.astro';
+import ProductList from '../components/services/ProductList.astro';
+import ProcessSteps from '../components/home/ProcessSteps.astro';
+import { loadCatalogue, loadPortfolio } from '../lib/catalogue/repository';
+import { faqsFor } from '../lib/catalogue/queries';
+import { getIndustryContent } from '../data/industries';
+import { compact, faqJsonLd, organizationJsonLd, websiteJsonLd } from '../lib/seo';
+
+const catalogue = await loadCatalogue(Astro.locals);
+const portfolio = await loadPortfolio(Astro.locals);
+const faqs = faqsFor(catalogue, 'general');
+const industries = [...catalogue.industries].sort((a, b) => a.sortOrder - b.sortOrder);
+
+const FEATURED_PRICES = [
+  'landing-page',
+  'business-website',
+  'ecommerce-website',
+  'restaurant-pos-billing',
+  'hospital-management-system',
+  'school-management-system',
+  'website-faq-chatbot',
+  'website-maintenance',
+];
+const featuredPrices = FEATURED_PRICES.map((slug) => catalogue.pricing.find((price) => price.serviceSlug === slug)).filter(
+  (price) => price !== undefined,
+);
+const products = [...catalogue.products].sort((a, b) => a.sortOrder - b.sortOrder).slice(0, 5);
+const featuredProject = portfolio[0];
+
+const COMMITMENTS = [
+  {
+    title: 'Prices you can see before you call',
+    body: `Indicative ranges for ${catalogue.pricing.length} services are published on this site and edited in one place, so what you read is what we quote from.`,
+  },
+  {
+    title: 'A written scope before any work',
+    body: 'You get the features in scope, the ones that are not, and one figure for development. Work starts only after you approve it.',
+  },
+  {
+    title: 'Third-party costs listed separately',
+    body: 'Hosting, domain renewals, payment gateway fees, message charges and AI usage are billed by those providers — never hidden inside our fee.',
+  },
+  {
+    title: 'Honest labels on everything',
+    body: 'Products are marked Available, Demo, In development or Concept. Sample screens are labelled as sample data.',
+  },
+];
+
+const APPROACH = [
+  { title: 'Process first', body: 'We map how your team works today before deciding on screens, so the software fits the counter, the ward or the classroom.' },
+  { title: 'Server-side security', body: 'Logins, roles, validation and data-access rules are enforced on the server and in the database, not just hidden in the interface.' },
+  { title: 'Fast on ordinary phones', body: 'Pages are rendered on the server with minimal JavaScript, so they load quickly on mid-range phones and patchy connections.' },
+  { title: 'One team, connected systems', body: 'Your website, internal system and automations can share the same data instead of being three separate tools.' },
+];
+---
+
+<MarketingLayout
+  title="DevMsr.in — Websites, Business Software & AI Automation"
+  description="Websites, custom business software and AI-powered workflows for hospitals, hotels, restaurants, retailers, travel companies and schools. Indicative prices in INR."
+  bareTitle
+  jsonLd={compact([organizationJsonLd(catalogue.settings.contactEmail), websiteJsonLd(), faqJsonLd(faqs)])}
+>
+  <!-- 1. Hero -->
+  <section class="page-container pb-20 pt-12 sm:pt-16 lg:pb-28 lg:pt-20" aria-labelledby="hero-title">
+    <div class="grid items-center gap-x-12 gap-y-16 lg:grid-cols-12">
+      <div class="lg:col-span-6 xl:col-span-6">
+        <p class="text-eyebrow flex items-center gap-2">
+          <span aria-hidden="true" class="inline-block size-1.5 rounded-full bg-clay"></span>
+          Websites · Business software · Automation
+        </p>
+        <h1 id="hero-title" class="text-display mt-6 text-ink">
+          Digital solutions that help your business <em class="font-normal italic text-olive">grow.</em>
+        </h1>
+        <p class="text-lede mt-6 max-w-xl">
+          We build websites, custom business software, and AI-powered workflows that help businesses simplify operations and serve customers better.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <Button href="/request-quote" size="lg">
+            Start your project <ArrowRight size={17} aria-hidden="true" />
+          </Button>
+          <Button href="/services" size="lg" variant="secondary">Explore our services</Button>
+        </div>
+        <div class="mt-10 border-t border-line pt-6">
+          <p class="text-small text-ink-muted">Built for</p>
+          <ul class="mt-3 flex flex-wrap gap-2">
+            {
+              industries.map((industry) => (
+                <li>
+                  <a
+                    href={`/industries/${industry.slug}`}
+                    class="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-ink transition-colors hover:border-ink-muted"
+                  >
+                    <span class="text-olive">
+                      <DynamicIcon name={industry.icon} size={14} />
+                    </span>
+                    {getIndustryContent(industry.slug)?.shortName ?? industry.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+      <div class="lg:col-span-6 lg:pl-6 xl:pl-10">
+        <LeadDeskPreview />
+        <p class="mt-14 text-[0.75rem] text-ink-muted sm:mt-16">
+          Illustrative screens with sample data. Lead Desk is the dashboard that handles enquiries from this website.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Commitments -->
+  <section class="border-y border-line bg-surface" aria-labelledby="commitments-title">
+    <div class="page-container section-space grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <div class="lg:sticky lg:top-28">
+          <SectionHeader id="commitments-title" eyebrow="How we work" title="Clear numbers, written scope, no surprises." />
+        </div>
+      </div>
+      <ol class="grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:col-span-8">
+        {
+          COMMITMENTS.map((item, index) => (
+            <li class="border-t border-line-strong pt-5">
+              <span class="font-mono text-[0.75rem] text-clay-ink">{String(index + 1).padStart(2, '0')}</span>
+              <h3 class="text-h3 mt-3">{item.title}</h3>
+              <p class="mt-2 text-ink-muted">{item.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- 3. Industries -->
+  <section class="page-container section-space" aria-labelledby="industries-title">
+    <div class="mb-10 flex flex-wrap items-end justify-between gap-6">
+      <SectionHeader
+        id="industries-title"
+        eyebrow="Industries"
+        title="Built around how your industry works."
+        intro="Each industry has its own queues, invoices and paperwork. We start from those, not from a generic template."
+      />
+      <a href="/industries" class="inline-flex items-center gap-1.5 font-medium text-ink hover:underline">
+        All industries <ArrowUpRight size={16} aria-hidden="true" />
+      </a>
+    </div>
+    <IndustryIndex catalogue={catalogue} />
+  </section>
+
+  <!-- 4. Services -->
+  <section class="bg-bg-sunken" aria-labelledby="services-title">
+    <div class="page-container section-space">
+      <div class="mb-10 grid gap-6 lg:grid-cols-12 lg:items-end">
+        <SectionHeader
+          class="lg:col-span-7"
+          id="services-title"
+          eyebrow="Services"
+          title="From a one-page site to a hospital system."
+          intro={`${catalogue.services.length} services across websites, software, automation, integrations and support.`}
+        />
+        <div class="flex gap-3 lg:col-span-5 lg:justify-end">
+          <Button href="/services" variant="secondary">Browse all services</Button>
+          <Button href="/pricing" variant="ghost">See pricing <ArrowRight size={16} aria-hidden="true" /></Button>
+        </div>
+      </div>
+      <CategoryGrid catalogue={catalogue} />
+    </div>
+  </section>
+
+  <!-- 5. Products -->
+  <section class="page-container section-space" aria-labelledby="products-title">
+    <div class="grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader
+          id="products-title"
+          eyebrow="Products & systems"
+          title="Reusable systems, honestly labelled."
+          intro="Some systems we plan to package as products. Until a product is finished, we build the same thing as a custom project."
+        />
+        <dl class="text-small mt-8 space-y-3">
+          <div class="flex gap-3"><dt class="w-28 shrink-0 font-medium text-ink">Available</dt><dd class="text-ink-muted">Implemented and ready to offer.</dd></div>
+          <div class="flex gap-3"><dt class="w-28 shrink-0 font-medium text-ink">Demo</dt><dd class="text-ink-muted">A working demo you can try.</dd></div>
+          <div class="flex gap-3"><dt class="w-28 shrink-0 font-medium text-ink">In development</dt><dd class="text-ink-muted">Being built; not finished.</dd></div>
+          <div class="flex gap-3"><dt class="w-28 shrink-0 font-medium text-ink">Concept</dt><dd class="text-ink-muted">Planned; available as a custom build.</dd></div>
+        </dl>
+      </div>
+      <div class="lg:col-span-8">
+        <ProductList products={products} />
+        <a href="/products" class="mt-6 inline-flex items-center gap-1.5 font-medium text-ink hover:underline">
+          All products <ArrowUpRight size={16} aria-hidden="true" />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Portfolio -->
+  <section class="page-container pb-6" aria-labelledby="portfolio-title">
+    <div class="grid gap-10 rounded-[1.25rem] border border-line bg-surface p-6 sm:p-10 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <p class="text-eyebrow">Portfolio</p>
+        <h2 id="portfolio-title" class="text-h2 mt-4">Work you can check for yourself.</h2>
+        <p class="mt-4 text-ink-muted">
+          We publish client work only with the client’s permission, and we will not pad this page with mock-ups. Ask for a walkthrough of a demo
+          when you book a call.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <Button href="/portfolio" variant="secondary">View portfolio</Button>
+          <Button href="/book-a-demo" variant="ghost">Book a demo <ArrowRight size={16} aria-hidden="true" /></Button>
+        </div>
+      </div>
+      {
+        featuredProject && (
+          <a href={`/portfolio/${featuredProject.slug}`} class="group rounded-[var(--radius-card)] border border-line bg-bg p-6 transition-colors hover:border-line-strong lg:col-span-7">
+            <p class="font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink-muted">
+              {featuredProject.projectType === 'internal' ? 'Internal project' : featuredProject.projectType === 'prototype' ? 'Prototype' : 'Client project'}
+            </p>
+            <h3 class="text-h3 mt-3 group-hover:underline">{featuredProject.title}</h3>
+            <p class="mt-2 text-ink-muted">{featuredProject.summary}</p>
+            <ul class="mt-5 flex flex-wrap gap-1.5">
+              {featuredProject.technologyStack.map((tech) => (
+                <li class="rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-[0.6875rem] text-ink-muted">{tech}</li>
+              ))}
+            </ul>
+          </a>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- 7. Process -->
+  <section class="page-container section-space" aria-labelledby="process-title">
+    <SectionHeader
+      class="mb-10"
+      id="process-title"
+      eyebrow="Process"
+      title="What happens after you get in touch."
+      intro="Five steps, the same for a landing page or a management system. Only the depth changes."
+    />
+    <ProcessSteps />
+  </section>
+
+  <!-- 8. Pricing -->
+  <section class="border-y border-line bg-surface" aria-labelledby="pricing-title">
+    <div class="page-container section-space grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <SectionHeader
+          id="pricing-title"
+          eyebrow="Indicative pricing"
+          title="Starting estimates, in rupees."
+          intro="These are typical ranges, not final quotes. Your price depends on scope, integrations, data migration, testing and deployment."
+        />
+        <ul class="text-small mt-6 space-y-2 text-ink-muted">
+          <li class="flex gap-2"><Check size={16} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />GST extra unless a price says otherwise</li>
+          <li class="flex gap-2"><Check size={16} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />Hosting, gateway, messaging and AI usage billed separately</li>
+          <li class="flex gap-2"><Check size={16} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />A “+” means larger projects can cost more</li>
+        </ul>
+        <Button href="/pricing" class="mt-8">Full price list <ArrowRight size={16} aria-hidden="true" /></Button>
+      </div>
+      <div class="lg:col-span-7">
+        <PriceList catalogue={catalogue} prices={featuredPrices} />
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Why DevMsr.in -->
+  <section class="page-container section-space" aria-labelledby="approach-title">
+    <SectionHeader class="mb-12" id="approach-title" eyebrow="Why DevMsr.in" title="Software that fits the work, not the other way round." />
+    <ul class="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        APPROACH.map((item) => (
+          <li>
+            <span aria-hidden="true" class="block h-px w-10 bg-clay" />
+            <h3 class="mt-5 text-lg font-semibold text-ink">{item.title}</h3>
+            <p class="text-small mt-2 text-ink-muted">{item.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- 10. FAQ -->
+  <section class="border-t border-line" aria-labelledby="faq-title">
+    <div class="page-container section-space grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader id="faq-title" eyebrow="Questions" title="Before you ask." />
+        <p class="mt-4 text-ink-muted">
+          Something else on your mind? <a class="link-olive" href="/contact">Send us a message</a>.
+        </p>
+      </div>
+      <div class="lg:col-span-8">
+        <FaqList faqs={faqs} />
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. Final CTA -->
+  <CtaBand />
+</MarketingLayout>

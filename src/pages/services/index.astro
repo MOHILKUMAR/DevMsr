@@ -1,0 +1,60 @@
+---
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import CategoryGrid from '../../components/services/CategoryGrid.astro';
+import CatalogueExplorer from '../../components/services/CatalogueExplorer';
+import { loadCatalogue } from '../../lib/catalogue/repository';
+import { buildExplorerServices, explorerOptions, readExplorerFilters } from '../../lib/catalogue/explorer';
+import { breadcrumbJsonLd } from '../../lib/seo';
+
+const catalogue = await loadCatalogue(Astro.locals);
+const options = explorerOptions(catalogue);
+const initialFilters = readExplorerFilters(Astro.url, catalogue);
+---
+
+<MarketingLayout
+  title="Services — Websites, Software, Automation and Support"
+  description={`${catalogue.services.length} services: websites, e-commerce, management systems, POS, CRM, AI automation, chatbots, integrations, hosting and maintenance. Indicative prices in INR.`}
+  jsonLd={[breadcrumbJsonLd([{ name: 'Services', path: '/services' }])]}
+>
+  <section class="page-container pb-12 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Services' }]} />
+    <div class="mt-10 grid gap-8 lg:grid-cols-12 lg:items-end">
+      <h1 class="text-h1 lg:col-span-7">Everything we build, in one list.</h1>
+      <p class="text-lede lg:col-span-5">
+        {catalogue.services.length} services in 11 categories. Filter by your industry or the kind of work, or open a category for scope, inclusions
+        and running costs.
+      </p>
+    </div>
+  </section>
+
+  <section class="page-container pb-16" aria-labelledby="categories-title">
+    <h2 id="categories-title" class="sr-only">Service categories</h2>
+    <CategoryGrid catalogue={catalogue} />
+  </section>
+
+  <section class="border-t border-line bg-bg-sunken" aria-labelledby="all-services-title">
+    <div class="page-container section-space">
+      <SectionHeader
+        class="mb-8"
+        id="all-services-title"
+        eyebrow="Find a service"
+        title="Search the full catalogue"
+        intro="Prices shown are the lowest indicative starting point for each service. GST extra."
+      />
+      <CatalogueExplorer
+        client:visible
+        mode="services"
+        action="/services#all-services-title"
+        services={buildExplorerServices(catalogue)}
+        industries={options.industries}
+        categories={options.categories}
+        initialFilters={initialFilters}
+      />
+    </div>
+  </section>
+
+  <CtaBand />
+</MarketingLayout>

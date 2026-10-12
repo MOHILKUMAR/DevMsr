@@ -1,0 +1,57 @@
+---
+import { ArrowUpRight } from '@lucide/astro';
+import DynamicIcon from '../ui/DynamicIcon.astro';
+import { getIndustryContent } from '../../data/industries';
+import { pricesForServices, resolveServices, serviceMap, servicesForIndustry } from '../../lib/catalogue/queries';
+import { formatFromPrice, lowestPrice } from '../../lib/catalogue/pricing';
+import type { Catalogue } from '../../types/catalogue';
+
+interface Props {
+  catalogue: Catalogue;
+  headingLevel?: 'h2' | 'h3';
+}
+const { catalogue, headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+const services = serviceMap(catalogue);
+
+const rows = [...catalogue.industries]
+  .sort((a, b) => a.sortOrder - b.sortOrder)
+  .map((industry, index) => {
+    const content = getIndustryContent(industry.slug);
+    const industryServices = servicesForIndustry(catalogue, industry.slug);
+    const lowest = lowestPrice(pricesForServices(catalogue, industryServices));
+    const highlights = content
+      ? resolveServices(services, content.solutionGroups.map((group) => group.serviceSlugs[0] ?? '')).slice(0, 4)
+      : industryServices.slice(0, 4);
+    return { industry, index, lowest, highlights, count: industryServices.length };
+  });
+---
+
+<ul class="border-t border-line">
+  {
+    rows.map(({ industry, index, lowest, highlights, count }) => (
+      <li class="border-b border-line">
+        <a
+          href={`/industries/${industry.slug}`}
+          class="group grid gap-x-8 gap-y-3 py-6 transition-colors sm:py-7 md:grid-cols-[3rem_minmax(0,1.1fr)_minmax(0,1.4fr)_auto] md:items-center"
+        >
+          <span class="hidden font-mono text-sm text-ink-muted md:block">{String(index + 1).padStart(2, '0')}</span>
+          <span class="flex items-center gap-4">
+            <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-olive-wash text-olive transition-colors group-hover:bg-olive group-hover:text-surface">
+              <DynamicIcon name={industry.icon} size={19} />
+            </span>
+            <Heading class="font-display text-[1.5rem] leading-tight text-ink sm:text-[1.75rem]">{industry.name}</Heading>
+          </span>
+          <span class="text-small text-ink-muted">
+            {highlights.map((service) => service.name).join(' · ')}
+            <span class="text-ink-muted"> · {count} services</span>
+          </span>
+          <span class="flex items-center justify-between gap-4 md:justify-end">
+            <span class="font-mono text-[0.8125rem] text-ink">{lowest ? formatFromPrice(lowest) : 'Quote on request'}</span>
+            <ArrowUpRight size={20} aria-hidden="true" class="text-ink-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-ink" />
+          </span>
+        </a>
+      </li>
+    ))
+  }
+</ul>

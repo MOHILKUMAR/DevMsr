@@ -1,0 +1,102 @@
+---
+import { actions } from 'astro:actions';
+import { Pencil, Plus, ExternalLink } from '@lucide/astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHeader from '../../components/admin/PageHeader.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import { listBlogPosts } from '../../lib/admin/repository';
+import { draftValue, formAction, noticeText, outcomeOf } from '../../lib/admin/page';
+import { renderMarkdown } from '../../lib/content/markdown';
+import { formatDate } from '../../lib/utils/dates';
+import { can } from '../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'content')) return Astro.redirect('/admin', 303);
+
+const outcome = outcomeOf([Astro.getActionResult(actions.admin.blog.save), Astro.getActionResult(actions.admin.blog.delete)], (r) =>
+  r.id ? `/admin/blog?notice=${r.notice ?? 'saved'}&edit=${r.id}` : `/admin/blog?notice=${r.notice ?? 'saved'}`,
+);
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+
+const posts = await listBlogPosts(db);
+const editId = Astro.url.searchParams.get('edit');
+const isNew = Astro.url.searchParams.has('new');
+const editing = editId ? posts.find((post) => post.id === editId) : undefined;
+const v = outcome.failure?.values;
+const errors = outcome.failure?.fieldErrors ?? {};
+const preview = editing ? renderMarkdown(draftValue(v, 'content', editing.content)) : '';
+---
+
+<AdminLayout title="Blog">
+  <PageHeader title="Blog" description="Write in Markdown. Raw HTML is displayed as text, and links are limited to safe URLs.">
+    <a href="/admin/blog?new=1" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink"><Plus size={15} aria-hidden="true" /> New post</a>
+  </PageHeader>
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  {
+    (isNew || editing) && (
+      <section class="mb-10 grid gap-6 xl:grid-cols-2" aria-labelledby="post-form-title">
+        <div class="rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6">
+          <h2 id="post-form-title" class="mb-5 text-lg font-semibold text-ink">{editing ? 'Edit post' : 'New post'}</h2>
+          <form method="POST" action={formAction(actions.admin.blog.save.queryString, editing ? { edit: editing.id } : { new: '1' })} class="space-y-5">
+            {editing && <input type="hidden" name="id" value={editing.id} />}
+            <Field id="title" label="Title" error={errors.title}><input id="title" name="title" required maxlength="200" value={draftValue(v, 'title', editing?.title)} class="field" /></Field>
+            <Field id="slug" label="Slug" error={errors.slug}><input id="slug" name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" value={draftValue(v, 'slug', editing?.slug)} class="field font-mono" /></Field>
+            <Field id="excerpt" label="Excerpt" error={errors.excerpt}><textarea id="excerpt" name="excerpt" rows="2" required maxlength="400" class="field">{draftValue(v, 'excerpt', editing?.excerpt)}</textarea></Field>
+            <Field id="content" label="Content (Markdown)" error={errors.content}><textarea id="content" name="content" rows="18" maxlength="100000" class="field font-mono text-sm">{draftValue(v, 'content', editing?.content)}</textarea></Field>
+            <Field id="coverImage" label="Cover image URL (https, optional)" error={errors.coverImage}><input id="coverImage" name="coverImage" type="url" value={draftValue(v, 'coverImage', editing?.cover_image)} class="field" /></Field>
+            <div class="grid gap-5 sm:grid-cols-2">
+              <Field id="seoTitle" label="SEO title" error={errors.seoTitle}><input id="seoTitle" name="seoTitle" maxlength="120" value={draftValue(v, 'seoTitle', editing?.seo_title)} class="field" /></Field>
+              <Field id="seoDescription" label="SEO description" error={errors.seoDescription}><input id="seoDescription" name="seoDescription" maxlength="320" value={draftValue(v, 'seoDescription', editing?.seo_description)} class="field" /></Field>
+            </div>
+            <Field id="status" label="Status" error={errors.status}>
+              <select id="status" name="status" class="field">
+                <option value="draft" selected={draftValue(v, 'status', editing?.status ?? 'draft') === 'draft'}>Draft (not public)</option>
+                <option value="published" selected={draftValue(v, 'status', editing?.status) === 'published'}>Published</option>
+              </select>
+            </Field>
+            <div class="flex gap-3">
+              <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-5 py-2.5 font-medium text-invert-ink">Save post</button>
+              <a href="/admin/blog" class="px-4 py-2.5 text-ink-muted hover:text-ink">Close</a>
+            </div>
+          </form>
+          {editing && (
+            <form method="POST" action={formAction(actions.admin.blog.delete.queryString)} class="mt-6 border-t border-line pt-4">
+              <input type="hidden" name="id" value={editing.id} />
+              <button type="submit" class="text-sm text-danger underline">Delete this post</button>
+            </form>
+          )}
+        </div>
+        {editing && (
+          <div class="rounded-[var(--radius-card)] border border-line bg-bg p-5 sm:p-6">
+            <p class="text-eyebrow mb-4">Preview of saved content</p>
+            <div class="prose-devmsr" set:html={preview} />
+          </div>
+        )}
+      </section>
+    )
+  }
+
+  <ul class="divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface">
+    {
+      posts.length === 0 ? (
+        <li class="px-4 py-6 text-center text-ink-muted">No posts yet.</li>
+      ) : (
+        posts.map((post) => (
+          <li class:list={['flex flex-wrap items-center gap-3 px-4 py-3', editing?.id === post.id && 'bg-olive-wash']}>
+            <span class="min-w-0 flex-1">
+              <span class="block font-medium text-ink">{post.title}</span>
+              <span class="block truncate text-sm text-ink-muted">{post.published_at ? `Published ${formatDate(post.published_at)}` : 'Never published'} · updated {formatDate(post.updated_at)}</span>
+            </span>
+            {post.status === 'published' ? <Badge tone="success">Published</Badge> : <Badge>Draft</Badge>}
+            {post.status === 'published' && <a href={`/blog/${post.slug}`} target="_blank" rel="noopener" class="text-ink-muted hover:text-ink" aria-label={`View ${post.title}`}><ExternalLink size={14} aria-hidden="true" /></a>}
+            <a href={`/admin/blog?edit=${post.id}`} class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm text-ink hover:bg-bg-sunken"><Pencil size={14} aria-hidden="true" /> Edit</a>
+          </li>
+        ))
+      )
+    }
+  </ul>
+</AdminLayout>

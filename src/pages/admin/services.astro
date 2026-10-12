@@ -1,0 +1,154 @@
+---
+import { actions } from 'astro:actions';
+import { Plus, Pencil, Eye, EyeOff, IndianRupee } from '@lucide/astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHeader from '../../components/admin/PageHeader.astro';
+import Notice from '../../components/admin/Notice.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import { listIndustries, listPricing, listServices } from '../../lib/admin/repository';
+import { draftChecked, draftList, draftValue, formAction, linesOf, noticeText, outcomeOf } from '../../lib/admin/page';
+import { SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
+import { SERVICE_STATUS_LABELS } from '../../lib/catalogue/labels';
+import { SERVICE_STATUSES } from '../../types/catalogue';
+import { can } from '../../lib/auth/types';
+
+const admin = Astro.locals.admin!;
+const db = Astro.locals.adminClient!;
+if (!can(admin, 'catalogue')) return Astro.redirect('/admin', 303);
+
+const editId = Astro.url.searchParams.get('edit');
+const isNew = Astro.url.searchParams.has('new');
+const categoryFilter = Astro.url.searchParams.get('category') ?? '';
+const q = (Astro.url.searchParams.get('q') ?? '').trim().toLowerCase().slice(0, 80);
+
+const outcome = outcomeOf([Astro.getActionResult(actions.admin.services.save), Astro.getActionResult(actions.admin.services.toggle)], (r) =>
+  r.notice === 'shown' || r.notice === 'hidden' ? `/admin/services?notice=${r.notice}` : `/admin/services?notice=${r.notice ?? 'saved'}&edit=${r.id ?? ''}`,
+);
+if (outcome.redirect) return Astro.redirect(outcome.redirect, 303);
+
+const [services, industries, prices] = await Promise.all([listServices(db), listIndustries(db), listPricing(db)]);
+const editing = editId ? services.find((service) => service.id === editId) : undefined;
+const showForm = isNew || Boolean(editing);
+const v = outcome.failure?.values;
+const errors = outcome.failure?.fieldErrors ?? {};
+const priceCount = new Map<string, number>();
+for (const price of prices) priceCount.set(price.service_id, (priceCount.get(price.service_id) ?? 0) + 1);
+const visible = services.filter(
+  (service) => (!categoryFilter || service.category === categoryFilter) && (!q || `${service.name} ${service.slug}`.toLowerCase().includes(q)),
+);
+const categoryName = new Map<string, string>(SERVICE_CATEGORY_CONTENT.map((c) => [c.slug, c.name]));
+const selectedIndustries = new Set(draftList(v, 'industryIds', editing?.service_industries.map((link) => link.industry_id) ?? []));
+---
+
+<AdminLayout title="Services">
+  <PageHeader title="Services" description={`${services.length} services. Assign industries, edit features and hide services you no longer offer.`}>
+    <a href="/admin/services?new=1" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink"><Plus size={15} aria-hidden="true" /> Add service</a>
+  </PageHeader>
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+
+  {
+    showForm && (
+      <section class="mb-10 rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6" aria-labelledby="service-form-title">
+        <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="service-form-title" class="text-lg font-semibold text-ink">{editing ? `Edit: ${editing.name}` : 'New service'}</h2>
+          {editing && <a href={`/admin/pricing?new=1&service=${editing.id}`} class="inline-flex items-center gap-1.5 text-sm text-olive underline"><IndianRupee size={14} aria-hidden="true" /> Add a price for this service</a>}
+        </div>
+        <form method="POST" action={formAction(actions.admin.services.save.queryString, editing ? { edit: editing.id } : { new: '1' })} class="grid gap-5 md:grid-cols-2">
+          {editing && <input type="hidden" name="id" value={editing.id} />}
+          <Field id="name" label="Name" error={errors.name}><input id="name" name="name" required maxlength="160" value={draftValue(v, 'name', editing?.name)} class="field" /></Field>
+          <Field id="slug" label="Slug" hint="Used in links. Lowercase with hyphens." error={errors.slug}><input id="slug" name="slug" required maxlength="80" pattern="[a-z0-9]+(-[a-z0-9]+)*" value={draftValue(v, 'slug', editing?.slug)} class="field font-mono" /></Field>
+          <Field id="shortDescription" label="Short description" hint="One sentence shown in lists." error={errors.shortDescription} class="md:col-span-2"><input id="shortDescription" name="shortDescription" required maxlength="400" value={draftValue(v, 'shortDescription', editing?.short_description)} class="field" /></Field>
+          <Field id="category" label="Category" error={errors.category}>
+            <select id="category" name="category" required class="field">
+              {SERVICE_CATEGORY_CONTENT.map((category) => <option value={category.slug} selected={draftValue(v, 'category', editing?.category) === category.slug}>{category.name}</option>)}
+            </select>
+          </Field>
+          <Field id="status" label="Availability" error={errors.status}>
+            <select id="status" name="status" class="field">
+              {SERVICE_STATUSES.map((status) => <option value={status} selected={draftValue(v, 'status', editing?.status ?? 'offered') === status}>{SERVICE_STATUS_LABELS[status]}</option>)}
+            </select>
+          </Field>
+          <Field id="features" label="Features (one per line)" error={errors.features}><textarea id="features" name="features" rows="6" class="field">{draftValue(v, 'features', linesOf(editing?.features))}</textarea></Field>
+          <Field id="description" label="Long description (optional)" error={errors.description}><textarea id="description" name="description" rows="6" maxlength="10000" class="field">{draftValue(v, 'description', editing?.description)}</textarea></Field>
+          <fieldset class="md:col-span-2">
+            <legend class="mb-2 text-sm font-medium text-ink">Industries</legend>
+            <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {industries.map((industry) => (
+                <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="industryIds" value={industry.id} checked={selectedIndustries.has(industry.id)} class="size-4 accent-[var(--olive)]" /> {industry.name}</label>
+              ))}
+            </div>
+            <p class="mt-1 text-[0.8125rem] text-ink-muted">Leave all unticked for general services that apply to any business.</p>
+          </fieldset>
+          <Field id="seoTitle" label="SEO title (optional)" error={errors.seoTitle}><input id="seoTitle" name="seoTitle" maxlength="120" value={draftValue(v, 'seoTitle', editing?.seo_title)} class="field" /></Field>
+          <Field id="seoDescription" label="SEO description (optional)" error={errors.seoDescription}><input id="seoDescription" name="seoDescription" maxlength="320" value={draftValue(v, 'seoDescription', editing?.seo_description)} class="field" /></Field>
+          <Field id="sortOrder" label="Sort order" error={errors.sortOrder}><input id="sortOrder" name="sortOrder" inputmode="numeric" value={draftValue(v, 'sortOrder', editing?.sort_order ?? 1000)} class="field" /></Field>
+          <label class="flex items-center gap-2 self-end pb-2.5 text-sm"><input type="checkbox" name="isActive" checked={draftChecked(v, 'isActive', editing?.is_active ?? true)} class="size-4 accent-[var(--olive)]" /> Show on website</label>
+          <div class="flex gap-3 md:col-span-2">
+            <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-5 py-2.5 font-medium text-invert-ink">Save service</button>
+            <a href="/admin/services" class="rounded-[var(--radius-control)] px-4 py-2.5 text-ink-muted hover:text-ink">Close</a>
+          </div>
+        </form>
+      </section>
+    )
+  }
+
+  <form method="GET" class="mb-4 flex flex-wrap items-end gap-3" role="search" aria-label="Filter services">
+    <div>
+      <label for="filter-q" class="mb-1 block text-sm font-medium text-ink">Search</label>
+      <input id="filter-q" name="q" type="search" value={q} class="field w-64" />
+    </div>
+    <div>
+      <label for="filter-category" class="mb-1 block text-sm font-medium text-ink">Category</label>
+      <select id="filter-category" name="category" class="field">
+        <option value="">All categories</option>
+        {SERVICE_CATEGORY_CONTENT.map((category) => <option value={category.slug} selected={categoryFilter === category.slug}>{category.name}</option>)}
+      </select>
+    </div>
+    <button type="submit" class="rounded-[var(--radius-control)] border border-line-strong px-4 py-2.5 text-sm text-ink">Filter</button>
+  </form>
+
+  <div class="overflow-x-auto rounded-[var(--radius-card)] border border-line bg-surface">
+    <table class="w-full min-w-[48rem] text-left text-sm">
+      <caption class="sr-only">Services</caption>
+      <thead class="border-b border-line bg-bg-sunken text-ink-muted">
+        <tr>
+          <th scope="col" class="px-4 py-2 font-medium">Service</th>
+          <th scope="col" class="px-4 py-2 font-medium">Category</th>
+          <th scope="col" class="px-4 py-2 font-medium">Industries</th>
+          <th scope="col" class="px-4 py-2 font-medium">Prices</th>
+          <th scope="col" class="px-4 py-2 font-medium">Visible</th>
+          <th scope="col" class="px-4 py-2"><span class="sr-only">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-line">
+        {
+          visible.map((service) => (
+            <tr class:list={['hover:bg-bg', editing?.id === service.id && 'bg-olive-wash']}>
+              <td class="px-4 py-2.5">
+                <span class="font-medium text-ink">{service.name}</span>
+                {service.status === 'on_request' && <Badge tone="clay" class="ml-2">On request</Badge>}
+                <span class="block font-mono text-[0.6875rem] text-ink-muted">{service.slug}</span>
+              </td>
+              <td class="px-4 py-2.5 text-ink-muted">{categoryName.get(service.category)}</td>
+              <td class="px-4 py-2.5 text-ink-muted">{service.service_industries.length || 'General'}</td>
+              <td class="px-4 py-2.5 text-ink-muted">{priceCount.get(service.id) ?? 0}</td>
+              <td class="px-4 py-2.5">
+                <form method="POST" action={formAction(actions.admin.services.toggle.queryString)}>
+                  <input type="hidden" name="id" value={service.id} />
+                  {!service.is_active && <input type="hidden" name="isActive" value="on" />}
+                  <button type="submit" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 hover:bg-bg-sunken" aria-label={`${service.is_active ? 'Hide' : 'Show'} ${service.name}`}>
+                    {service.is_active ? <><Eye size={14} aria-hidden="true" class="text-success" /> Shown</> : <><EyeOff size={14} aria-hidden="true" class="text-ink-muted" /> Hidden</>}
+                  </button>
+                </form>
+              </td>
+              <td class="px-4 py-2.5 text-right">
+                <a href={`/admin/services?edit=${service.id}`} class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-ink hover:bg-bg-sunken"><Pencil size={14} aria-hidden="true" /> Edit<span class="sr-only"> {service.name}</span></a>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</AdminLayout>

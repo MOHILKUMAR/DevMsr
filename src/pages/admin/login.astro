@@ -1,0 +1,56 @@
+---
+import { actions } from 'astro:actions';
+import { LockKeyhole } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Wordmark from '../../components/layout/Wordmark.astro';
+import { getServerConfig } from '../../lib/server/config';
+import { safeAdminRedirect } from '../../lib/auth/redirect';
+
+const login = Astro.getActionResult(actions.auth.login);
+if (login?.data?.ok) return Astro.redirect(login.data.redirect, 303);
+const logout = Astro.getActionResult(actions.auth.logout);
+if (logout?.data?.ok) return Astro.redirect(logout.data.redirect, 303);
+
+const configured = getServerConfig().supabase !== null;
+const next = safeAdminRedirect(Astro.url.searchParams.get('next') ?? undefined);
+const error = login?.data && !login.data.ok ? login.data.message : login?.error ? 'Sign-in failed. Please try again.' : null;
+const signedOut = Astro.url.searchParams.has('signed_out');
+---
+
+<BaseLayout title="Sign in · Admin" description="DevMsr.in admin sign-in" noindex>
+  <main class="flex min-h-dvh items-center justify-center px-4 py-12">
+    <div class="w-full max-w-sm">
+      <div class="mb-8 flex items-center justify-between">
+        <Wordmark />
+        <span class="rounded bg-bg-sunken px-1.5 py-0.5 font-mono text-[0.625rem] uppercase tracking-[0.08em] text-ink-muted">Admin</span>
+      </div>
+      <div class="rounded-[var(--radius-card)] border border-line bg-surface p-6 shadow-soft">
+        <h1 class="flex items-center gap-2 font-display text-2xl text-ink">
+          <LockKeyhole size={20} aria-hidden="true" class="text-olive" /> Sign in
+        </h1>
+        <p class="mt-1 text-sm text-ink-muted">For the DevMsr.in team only.</p>
+
+        {!configured && <p class="mt-5 rounded-md bg-warning-soft px-3 py-2 text-sm text-ink" role="alert">Sign-in is unavailable: Supabase is not configured on this server.</p>}
+        {error && <p class="mt-5 rounded-md bg-danger-soft px-3 py-2 text-sm text-ink" role="alert">{error}</p>}
+        {signedOut && !error && <p class="mt-5 rounded-md bg-success-soft px-3 py-2 text-sm text-ink" role="status">You have been signed out.</p>}
+
+        <form method="POST" action={`${actions.auth.login.queryString}&next=${encodeURIComponent(next)}`} class="mt-6 space-y-4">
+          <input type="hidden" name="next" value={next} />
+          <div>
+            <label for="email" class="mb-1.5 block text-sm font-medium text-ink">Email</label>
+            <input id="email" name="email" type="email" autocomplete="username" required class="field" />
+          </div>
+          <div>
+            <label for="password" class="mb-1.5 block text-sm font-medium text-ink">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required class="field" />
+          </div>
+          <button type="submit" class="w-full rounded-[var(--radius-control)] bg-invert px-4 py-2.5 font-medium text-invert-ink hover:opacity-90" disabled={!configured}>
+            Sign in
+          </button>
+        </form>
+        <p class="mt-5 text-[0.8125rem] text-ink-muted">Forgot your password? Reset it from the Supabase dashboard (Authentication → Users). See docs/SETUP.md.</p>
+      </div>
+      <p class="mt-6 text-center text-sm"><a href="/" class="text-ink-muted hover:text-ink">← Back to devmsr.in</a></p>
+    </div>
+  </main>
+</BaseLayout>
