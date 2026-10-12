@@ -20,8 +20,7 @@ import {
 import { getServerConfig } from '../lib/server/config';
 import { leadStoreFrom, notificationSettingsFrom } from '../lib/leads/service';
 import { deliverLeadNotifications } from '../lib/leads/notifications';
-import { BUDGET_RANGES, CONTACT_METHODS, TIMELINES } from '../schemas/lead';
-import { getServiceCategoryContent } from '../data/service-categories';
+import { LEAD_EMAIL_COLUMNS, leadEmailData, type LeadEmailRow } from '../lib/leads/retry';
 
 /**
  * Admin mutations. Every action goes through defineAdminAction (auth,
@@ -91,32 +90,7 @@ const leads = {
     handler: async ({ id, eventType }, { db, action }) => {
       // Read through the admin session (RLS confirms access), then send and
       // record the outcome with the server-only store.
-      const lead = check(
-        await db
-          .from('leads')
-          .select(
-            'id, reference_number, form_type, name, email, business_name, phone, project_description, budget_range, timeline, preferred_contact, website_url, consultation_time, service_category, industries(name), services(name)',
-          )
-          .eq('id', id)
-          .maybeSingle(),
-      ) as null | {
-        id: string;
-        reference_number: string;
-        form_type: 'contact' | 'quote' | 'demo';
-        name: string;
-        email: string;
-        business_name: string | null;
-        phone: string | null;
-        project_description: string;
-        budget_range: string | null;
-        timeline: string | null;
-        preferred_contact: string | null;
-        website_url: string | null;
-        consultation_time: string | null;
-        service_category: string | null;
-        industries: { name: string } | null;
-        services: { name: string } | null;
-      };
+      const lead = check(await db.from('leads').select(LEAD_EMAIL_COLUMNS).eq('id', id).maybeSingle()) as LeadEmailRow | null;
       if (!lead) return NOT_FOUND;
 
       const config = getServerConfig();
@@ -126,32 +100,7 @@ const leads = {
       if (!settings.provider) return { ok: false, message: 'Email is not configured (RESEND_API_KEY and EMAIL_FROM).' };
       if (eventType === 'lead_acknowledgement') settings.sendAcknowledgement = true;
 
-      const label = (list: readonly { value: string; label: string }[], value: string | null) => list.find((item) => item.value === value)?.label;
-      await deliverLeadNotifications(
-        store,
-        settings,
-        {
-          leadId: lead.id,
-          data: {
-            reference: lead.reference_number,
-            formType: lead.form_type,
-            name: lead.name,
-            email: lead.email,
-            businessName: lead.business_name ?? undefined,
-            phone: lead.phone ?? undefined,
-            industry: lead.industries?.name ?? 'Other / not listed',
-            interest: lead.services?.name ?? getServiceCategoryContent(lead.service_category ?? '')?.name ?? 'Not sure yet',
-            budget: label(BUDGET_RANGES, lead.budget_range),
-            timeline: label(TIMELINES, lead.timeline),
-            preferredContact: label(CONTACT_METHODS, lead.preferred_contact),
-            websiteUrl: lead.website_url ?? undefined,
-            consultationTime: lead.consultation_time ?? undefined,
-            projectDescription: lead.project_description,
-            adminUrl: `${action.url.origin}/admin/leads/${lead.id}`,
-          },
-        },
-        { requestId: action.locals.requestId, only: [eventType] },
-      );
+      await deliverLeadNotifications(store, settings, { leadId: lead.id, data: leadEmailData(lead, action.url.origin) }, { requestId: action.locals.requestId, only: [eventType] });
 
       const event = check(
         await db.from('notification_events').select('status, last_error').eq('lead_id', id).eq('event_type', eventType).maybeSingle(),

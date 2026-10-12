@@ -26,6 +26,7 @@ import {
 import { formatFromPrice, lowestPrice } from '../../lib/catalogue/pricing';
 import { SERVICE_STATUS_LABELS } from '../../lib/catalogue/labels';
 import { breadcrumbJsonLd, compact, faqJsonLd, serviceJsonLd } from '../../lib/seo';
+import { FILL_LAST_2 } from '../../lib/utils/grid';
 
 const slug = Astro.params.slug ?? '';
 const catalogue = await loadCatalogue(Astro.locals);
@@ -134,7 +135,7 @@ const path = `/industries/${slug}`;
               {group.services.map((service) => {
                 const servicePrice = lowestPrice(pricesForService(catalogue, service.slug));
                 return (
-                  <li class="flex flex-col bg-surface p-5">
+                  <li class:list={['flex flex-col bg-surface p-5', FILL_LAST_2]}>
                     <div class="flex items-start justify-between gap-3">
                       <h4 class="font-medium text-ink">{service.name}</h4>
                       {service.status === 'on_request' && <Badge tone="clay">{SERVICE_STATUS_LABELS.on_request}</Badge>}

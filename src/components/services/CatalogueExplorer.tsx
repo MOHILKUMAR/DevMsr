@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useState, type ChangeEvent } from 'react';
 import { Search, X, ChevronDown } from 'lucide-react';
 import { PRICE_BANDS, priceMatchesBand, type PriceBandId } from '../../lib/catalogue/pricing';
 import type { BillingInterval, PricingModel, ServiceStatus } from '../../types/catalogue';
+import { FILL_LAST_2_3 } from '../../lib/utils/grid';
 
 /**
  * Filterable list of services or prices.
@@ -244,7 +245,7 @@ export default function CatalogueExplorer(props: Props) {
       {props.mode === 'services' && count > 0 && (
         <ul className="grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
           {serviceResults.map((service) => (
-            <li key={service.slug} className="flex flex-col bg-surface p-5">
+            <li key={service.slug} className={`flex flex-col bg-surface p-5 ${FILL_LAST_2_3}`}>
               <p className="font-mono text-[0.6875rem] uppercase tracking-[0.06em] text-ink-muted">
                 <a href={`/services/${service.category}`} className="hover:text-ink hover:underline">
                   {categoryNames.get(service.category) ?? service.category}

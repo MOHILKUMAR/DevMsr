@@ -16,6 +16,7 @@ import { faqsFor, pricesForService, pricesForServices, productsForCategory, serv
 import { formatFromPrice, lowestPrice } from '../../lib/catalogue/pricing';
 import { SERVICE_STATUS_LABELS } from '../../lib/catalogue/labels';
 import { breadcrumbJsonLd, compact, faqJsonLd, serviceJsonLd } from '../../lib/seo';
+import { FILL_LAST_2_3 } from '../../lib/utils/grid';
 
 const slug = Astro.params.slug ?? '';
 const content = getServiceCategoryContent(slug);
@@ -136,7 +137,7 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
             const price = lowestPrice(pricesForService(catalogue, service.slug));
             const industryNames = service.industrySlugs.map((s) => industriesBySlug.get(s)?.name).filter(Boolean);
             return (
-              <li class="flex flex-col bg-surface p-5">
+              <li class:list={['flex flex-col bg-surface p-5', FILL_LAST_2_3]}>
                 <div class="flex items-start justify-between gap-3">
                   <h3 class="font-medium text-ink">{service.name}</h3>
                   {service.status === 'on_request' && <Badge tone="clay">{SERVICE_STATUS_LABELS.on_request}</Badge>}

@@ -70,3 +70,18 @@ test('action responses for lead submissions are not cacheable', async ({ request
   const body = await response.text();
   expect(body).not.toMatch(/stack|at .*\.mjs|postgres|supabase/i);
 });
+
+test('health endpoint reports coarse status only', async ({ request }) => {
+  const response = await request.get('/api/health');
+  expect([200, 503]).toContain(response.status());
+  const body = (await response.json()) as Record<string, unknown>;
+  expect(Object.keys(body).sort()).toEqual(['database', 'status', 'time']);
+  expect(['ok', 'unconfigured', 'error']).toContain(body.database);
+  expect(response.headers()['cache-control']).toContain('no-store');
+});
+
+test('notification retry endpoint requires the cron secret', async ({ request }) => {
+  expect((await request.get('/api/cron/retry-notifications')).status()).toBe(405);
+  expect((await request.post('/api/cron/retry-notifications')).status()).toBe(401);
+  expect((await request.post('/api/cron/retry-notifications', { headers: { Authorization: 'Bearer wrong-secret-value-123456789' } })).status()).toBe(401);
+});
