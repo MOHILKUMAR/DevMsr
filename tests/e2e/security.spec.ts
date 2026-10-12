@@ -85,3 +85,9 @@ test('notification retry endpoint requires the cron secret', async ({ request })
   expect((await request.post('/api/cron/retry-notifications')).status()).toBe(401);
   expect((await request.post('/api/cron/retry-notifications', { headers: { Authorization: 'Bearer wrong-secret-value-123456789' } })).status()).toBe(401);
 });
+
+test('preview deployments are hidden from search engines; the real site is not', async ({ request, baseURL }) => {
+  const tag = (await request.get('/')).headers()['x-robots-tag'];
+  if (new URL(baseURL ?? 'http://localhost').hostname.endsWith('.workers.dev')) expect(tag).toBe('noindex, nofollow');
+  else expect(tag).toBeUndefined();
+});

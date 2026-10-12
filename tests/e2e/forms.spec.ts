@@ -5,7 +5,21 @@ import { expect, test } from '@playwright/test';
  * client + server validation, spam defences and honest failure states.
  * With Supabase configured (E2E_EXPECT_DATABASE=1), the final test expects
  * a saved lead and a reference number instead of "unavailable".
+ *
+ * Against a deployed site with a real database, set E2E_READ_ONLY=1: tests
+ * that could save a genuine lead (and email the owner) are then skipped.
  */
+
+const READ_ONLY = process.env.E2E_READ_ONLY === '1';
+
+/**
+ * Waits until the React form island has hydrated. Before that, the form is a
+ * plain HTML form (the no-JavaScript fallback), so a click would submit it to
+ * the server directly instead of running client-side validation.
+ */
+async function waitForForm(page: import('@playwright/test').Page) {
+  await page.locator('astro-island:not([ssr]) form').waitFor({ state: 'attached', timeout: 20_000 });
+}
 
 async function fillValid(page: import('@playwright/test').Page) {
   await page.getByLabel('Name (required)').fill('Playwright Test');
@@ -18,6 +32,7 @@ async function fillValid(page: import('@playwright/test').Page) {
 
 test('shows inline and summary errors for an empty submission', async ({ page }) => {
   await page.goto('/request-quote');
+  await waitForForm(page);
   await page.getByRole('button', { name: 'Request a quote' }).click();
   const summary = page.getByRole('alert');
   await expect(summary).toContainText('Please check the highlighted fields');
@@ -29,6 +44,7 @@ test('shows inline and summary errors for an empty submission', async ({ page })
 
 test('requires a phone number when WhatsApp is the preferred contact', async ({ page }) => {
   await page.goto('/contact');
+  await waitForForm(page);
   await fillValid(page);
   await page.getByLabel(/Preferred contact method/).selectOption('whatsapp');
   await page.getByRole('button', { name: 'Send message' }).click();
@@ -48,14 +64,18 @@ test('ignores unknown preselection values', async ({ page }) => {
 });
 
 test('rejects a submission made within seconds of loading the page', async ({ page }) => {
+  test.skip(READ_ONLY, 'timing-dependent: on a slow network the form can be old enough to be accepted');
   await page.goto('/book-a-demo');
+  await waitForForm(page);
   await fillValid(page);
   await page.getByRole('button', { name: 'Request a demo' }).click();
   await expect(page.getByRole('alert')).toContainText(/very quick|temporarily unavailable/);
 });
 
 test('a valid submission either saves (with database) or fails honestly (without)', async ({ page }) => {
+  test.skip(READ_ONLY, 'would create a real lead and email the owner');
   await page.goto('/request-quote');
+  await waitForForm(page);
   await fillValid(page);
   await page.waitForTimeout(3500); // the signed form token must be at least 3 seconds old
   await page.getByRole('button', { name: 'Request a quote' }).click();

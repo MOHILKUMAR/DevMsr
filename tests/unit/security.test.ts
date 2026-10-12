@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { hashIdentifier, issueFormToken, verifyFormToken } from '../../src/lib/security/tokens';
 import { renderMarkdown, safeUrl } from '../../src/lib/content/markdown';
-import { securityHeadersFor } from '../../src/lib/security/headers';
+import { isPreviewHost, securityHeadersFor } from '../../src/lib/security/headers';
 import { sanitiseLogFields } from '../../src/lib/server/logger';
 import { can } from '../../src/lib/auth/types';
 import { ResendProvider } from '../../src/lib/email/provider';
@@ -80,6 +80,16 @@ describe('headers, logging and roles', () => {
     expect(headers['X-Robots-Tag']).toContain('noindex');
     expect(headers['Strict-Transport-Security']).toBeDefined();
     expect(headers['Content-Security-Policy']).toContain("frame-ancestors 'none'");
+  });
+
+  it('marks preview hosts noindex without making public pages private', () => {
+    expect(isPreviewHost('devmsr.mohil4280.workers.dev')).toBe(true);
+    expect(isPreviewHost('devmsr.in')).toBe(false);
+    expect(isPreviewHost('workers.dev.evil.example')).toBe(false);
+    const preview = securityHeadersFor({ private: false, https: true, requestId: 'r', noindex: true });
+    expect(preview['X-Robots-Tag']).toBe('noindex, nofollow');
+    expect(preview['Cache-Control']).toBeUndefined();
+    expect(securityHeadersFor({ private: false, https: true, requestId: 'r' })['X-Robots-Tag']).toBeUndefined();
   });
 
   it('redacts personal data from log fields', () => {
