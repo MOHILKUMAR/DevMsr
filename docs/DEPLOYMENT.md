@@ -2,16 +2,17 @@
 
 Target: **Cloudflare Workers** (static assets + server rendering in one Worker), using the domain already on Cloudflare nameservers.
 
-## Current state (inspected 12 Oct 2026)
+## Current state
 
-- `devmsr.in` uses Cloudflare nameservers (`fay`, `gabriel`) but has **no A, AAAA, CNAME, MX or TXT records** — nothing is live, and nothing can be overwritten by a deployment.
-- The GitHub repository `MOHILKUMAR/DevMsr` was empty; this work is on branch `feat/astro-platform` (not pushed).
-- No previous website exists, so "rollback" before cut-over simply means not attaching the domain.
+- **Live since 12 Oct 2026** on `https://devmsr.in` (Worker `devmsr`). `www.devmsr.in` and plain-http requests redirect permanently to `https://devmsr.in` (in `src/middleware.ts`).
+- The custom domains are declared in `wrangler.jsonc` (`routes`), so every `npm run deploy` keeps them.
+- The `workers.dev` address and per-version preview URLs stay enabled for testing; pages there send `X-Robots-Tag: noindex`.
+- Before go-live the domain had no website records, so there was no previous site to roll back to.
 
 ## One-time setup
 
 1. **You:** `npx wrangler login` (opens a browser to authorise Wrangler for your Cloudflare account).
-2. Create the Worker on its `*.workers.dev` address only — `wrangler.jsonc` deliberately has no routes, so this does **not** touch `devmsr.in`:
+2. Deploy (the first deploy creates the Worker):
    ```bash
    npm run deploy
    ```
@@ -44,13 +45,14 @@ Target: **Cloudflare Workers** (static assets + server rendering in one Worker),
    - [ ] `E2E_BASE_URL=https://<preview-url> E2E_READ_ONLY=1 npm run test:e2e` passes. `E2E_READ_ONLY=1` skips the tests that could save a real lead and email you; without it, a live database collects test leads
 3. **You approve** the cut-over.
 
-## Domain cut-over (after approval)
+## Domain cut-over (done 12 Oct 2026)
 
-1. **You:** Cloudflare dashboard → *Workers & Pages → devmsr → Settings → Domains & Routes → Add → Custom domain*: `devmsr.in`, then again for `www.devmsr.in`. Cloudflare creates the DNS records and certificates. (Equivalent: uncomment `routes` in `wrangler.jsonc` and deploy.)
-2. **You:** add a Redirect Rule (*Rules → Redirect Rules*): `www.devmsr.in/*` → `https://devmsr.in/${1}`, 301.
-3. Update Turnstile hostnames and set Supabase *Authentication → URL Configuration → Site URL* to `https://devmsr.in`.
-4. In GitHub, set variable `SITE_URL=https://devmsr.in` and secret `CRON_SECRET` to enable the daily health ping and notification retries.
-5. Submit `https://devmsr.in/sitemap.xml` in Google Search Console.
+1. ✅ Custom domains `devmsr.in` and `www.devmsr.in` added through `routes` in `wrangler.jsonc`; Cloudflare created the DNS records and certificates.
+2. ✅ `www` → apex and http → https redirects (301) handled by the middleware.
+3. **You:** turn on *SSL/TLS → Edge Certificates → Always Use HTTPS* for the zone, so static files are also redirected to https (pages already are).
+4. Update Turnstile hostnames and set Supabase *Authentication → URL Configuration → Site URL* to `https://devmsr.in`.
+5. In GitHub, set variable `SITE_URL=https://devmsr.in` and secret `CRON_SECRET` to enable the daily health ping and notification retries.
+6. Submit `https://devmsr.in/sitemap.xml` in Google Search Console.
 
 No existing DNS record needs to be deleted.
 
@@ -59,7 +61,7 @@ No existing DNS record needs to be deleted.
 | Situation | Action |
 | --- | --- |
 | Bad deploy | `npx wrangler rollback` (or dashboard → *Deployments* → roll back to a previous version). Instant. |
-| Need to take the site offline | Remove the custom domains from the Worker. `devmsr.in` returns to its current (empty) state. |
+| Need to take the site offline | Remove the `routes` from `wrangler.jsonc` and deploy, or remove the custom domains in the dashboard. `devmsr.in` then serves nothing, as before go-live. |
 | Bad migration | Migrations are additive; restore from your latest dump (see SECURITY → Backups). Test migrations on a second free project first. |
 
 ## Continuous deployment (optional)

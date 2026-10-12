@@ -41,8 +41,8 @@ Legend: ✅ implemented and verified here · 🟡 implemented, needs verificatio
 - ✅ Secret scan of browser assets (`npm run check:secrets`)
 - ✅ CI workflow; scheduled health ping + notification retry workflow
 - ✅ Docs: setup, security/RLS, deployment/rollback, costs, decisions
-- 🟡 Preview deployment on `*.workers.dev` (needs `wrangler login`)
-- ⏳ Domain cut-over — only after your approval
+- ✅ Preview deployment on `devmsr.mohil4280.workers.dev` (noindex); live checks 22/22 there before go-live
+- ✅ Domain cut-over (approved and done 12 Oct 2026): live on https://devmsr.in; www and http redirect to it; read-only E2E 76/76 and live database checks 24/24 on the production domain
 
 ## Before launch (your actions)
 - [x] Create Supabase project, run migrations + seed, create owner profile, disable sign-ups (docs/SETUP.md) — `npm run verify:supabase` passes 24/24
@@ -51,7 +51,8 @@ Legend: ✅ implemented and verified here · 🟡 implemented, needs verificatio
 - [ ] Set Worker secrets; deploy to workers.dev; run the preview checklist (docs/DEPLOYMENT.md)
 - [ ] Review all copy, especially service timelines, the seeded blog post, product concepts, privacy policy and terms
 - [ ] Add contact email / phone / WhatsApp in `/admin/settings` (left empty rather than invented)
-- [ ] Approve and perform the domain cut-over
+- [x] Approve and perform the domain cut-over
+- [ ] Turn on *Always Use HTTPS* for the zone; set Supabase Site URL to https://devmsr.in; submit the sitemap in Search Console
 
 ## Deferred (Phase 6 and later)
 - ⏳ Quotation builder, package purchasing, Razorpay (server-side orders, signature + webhook verification, idempotency)

@@ -7,12 +7,17 @@
   "observability": {
     "enabled": true
   },
-  // Custom domains are attached only after the preview deployment is approved.
-  // See docs/DEPLOYMENT.md. Do not uncomment before DNS cut-over.
-  // "routes": [
-  //   { "pattern": "devmsr.in", "custom_domain": true },
-  //   { "pattern": "www.devmsr.in", "custom_domain": true }
-  // ],
+  // Production domains (go-live approved 12 Oct 2026). Cloudflare manages the
+  // DNS records and certificates for custom domains. www redirects to the apex
+  // in src/middleware.ts. To take the site offline, remove these and redeploy.
+  // Keep the workers.dev address and per-version preview URLs for testing
+  // (docs/DEPLOYMENT.md). Pages there are marked noindex by the middleware.
+  "workers_dev": true,
+  "preview_urls": true,
+  "routes": [
+    { "pattern": "devmsr.in", "custom_domain": true },
+    { "pattern": "www.devmsr.in", "custom_domain": true }
+  ],
   "vars": {
     "SEND_LEAD_ACKNOWLEDGEMENT": "false"
   }

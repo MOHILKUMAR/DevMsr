@@ -7,10 +7,15 @@ function isAdminPath(pathname: string): boolean {
   return pathname === '/admin' || pathname.startsWith('/admin/');
 }
 
+/** The canonical host; www.devmsr.in and plain-http requests redirect here permanently. */
+const CANONICAL_HOST = 'devmsr.in';
+
 /** Pages that embed a per-render form token and idempotency key must never be cached. */
 const NO_STORE_PATHS = new Set(['/contact', '/request-quote', '/book-a-demo']);
 
 /**
+ * 0. Redirects www.devmsr.in and plain-http requests to https://devmsr.in
+ *    (301), keeping path and query.
  * 1. Assigns a request id for log correlation.
  * 2. For /admin pages, admin actions and /api/admin endpoints: verifies the
  *    Supabase session and admin profile on the server. Unauthenticated page
@@ -20,6 +25,11 @@ const NO_STORE_PATHS = new Set(['/contact', '/request-quote', '/book-a-demo']);
  *    and every page on a *.workers.dev preview host is marked noindex.
  */
 export const onRequest = defineMiddleware(async (context, next) => {
+  const { hostname, protocol } = context.url;
+  if (hostname === `www.${CANONICAL_HOST}` || (hostname === CANONICAL_HOST && protocol === 'http:')) {
+    return context.redirect(`https://${CANONICAL_HOST}${context.url.pathname}${context.url.search}`, 301);
+  }
+
   context.locals.requestId = context.request.headers.get('cf-ray') ?? crypto.randomUUID();
   context.locals.admin = null;
   context.locals.adminClient = null;
