@@ -1,7 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getActionContext } from 'astro:actions';
 import { resolveAdmin } from './lib/auth/session';
-import { securityHeadersFor, withHeaders } from './lib/security/headers';
+import { isPreviewHost, securityHeadersFor, withHeaders } from './lib/security/headers';
 
 function isAdminPath(pathname: string): boolean {
   return pathname === '/admin' || pathname.startsWith('/admin/');
@@ -16,7 +16,8 @@ const NO_STORE_PATHS = new Set(['/contact', '/request-quote', '/book-a-demo']);
  *    Supabase session and admin profile on the server. Unauthenticated page
  *    requests are redirected to /admin/login. Actions and endpoints also
  *    check `locals.admin` themselves (defence in depth).
- * 3. Adds security headers; private pages are marked no-store / noindex.
+ * 3. Adds security headers; private pages are marked no-store / noindex,
+ *    and every page on a *.workers.dev preview host is marked noindex.
  */
 export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.requestId = context.request.headers.get('cf-ray') ?? crypto.randomUUID();
@@ -50,6 +51,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     private: adminRequest || pathname.startsWith('/api/'),
     https: context.url.protocol === 'https:',
     requestId: context.locals.requestId,
+    noindex: isPreviewHost(context.url.hostname),
   });
   if (NO_STORE_PATHS.has(pathname) || pathname.startsWith('/_actions/')) headers['Cache-Control'] = 'private, no-store';
   return withHeaders(response, headers);

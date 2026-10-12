@@ -41,7 +41,7 @@ Target: **Cloudflare Workers** (static assets + server rendering in one Worker),
    - [ ] the lead appears in `/admin/leads`; status, note and follow-up changes appear in its history
    - [ ] a price edited in `/admin/pricing` appears on `/pricing`
    - [ ] signed out, `/admin` redirects to sign-in; a non-admin Supabase user cannot sign in
-   - [ ] `E2E_BASE_URL=https://<preview-url> npm run test:e2e` passes (set `E2E_EXPECT_DATABASE=1` to require a saved lead)
+   - [ ] `E2E_BASE_URL=https://<preview-url> E2E_READ_ONLY=1 npm run test:e2e` passes. `E2E_READ_ONLY=1` skips the tests that could save a real lead and email you; without it, a live database collects test leads
 3. **You approve** the cut-over.
 
 ## Domain cut-over (after approval)

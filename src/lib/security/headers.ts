@@ -17,20 +17,28 @@ export const BASE_SECURITY_HEADERS: Record<string, string> = {
 
 export const HSTS_HEADER = 'max-age=31536000; includeSubDomains';
 
+/**
+ * Preview deployments (the Worker's *.workers.dev address) must not be
+ * indexed: the real site is devmsr.in and duplicates would compete with it.
+ */
+export function isPreviewHost(hostname: string): boolean {
+  return hostname.endsWith('.workers.dev');
+}
+
 export interface HeaderOptions {
   /** Private pages: never cache, never index. */
   private: boolean;
   https: boolean;
   requestId: string;
+  /** Keep search engines out (e.g. preview hosts) without changing caching. */
+  noindex?: boolean;
 }
 
 export function securityHeadersFor(options: HeaderOptions): Record<string, string> {
   const headers: Record<string, string> = { ...BASE_SECURITY_HEADERS, 'X-Request-Id': options.requestId };
   if (options.https) headers['Strict-Transport-Security'] = HSTS_HEADER;
-  if (options.private) {
-    headers['Cache-Control'] = 'private, no-store';
-    headers['X-Robots-Tag'] = 'noindex, nofollow';
-  }
+  if (options.private) headers['Cache-Control'] = 'private, no-store';
+  if (options.private || options.noindex) headers['X-Robots-Tag'] = 'noindex, nofollow';
   return headers;
 }
 
