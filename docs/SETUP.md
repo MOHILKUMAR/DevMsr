@@ -26,7 +26,7 @@ With only `APP_SECRET` set, the site works with bundled data and forms report "t
    - Publishable key (`sb_publishable_…`) → `SUPABASE_PUBLISHABLE_KEY`
    - Secret key (`sb_secret_…`) → `SUPABASE_SECRET_KEY` — **server only**, never share it or put it in client code.
 3. Apply the schema. Either:
-   - **SQL Editor:** run each file in `supabase/migrations/` in filename order, then run `supabase/seed.sql`; or
+   - **SQL Editor:** run each file in `supabase/migrations/` in filename order, then run `supabase/seed.sql`. If the editor warns about a "destructive operation", confirm: the `delete` statements it detects are inside function definitions (lead retention, link syncing) and delete nothing when the script runs. If any statement fails, the whole script is rolled back — fix the error and run it again; or
    - **CLI:**
      ```bash
      npx supabase login
@@ -35,17 +35,18 @@ With only `APP_SECRET` set, the site works with bundled data and forms report "t
      ```
      then run `supabase/seed.sql` in the SQL Editor.
 4. In *Project Settings → Data API*, confirm the exposed schemas are `public` (and `graphql_public`) only. The `internal` schema (rate limits) must **not** be exposed.
-5. In *Authentication → Sign In / Providers*, **turn off "Allow new users to sign up"**. Admin accounts are created by hand (next step). Even if sign-up were left on, a new account gets no access without an admin profile — but there is no reason to allow it.
+5. In *Authentication → Sign In / Providers*, under **User Signups**, **turn off "Allow new users to sign up"** and click **Save changes**. Leave the Email provider itself enabled. Admin accounts are created by hand (next step). Even if sign-up were left on, a new account gets no access without an admin profile — but there is no reason to allow it.
 
 ### Create the first admin (owner)
 
-1. **You:** *Authentication → Users → Add user → Create new user*. Enter your email and a strong password, tick **Auto Confirm User**. Copy the user's **UID**.
-2. **You:** in the SQL Editor run:
+1. **You:** *Authentication → Users → Add user → Create new user*. Enter your email and a strong password, tick **Auto Confirm User**.
+2. **You:** in the SQL Editor run (it should report 1 row):
    ```sql
    insert into public.admin_profiles (auth_user_id, display_name, role)
-   values ('<paste-the-UID>', 'Your Name', 'owner');
+   select id, 'Your Name', 'owner' from auth.users where email = '<your-email>';
    ```
-3. Sign in at `/admin/login`.
+3. Run `npm run verify:supabase`. It checks the schema and seed, that an active owner exists, and that visitors cannot read private tables or call server-only functions. It is read-only and prints no keys or personal data; all 24 checks should pass.
+4. Sign in at `/admin/login`.
 
 Roles: `owner` (everything, including deleting leads), `admin` (everything except deleting leads), `editor` (products, portfolio, blog only). Admin profiles can only be created or changed with SQL — never through the website or API — so nobody can grant themselves access.
 
@@ -54,12 +55,12 @@ Roles: `owner` (everything, including deleting leads), `admin` (everything excep
 ## 3. Email (Resend)
 
 1. **You:** create an account at <https://resend.com>.
-2. **You:** *Domains → Add domain* — use a subdomain such as `mail.devmsr.in`. Add the DNS records Resend shows (TXT for SPF/DKIM, MX for the return path) in **Cloudflare DNS** with the proxy **off** (grey cloud). Wait for verification.
+2. **You:** *Domains → Add domain* (for example `devmsr.in`). Add the DNS records Resend shows (TXT for SPF/DKIM, MX for the return path) in **Cloudflare DNS** with the proxy **off** (grey cloud). Wait for verification. `EMAIL_FROM` must use **exactly** the domain you verified — e.g. `notify@devmsr.in` when you verified `devmsr.in`.
 3. **You:** *API Keys → Create* with **Sending access** only, limited to that domain.
 4. Set:
    ```
    RESEND_API_KEY=re_…
-   EMAIL_FROM="DevMsr.in <notify@mail.devmsr.in>"
+   EMAIL_FROM="DevMsr.in <notify@devmsr.in>"
    OWNER_NOTIFICATION_EMAIL=<the inbox you read>
    SEND_LEAD_ACKNOWLEDGEMENT=false   # "true" to email prospects their reference number
    ```

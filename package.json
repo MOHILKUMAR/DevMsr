@@ -20,7 +20,8 @@
     "cf-typegen": "wrangler types",
     "deploy": "astro build && node scripts/check-client-secrets.mjs && wrangler deploy --config dist/server/wrangler.json",
     "deploy:preview": "astro build && node scripts/check-client-secrets.mjs && wrangler versions upload --config dist/server/wrangler.json",
-    "check:secrets": "node scripts/check-client-secrets.mjs"
+    "check:secrets": "node scripts/check-client-secrets.mjs",
+    "verify:supabase": "node scripts/verify-supabase.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.4",

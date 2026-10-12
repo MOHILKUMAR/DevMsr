@@ -23,12 +23,17 @@ export interface EmailProvider {
 
 export class ResendProvider implements EmailProvider {
   readonly name = 'resend';
+  private readonly apiKey: string;
+  private readonly from: string;
+  private readonly fetchImpl: typeof fetch;
 
-  constructor(
-    private readonly apiKey: string,
-    private readonly from: string,
-    private readonly fetchImpl: typeof fetch = fetch,
-  ) {}
+  constructor(apiKey: string, from: string, fetchImpl?: typeof fetch) {
+    this.apiKey = apiKey;
+    this.from = from;
+    // Call fetch unbound: Cloudflare Workers throws "Illegal invocation" when
+    // fetch runs with `this` set to another object (e.g. this.fetchImpl(...)).
+    this.fetchImpl = (input, init) => (fetchImpl ?? fetch)(input, init);
+  }
 
   async send(message: EmailMessage): Promise<SendResult> {
     try {

@@ -4,6 +4,7 @@ import { renderMarkdown, safeUrl } from '../../src/lib/content/markdown';
 import { securityHeadersFor } from '../../src/lib/security/headers';
 import { sanitiseLogFields } from '../../src/lib/server/logger';
 import { can } from '../../src/lib/auth/types';
+import { ResendProvider } from '../../src/lib/email/provider';
 import { cleanText, leadFieldsSchema } from '../../src/schemas/lead';
 
 const SECRET = 'another-test-secret-with-enough-length-123';
@@ -49,6 +50,26 @@ describe('markdown rendering', () => {
     expect(safeUrl('//evil.example')).toBeNull();
     expect(safeUrl('JAVASCRIPT:alert(1)')).toBeNull();
     expect(safeUrl('mailto:hi@example.com')).toBe('mailto:hi@example.com');
+  });
+});
+
+describe('Resend provider', () => {
+  it('calls fetch unbound, as Cloudflare Workers requires', async () => {
+    // Mimics workerd: fetch must not be invoked with `this` bound to another object.
+    function workerFetch(this: unknown, _input: RequestInfo | URL, _init?: RequestInit): Promise<Response> {
+      if (this !== undefined && this !== globalThis) throw new TypeError('Illegal invocation');
+      return Promise.resolve(new Response(JSON.stringify({ id: 'email_123' }), { status: 200 }));
+    }
+    const provider = new ResendProvider('re_test', 'DevMsr.in <notify@example.com>', workerFetch as typeof fetch);
+    const result = await provider.send({ to: 'owner@example.com', subject: 's', html: '<p>h</p>', text: 't', idempotencyKey: 'k' });
+    expect(result).toEqual({ ok: true, messageId: 'email_123' });
+  });
+
+  it('reports provider errors as retryable or not', async () => {
+    const failing = new ResendProvider('re_test', 'x <a@b.c>', (() => Promise.resolve(new Response('upstream', { status: 503 }))) as typeof fetch);
+    expect(await failing.send({ to: 'a@b.c', subject: 's', html: 'h', text: 't', idempotencyKey: 'k' })).toMatchObject({ ok: false, retryable: true });
+    const rejected = new ResendProvider('re_test', 'x <a@b.c>', (() => Promise.resolve(new Response('bad from', { status: 403 }))) as typeof fetch);
+    expect(await rejected.send({ to: 'a@b.c', subject: 's', html: 'h', text: 't', idempotencyKey: 'k' })).toMatchObject({ ok: false, retryable: false });
   });
 });
 

@@ -90,7 +90,7 @@ Restore: create a project, apply `supabase/migrations`, then load the data dump 
 
 ## Known limitations
 
-- End-to-end flows against a live Supabase project (real sign-in, saving a lead, Resend delivery) are implemented and covered by local database and unit tests, but have not yet been run against your live services (pending credentials).
+- Live checks against the production Supabase project passed on 12 Oct 2026 (`npm run verify:supabase`: RLS, grants and schema; plus a one-off end-to-end run of lead intake, admin actions and Resend delivery against the production build on workerd). They have not yet been repeated on the deployed Cloudflare Worker.
 - No MFA for admin sign-in yet (Supabase supports TOTP; deferred).
 - Rate-limit counters live in the database; a database outage disables lead intake (by design — leads cannot be saved anyway).
 - The bundled-data fallback for public pages means an unreachable database shows the last *deployed* catalogue rather than the latest admin edits (logged as `catalogue.fallback`).

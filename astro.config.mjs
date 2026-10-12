@@ -77,7 +77,7 @@ export default defineConfig({
       SUPABASE_SECRET_KEY: serverSecret('sb_secret_… key, used only for lead intake'),
       APP_SECRET: serverSecret('32+ random characters for HMAC form tokens and IP hashing'),
       RESEND_API_KEY: serverSecret('Resend API key'),
-      EMAIL_FROM: serverSecret('Verified sender, e.g. "DevMsr.in <notify@mail.devmsr.in>"'),
+      EMAIL_FROM: serverSecret('Verified sender, e.g. "DevMsr.in <notify@devmsr.in>"'),
       OWNER_NOTIFICATION_EMAIL: serverSecret('Inbox that receives new lead alerts'),
       SEND_LEAD_ACKNOWLEDGEMENT: serverSecret('"true" to email prospects a receipt'),
       TURNSTILE_SITE_KEY: serverSecret('Cloudflare Turnstile site key'),
