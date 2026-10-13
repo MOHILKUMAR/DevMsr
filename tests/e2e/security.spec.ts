@@ -31,6 +31,21 @@ test('admin pages redirect to sign-in when signed out', async ({ request }) => {
   }
 });
 
+test('a signed-out admin form submission is not saved and says so on sign-in', async ({ page, request, baseURL }) => {
+  const id = '00000000-0000-0000-0000-000000000000';
+  const response = await request.post(`/admin/leads/${id}?_action=admin.leads.delete`, {
+    form: { id, confirm: 'DELETE' },
+    headers: { Origin: baseURL ?? '' },
+    maxRedirects: 0,
+  });
+  expect(response.status()).toBe(303);
+  const location = response.headers()['location'] ?? '';
+  expect(location).toBe(`/admin/login?next=${encodeURIComponent(`/admin/leads/${id}`)}&reason=unsaved`);
+  await page.goto(location);
+  await expect(page.getByRole('status')).toContainText('your last change was not saved');
+  await expect(page.locator('input[name="next"]')).toHaveValue(`/admin/leads/${id}`);
+});
+
 test('admin actions reject unauthenticated calls', async ({ request, baseURL }) => {
   for (const action of ['admin.leads.updateStatus', 'admin.pricing.save', 'admin.settings.save', 'admin.leads.delete']) {
     const response = await request.post(`/_actions/${action}`, {

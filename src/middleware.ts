@@ -1,6 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getActionContext } from 'astro:actions';
 import { resolveAdmin } from './lib/auth/session';
+import { signInRedirect } from './lib/auth/redirect';
 import { isPreviewHost, securityHeadersFor, withHeaders } from './lib/security/headers';
 
 function isAdminPath(pathname: string): boolean {
@@ -19,8 +20,9 @@ const NO_STORE_PATHS = new Set(['/contact', '/request-quote', '/book-a-demo']);
  * 1. Assigns a request id for log correlation.
  * 2. For /admin pages, admin actions and /api/admin endpoints: verifies the
  *    Supabase session and admin profile on the server. Unauthenticated page
- *    requests are redirected to /admin/login. Actions and endpoints also
- *    check `locals.admin` themselves (defence in depth).
+ *    requests are redirected to /admin/login, which says when a submitted
+ *    form was not saved or the session has ended. Actions and endpoints
+ *    also check `locals.admin` themselves (defence in depth).
  * 3. Adds security headers; private pages are marked no-store / noindex,
  *    and every page on a *.workers.dev preview host is marked noindex.
  */
@@ -42,14 +44,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const adminRequest = adminPage || pathname.startsWith('/api/admin/') || action?.name.startsWith('admin.') === true;
 
   if (adminRequest) {
-    const { admin, client } = await resolveAdmin(context.request, context.cookies, context.locals.requestId);
+    const { admin, client, hadSession } = await resolveAdmin(context.request, context.cookies, context.locals.requestId);
     context.locals.admin = admin;
     context.locals.adminClient = admin ? client : null;
 
     const isLogin = pathname === '/admin/login';
     if (adminPage && !admin && !isLogin) {
-      const nextPath = encodeURIComponent(pathname + context.url.search);
-      return withHeaders(context.redirect(`/admin/login?next=${nextPath}`, 303), securityHeadersFor({ private: true, https: context.url.protocol === 'https:', requestId: context.locals.requestId }));
+      return withHeaders(context.redirect(signInRedirect(context.url, context.request.method, hadSession), 303), securityHeadersFor({ private: true, https: context.url.protocol === 'https:', requestId: context.locals.requestId }));
     }
     if (adminPage && admin && isLogin && context.request.method === 'GET') {
       return withHeaders(context.redirect('/admin', 303), securityHeadersFor({ private: true, https: context.url.protocol === 'https:', requestId: context.locals.requestId }));

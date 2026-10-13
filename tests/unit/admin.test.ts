@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { pricingSchema, productSchema, portfolioSchema, faqSchema, settingsSchema, leadFollowUpSchema, leadDeleteSchema } from '../../src/schemas/admin';
 import { formToObject } from '../../src/lib/admin/form';
-import { safeAdminRedirect } from '../../src/lib/auth/redirect';
+import { safeAdminRedirect, signInReasonText, signInRedirect } from '../../src/lib/auth/redirect';
 import { mergeCsp } from '../../src/lib/security/headers';
 
 const SERVICE_ID = '7b0c4a3e-8f1d-4c7e-9a2b-1d2e3f4a5b6c';
@@ -105,6 +105,20 @@ describe('redirect and CSP helpers', () => {
     expect(safeAdminRedirect('/pricing')).toBe('/admin');
     expect(safeAdminRedirect('/admin/login')).toBe('/admin');
     expect(safeAdminRedirect(undefined)).toBe('/admin');
+    expect(safeAdminRedirect('/admin/leads/abc?_action=admin.leads.delete')).toBe('/admin/leads/abc');
+    expect(safeAdminRedirect('/admin/leads?status=new&_action=x')).toBe('/admin/leads?status=new');
+  });
+
+  it('sends signed-out admin requests to sign-in with the reason and without the action', () => {
+    const page = new URL('https://devmsr.in/admin/leads/abc?_action=admin.leads.delete');
+    expect(signInRedirect(page, 'POST', true)).toBe('/admin/login?next=%2Fadmin%2Fleads%2Fabc&reason=unsaved');
+    expect(signInRedirect(page, 'POST', false)).toBe('/admin/login?next=%2Fadmin%2Fleads%2Fabc&reason=unsaved');
+    const list = new URL('https://devmsr.in/admin/leads?status=new');
+    expect(signInRedirect(list, 'GET', true)).toBe('/admin/login?next=%2Fadmin%2Fleads%3Fstatus%3Dnew&reason=expired');
+    expect(signInRedirect(list, 'GET', false)).toBe('/admin/login?next=%2Fadmin%2Fleads%3Fstatus%3Dnew');
+    expect(signInReasonText('unsaved')).toMatch(/not saved/);
+    expect(signInReasonText('expired')).toMatch(/session has ended/);
+    for (const key of [null, '', 'toString', '__proto__', 'other']) expect(signInReasonText(key), String(key)).toBeNull();
   });
 
   it('merges header-only CSP directives without dropping Astro hashes', () => {

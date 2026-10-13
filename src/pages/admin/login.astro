@@ -4,7 +4,7 @@ import { LockKeyhole } from '@lucide/astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Wordmark from '../../components/layout/Wordmark.astro';
 import { getServerConfig } from '../../lib/server/config';
-import { safeAdminRedirect } from '../../lib/auth/redirect';
+import { safeAdminRedirect, signInReasonText } from '../../lib/auth/redirect';
 
 const login = Astro.getActionResult(actions.auth.login);
 if (login?.data?.ok) return Astro.redirect(login.data.redirect, 303);
@@ -15,6 +15,7 @@ const configured = getServerConfig().supabase !== null;
 const next = safeAdminRedirect(Astro.url.searchParams.get('next') ?? undefined);
 const error = login?.data && !login.data.ok ? login.data.message : login?.error ? 'Sign-in failed. Please try again.' : null;
 const signedOut = Astro.url.searchParams.has('signed_out');
+const reason = signInReasonText(Astro.url.searchParams.get('reason'));
 ---
 
 <BaseLayout title="Sign in · Admin" description="DevMsr.in admin sign-in" noindex>
@@ -33,6 +34,7 @@ const signedOut = Astro.url.searchParams.has('signed_out');
         {!configured && <p class="mt-5 rounded-md bg-warning-soft px-3 py-2 text-sm text-ink" role="alert">Sign-in is unavailable: Supabase is not configured on this server.</p>}
         {error && <p class="mt-5 rounded-md bg-danger-soft px-3 py-2 text-sm text-ink" role="alert">{error}</p>}
         {signedOut && !error && <p class="mt-5 rounded-md bg-success-soft px-3 py-2 text-sm text-ink" role="status">You have been signed out.</p>}
+        {reason && !error && <p class="mt-5 rounded-md bg-warning-soft px-3 py-2 text-sm text-ink" role="status">{reason}</p>}
 
         <form method="POST" action={`${actions.auth.login.queryString}&next=${encodeURIComponent(next)}`} class="mt-6 space-y-4">
           <input type="hidden" name="next" value={next} />
