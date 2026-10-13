@@ -189,6 +189,7 @@ const pricing = {
         price_note: input.priceNote,
         included_features: input.includedFeatures,
         excluded_features: input.excludedFeatures,
+        price_factors: input.priceFactors,
         estimated_delivery: input.estimatedDelivery,
         tax_inclusive: input.taxInclusive,
         sort_order: input.sortOrder,

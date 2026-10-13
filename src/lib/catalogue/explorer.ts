@@ -74,6 +74,7 @@ export function buildExplorerPrices(catalogue: Catalogue): ExplorerPrice[] {
           note: price.priceNote,
           included: price.includedFeatures,
           excluded: price.excludedFeatures,
+          factors: price.priceFactors,
           taxInclusive: price.taxInclusive,
           estimatedDelivery: price.estimatedDelivery,
           category: service.category,

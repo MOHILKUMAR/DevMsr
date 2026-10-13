@@ -1,0 +1,195 @@
+---
+import { CircleCheck } from '@lucide/astro';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import FaqList from '../components/ui/FaqList.astro';
+import CtaBand from '../components/ui/CtaBand.astro';
+import {
+  CHANGE_PAYMENTS,
+  CHANGE_RULES,
+  DEFECT_RULE,
+  EXAMPLE_PROJECT_FEE,
+  HANDOVER_ITEMS,
+  INVOICE_RULES,
+  MILESTONES,
+  MILESTONE_NOTES,
+  PAYMENT_FAQ_LIST,
+  VISIT_FEES,
+  VISIT_NOTES,
+} from '../data/payment-terms';
+import { formatAmount } from '../lib/utils/money';
+import { breadcrumbJsonLd, compact, faqJsonLd } from '../lib/seo';
+
+// Exact whole-rupee split of the example fee (integer maths, no floats).
+const exampleShares = MILESTONES.map(
+  (milestone) => `${formatAmount(String((BigInt(EXAMPLE_PROJECT_FEE) * BigInt(milestone.percent)) / 100n))} ${milestone.example}`,
+);
+
+const AT_A_GLANCE = [
+  '50% to book, 30% at the working demo, 20% before handover',
+  'First remote discovery call is free',
+  'Changes are priced in writing before any extra work',
+  'GST is extra unless the quote says otherwise',
+];
+---
+
+<MarketingLayout
+  title="How Payments Work — Milestones, Visits and Changes"
+  description="How DevMsr.in projects are paid: a 50% advance, 30% at the working demo and 20% before handover, plus consultation and visit fees, change requests, GST and invoice terms."
+  jsonLd={compact([breadcrumbJsonLd([{ name: 'Payments', path: '/payments' }]), faqJsonLd(PAYMENT_FAQ_LIST)])}
+>
+  <section class="page-container pb-12 pt-8 sm:pt-10">
+    <Breadcrumbs items={[{ label: 'Payments' }]} />
+    <div class="mt-10 grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-7">
+        <h1 class="text-h1">How payments work.</h1>
+        <p class="text-lede mt-5">
+          Every project starts with a written quotation that lists the deliverables, exclusions, timeline and payment milestones. These are our
+          standard terms; your signed quotation always takes precedence.
+        </p>
+      </div>
+      <aside class="self-end rounded-[var(--radius-card)] border border-line bg-surface p-5 text-small lg:col-span-5" aria-labelledby="glance-title">
+        <p id="glance-title" class="font-semibold text-ink">At a glance</p>
+        <ul class="mt-3 space-y-1.5 text-ink-muted">
+          {
+            AT_A_GLANCE.map((item) => (
+              <li class="flex gap-2">
+                <CircleCheck size={16} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="page-container pb-16" aria-labelledby="milestones-title">
+    <SectionHeader
+      id="milestones-title"
+      eyebrow="Milestones"
+      title="Three payments, tied to visible progress."
+      intro="For most projects, the agreed project fee is paid in three parts."
+    />
+    <ol class="mt-10 grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line md:grid-cols-3">
+      {
+        MILESTONES.map((milestone, index) => (
+          <li class="flex flex-col bg-surface p-6">
+            <span class="font-mono text-[0.75rem] text-clay-ink">{String(index + 1).padStart(2, '0')}</span>
+            <span class="tabular mt-4 font-display text-[2.5rem] leading-none text-ink">{milestone.percent}%</span>
+            <h3 class="mt-3 font-medium text-ink">{milestone.name}</h3>
+            <p class="text-small mt-2 text-ink">{milestone.due}</p>
+            <p class="text-small mt-2 text-ink-muted">{milestone.covers}</p>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="text-small mt-5 text-ink-muted">
+      <strong class="font-medium text-ink">Example:</strong> on a {formatAmount(String(EXAMPLE_PROJECT_FEE))} project, {exampleShares.join(', ')}, plus GST
+      where applicable.
+    </p>
+    <ul class="text-small mt-6 max-w-3xl space-y-2 text-ink-muted">
+      {MILESTONE_NOTES.map((note) => <li class="flex gap-2"><span aria-hidden="true" class="text-olive">·</span>{note}</li>)}
+    </ul>
+  </section>
+
+  <section class="border-y border-line bg-surface" aria-labelledby="visits-title">
+    <div class="page-container section-space grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader id="visits-title" eyebrow="Consultations" title="Calls and site visits." intro="The first conversation is free. Visits are priced up front." />
+      </div>
+      <div class="lg:col-span-8">
+        <dl class="grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line">
+          {
+            VISIT_FEES.map((visit) => (
+              <div class="grid gap-1 bg-surface p-5 sm:grid-cols-[1fr_auto] sm:gap-x-6">
+                <dt class="font-medium text-ink">{visit.name}</dt>
+                <dd class="tabular font-mono text-[0.875rem] text-ink sm:row-span-2 sm:text-right">{visit.fee}</dd>
+                <dd class="text-small text-ink-muted">{visit.detail}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <ul class="text-small mt-5 space-y-2 text-ink-muted">
+          {VISIT_NOTES.map((note) => <li>{note}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container section-space grid gap-12 lg:grid-cols-12" aria-labelledby="changes-title">
+    <div class="lg:col-span-4">
+      <SectionHeader id="changes-title" eyebrow="Changes" title="Changes after the scope is agreed." intro="Extra work is estimated, approved and paid for separately — never silently absorbed." />
+    </div>
+    <div class="lg:col-span-8">
+      <ul class="space-y-3 text-ink">
+        {CHANGE_RULES.map((rule) => <li class="flex gap-2"><span aria-hidden="true" class="text-olive">+</span>{rule}</li>)}
+      </ul>
+      <h3 class="text-eyebrow mb-3 mt-10">Paying for approved changes</h3>
+      <dl class="grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-3">
+        {
+          CHANGE_PAYMENTS.map((row) => (
+            <div class="bg-surface p-5">
+              <dt class="font-medium text-ink">{row.size}</dt>
+              <dd class="text-small mt-2 text-ink">
+                <span class="text-ink-muted">Before work starts:</span> {row.before}
+              </dd>
+              <dd class="text-small mt-1 text-ink">
+                <span class="text-ink-muted">Later:</span> {row.after}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="text-small mt-5 text-ink-muted">A different schedule can be agreed in writing.</p>
+      <p class="mt-8 rounded-[var(--radius-card)] border border-line bg-surface p-5 text-ink">
+        <span class="font-medium">Defects are not change requests.</span>{' '}
+        <span class="text-ink-muted">{DEFECT_RULE}</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="border-y border-line bg-surface" aria-labelledby="invoices-title">
+    <div class="page-container section-space grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader id="invoices-title" eyebrow="Invoices" title="Quotations, invoices and taxes." />
+      </div>
+      <ul class="space-y-3 text-ink lg:col-span-8">
+        {INVOICE_RULES.map((rule) => <li class="flex gap-2"><span aria-hidden="true" class="text-olive">+</span>{rule}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="page-container section-space grid gap-12 lg:grid-cols-12" aria-labelledby="handover-title">
+    <div class="lg:col-span-4">
+      <SectionHeader id="handover-title" eyebrow="Handover" title="What you receive at the end." />
+    </div>
+    <div class="lg:col-span-8">
+      <p class="text-ink">Your quotation lists exactly what is handed over, for example:</p>
+      <ul class="mt-4 flex flex-wrap gap-2">
+        {HANDOVER_ITEMS.map((item) => <li class="rounded-full border border-line bg-surface px-3 py-1 text-small text-ink">{item}</li>)}
+      </ul>
+      <p class="text-small mt-5 text-ink-muted">Release timing follows the payment terms in your signed quotation.</p>
+    </div>
+  </section>
+
+  <section class="border-t border-line" aria-labelledby="payments-faq-title">
+    <div class="page-container section-space grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader id="payments-faq-title" eyebrow="Questions" title="About payments" />
+        <p class="mt-4 text-ink-muted">
+          Prices for each service are on the <a class="link-olive" href="/pricing">pricing page</a>. There is no online checkout yet: every project
+          starts with a <a class="link-olive" href="/request-quote">quote request</a>.
+        </p>
+      </div>
+      <div class="lg:col-span-8"><FaqList faqs={PAYMENT_FAQ_LIST} /></div>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Ready for a written quote?"
+    body="Send a short description of your project. We reply with questions, then a quotation with the scope, timeline and payment milestones."
+    primaryLabel="Request a quote"
+  />
+</MarketingLayout>

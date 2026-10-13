@@ -112,6 +112,9 @@ const priceText = (row: (typeof prices)[number]) =>
             <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="taxInclusive" checked={draftChecked(v, 'taxInclusive', editing?.tax_inclusive ?? false)} class="size-4 accent-[var(--olive)]" /> Price includes GST</label>
             <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" checked={draftChecked(v, 'isActive', editing?.is_active ?? true)} class="size-4 accent-[var(--olive)]" /> Show on website</label>
           </div>
+          <Field id="priceFactors" label="What can increase the price (one per line)" hint="Shown with the price, e.g. “Page count” or “Integrations”." error={errors.priceFactors} class="md:col-span-2 xl:col-span-3">
+            <textarea id="priceFactors" name="priceFactors" rows="4" class="field">{draftValue(v, 'priceFactors', linesOf(editing?.price_factors))}</textarea>
+          </Field>
           <div class="flex flex-wrap gap-3 md:col-span-2 xl:col-span-3">
             <button type="submit" class="rounded-[var(--radius-control)] bg-invert px-5 py-2.5 font-medium text-invert-ink">Save price</button>
             <a href="/admin/pricing" class="rounded-[var(--radius-control)] px-4 py-2.5 text-ink-muted hover:text-ink">Cancel</a>

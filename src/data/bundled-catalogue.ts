@@ -52,6 +52,7 @@ export function buildBundledCatalogue(): Catalogue {
     priceNote: row.note ?? null,
     includedFeatures: row.included ?? [],
     excludedFeatures: row.excluded ?? [],
+    priceFactors: row.factors ?? [],
     estimatedDelivery: null,
     taxInclusive: false,
     sortOrder: (index + 1) * 10,

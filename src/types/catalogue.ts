@@ -91,6 +91,8 @@ export interface ServicePrice {
   priceNote: string | null;
   includedFeatures: string[];
   excludedFeatures: string[];
+  /** What can move a quote towards (or above) the upper figure. */
+  priceFactors: string[];
   estimatedDelivery: string | null;
   taxInclusive: boolean;
   sortOrder: number;

@@ -18,6 +18,7 @@ function price(overrides: Partial<ServicePrice> = {}): ServicePrice {
     priceNote: null,
     includedFeatures: [],
     excludedFeatures: [],
+    priceFactors: [],
     estimatedDelivery: null,
     taxInclusive: false,
     sortOrder: 0,
