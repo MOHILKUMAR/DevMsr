@@ -62,15 +62,26 @@ describe('price formatting', () => {
     expect(formatPrice(price({ pricingModel: 'quote_only', minimumAmount: null, maximumAmount: null }))).toBe('Quote on request');
   });
 
-  it('picks the lowest one-time starting price', () => {
-    const lowest = lowestPrice([
+  it('picks the lowest one-time or monthly starting price', () => {
+    const prices = [
       price({ id: 'a', minimumAmount: '15000.00' }),
       price({ id: 'b', minimumAmount: '1500.00', billingInterval: 'monthly' }),
       price({ id: 'c', minimumAmount: '8000.00' }),
       price({ id: 'd', pricingModel: 'quote_only', minimumAmount: null }),
-    ]);
-    expect(lowest?.id).toBe('c');
-    expect(formatFromPrice(lowest!)).toBe('From ₹8,000');
+      price({ id: 'e', minimumAmount: '500.00', billingInterval: 'yearly' }),
+      price({ id: 'f', minimumAmount: '10.00', billingInterval: 'per_use' }),
+    ];
+    const lowest = lowestPrice(prices);
+    expect(lowest?.id).toBe('b');
+    expect(formatFromPrice(lowest!)).toBe('From ₹1,500/month');
+
+    // A cheaper one-time price still wins over a monthly one.
+    const oneTime = lowestPrice([...prices, price({ id: 'g', minimumAmount: '1000.00' })]);
+    expect(oneTime?.id).toBe('g');
+    expect(formatFromPrice(oneTime!)).toBe('From ₹1,000');
+
+    // Only yearly or usage-based prices: no "from" figure.
+    expect(lowestPrice([prices[4]!, prices[5]!])).toBeNull();
   });
 
   it('matches budget bands by overlap', () => {

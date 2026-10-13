@@ -58,12 +58,18 @@ export function formatFromPrice(price: PriceShape): string {
   return `From ${formatAmount(price.minimumAmount, price.currency)}${suffix}`;
 }
 
-/** Lowest active one-time minimum among prices, or null. Used for "from" badges. */
+/** Billing intervals that count towards "from" figures. Yearly and usage-based prices are left out. */
+const FROM_PRICE_INTERVALS: ReadonlySet<BillingInterval> = new Set(['one_time', 'monthly']);
+
+/**
+ * Lowest active one-time or monthly minimum among prices, or null. Used for
+ * "from" badges; formatFromPrice adds "/month" when the lowest is monthly.
+ */
 export function lowestPrice<T extends PriceShape>(prices: T[]): T | null {
   let lowest: T | null = null;
   for (const price of prices) {
     if (!price.minimumAmount || price.pricingModel === 'quote_only') continue;
-    if (price.billingInterval !== 'one_time') continue;
+    if (!FROM_PRICE_INTERVALS.has(price.billingInterval)) continue;
     if (!lowest || !lowest.minimumAmount || compareAmounts(price.minimumAmount, lowest.minimumAmount) < 0) {
       lowest = price;
     }
