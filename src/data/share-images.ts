@@ -14,6 +14,26 @@ export const SHARE_IMAGES: Record<string, { url: string; alt: string }> = {
     "url": "/og/blog-1cc45580.png",
     "alt": "Blog: Notes on business software, pricing and automation."
   },
+  "/blog/business-website-cost-india": {
+    "url": "/og/blog-business-website-cost-india-37ef1c8e.png",
+    "alt": "Blog: How much does a business website cost in India?"
+  },
+  "/blog/hospital-management-system-cost-india": {
+    "url": "/og/blog-hospital-management-system-cost-india-c88cc37e.png",
+    "alt": "Blog: How much does a hospital management system cost in India?"
+  },
+  "/blog/how-software-projects-are-priced": {
+    "url": "/og/blog-how-software-projects-are-priced-41f3db3a.png",
+    "alt": "Blog: How a software project is priced, from quote to handover"
+  },
+  "/blog/restaurant-pos-software-cost": {
+    "url": "/og/blog-restaurant-pos-software-cost-1ed716d6.png",
+    "alt": "Blog: Restaurant POS software: what decides the price?"
+  },
+  "/blog/school-management-software-cost-india": {
+    "url": "/og/blog-school-management-software-cost-india-0df644e3.png",
+    "alt": "Blog: School management software for Indian schools: features and cost"
+  },
   "/blog/what-decides-the-cost-of-business-software": {
     "url": "/og/blog-what-decides-the-cost-of-business-software-3c0ddd78.png",
     "alt": "Blog: What decides the cost of business software"

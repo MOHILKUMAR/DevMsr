@@ -9,6 +9,40 @@ import { SERVICE_CATEGORY_CONTENT } from '../../src/data/service-categories.ts';
 import { BLOG_SEED } from '../../src/data/seed/content.ts';
 import { MILESTONES } from '../../src/data/payment-terms.ts';
 
+/**
+ * Blog posts written in /admin/blog live in the database, not in code. List a
+ * post here (with its title and excerpt as published) to give it its own card,
+ * then run `npm run share-images:generate`. Posts not listed use the Blog card.
+ * If a post's title or excerpt is edited later, update it here too.
+ */
+const BLOG_CARDS: { slug: string; title: string; excerpt: string }[] = [
+  {
+    slug: 'hospital-management-system-cost-india',
+    title: 'How much does a hospital management system cost in India?',
+    excerpt: 'Indicative prices for clinic and hospital software, from OPD tokens to a hospital management system, and what moves a quote up or down.',
+  },
+  {
+    slug: 'restaurant-pos-software-cost',
+    title: 'Restaurant POS software: what decides the price?',
+    excerpt: 'What restaurant billing and POS software costs, from a digital menu to a full restaurant system, and the choices that move the price.',
+  },
+  {
+    slug: 'business-website-cost-india',
+    title: 'How much does a business website cost in India?',
+    excerpt: 'What a website costs, from a one-page landing page to a business site or online store, and the running costs to plan for after launch.',
+  },
+  {
+    slug: 'how-software-projects-are-priced',
+    title: 'How a software project is priced, from quote to handover',
+    excerpt: 'From the first call to handover: how we work out a quote, where a project sits in a price range, how changes are handled and how payments are split.',
+  },
+  {
+    slug: 'school-management-software-cost-india',
+    title: 'School management software for Indian schools: features and cost',
+    excerpt: 'What school software costs, from admission tracking and websites to a school management system for students, attendance and fees.',
+  },
+];
+
 export interface Card {
   path: string;
   eyebrow: string;
@@ -41,6 +75,7 @@ export const SHARE_CARDS: Card[] = [
   ...INDUSTRY_CONTENT.map((industry) => ({ path: `/industries/${industry.slug}`, eyebrow: industry.name, title: industry.heroTitle, subtitle: industry.seoTitle })),
   ...SERVICE_CATEGORY_CONTENT.map((category) => ({ path: `/services/${category.slug}`, eyebrow: category.name, title: category.tagline, subtitle: category.seoTitle })),
   ...BLOG_SEED.filter((post) => post.status === 'published').map((post) => ({ path: `/blog/${post.slug}`, eyebrow: 'Blog', title: post.title, subtitle: post.excerpt })),
+  ...BLOG_CARDS.map((post) => ({ path: `/blog/${post.slug}`, eyebrow: 'Blog', title: post.title, subtitle: post.excerpt })),
 ];
 
 /** File name without the hash, e.g. "industries-healthcare". */
