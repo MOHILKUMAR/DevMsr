@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { useForm, type FieldPath } from 'react-hook-form';
+import { useForm, useWatch, type Control, type FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { actions } from 'astro:actions';
 import { CircleCheck, CircleAlert, LoaderCircle, ChevronDown } from 'lucide-react';
@@ -132,12 +132,23 @@ function Field(props: { id: string; label: string; required?: boolean; hint?: st
   );
 }
 
+/** Character count for the description. Watches the field on its own, so typing does not re-render the whole form. */
+function CharacterCount(props: { id: string; control: Control<LeadFieldsInput, unknown, LeadFields> }) {
+  const value = useWatch({ control: props.control, name: 'projectDescription' }) ?? '';
+  return (
+    <p id={props.id} className="mt-1 text-right font-mono text-[0.75rem] text-ink-muted" aria-live="off">
+      {value.length} / 5000
+    </p>
+  );
+}
+
 export default function LeadForm(props: LeadFormProps) {
   const ids = useId();
   const id = (name: string) => `${ids}-${name}`;
   const formRef = useRef<HTMLFormElement>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
   const successRef = useRef<HTMLHeadingElement>(null);
+  const focusSummaryAfterSubmit = useRef(false);
   const turnstileRef = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState('');
@@ -149,7 +160,7 @@ export default function LeadForm(props: LeadFormProps) {
     register,
     handleSubmit,
     setError,
-    watch,
+    control,
     formState: { errors, isSubmitting, submitCount },
   } = useForm<LeadFieldsInput, unknown, LeadFields>({
     resolver: zodResolver(leadFieldsSchema),
@@ -213,9 +224,18 @@ export default function LeadForm(props: LeadFormProps) {
     if (outcome?.status === 'success') successRef.current?.focus();
     else if (outcome) summaryRef.current?.focus();
   }, [outcome]);
+  // Once per submit attempt that fails validation. Not on every change: after a submit, fields
+  // re-validate as you type, and refocusing then would pull focus out of the field being edited.
   useEffect(() => {
-    if (submitCount > 0 && Object.keys(errors).length > 0) summaryRef.current?.focus();
-  }, [submitCount, errors]);
+    if (!focusSummaryAfterSubmit.current) return;
+    focusSummaryAfterSubmit.current = false;
+    summaryRef.current?.focus();
+  }, [submitCount]);
+
+  const onInvalid = () => {
+    // The summary renders with the new errors after this call, so the effect above focuses it.
+    focusSummaryAfterSubmit.current = true;
+  };
 
   const onValid = async () => {
     const form = formRef.current;
@@ -260,7 +280,6 @@ export default function LeadForm(props: LeadFormProps) {
   }
 
   const fieldErrorEntries = FIELD_ORDER.filter((name) => errors[name]?.message).map((name) => [name, errors[name]!.message as string] as const);
-  const description = watch('projectDescription') ?? '';
   const describedBy = (name: string, hint: boolean) => (errors[name as keyof typeof errors] ? `${id(name)}-error` : hint ? `${id(name)}-hint` : undefined);
   const invalid = (name: string) => (errors[name as keyof typeof errors] ? true : undefined);
 
@@ -275,7 +294,7 @@ export default function LeadForm(props: LeadFormProps) {
       method="POST"
       action={props.actionUrl}
       noValidate={hydrated}
-      onSubmit={handleSubmit(onValid)}
+      onSubmit={handleSubmit(onValid, onInvalid)}
       aria-describedby={`${id('required-note')}`}
       className="space-y-6"
     >
@@ -433,9 +452,7 @@ export default function LeadForm(props: LeadFormProps) {
           maxLength={5000}
           {...register('projectDescription')}
         />
-        <p id={id('count')} className="mt-1 text-right font-mono text-[0.75rem] text-ink-muted" aria-live="off">
-          {description.length} / 5000
-        </p>
+        <CharacterCount id={id('count')} control={control} />
       </Field>
 
       <div>
