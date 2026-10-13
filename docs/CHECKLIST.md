@@ -59,4 +59,4 @@ Legend: ✅ implemented and verified here · 🟡 implemented, needs verificatio
 - ⏳ Invoices, client portal, project tracking, support tickets
 - ⏳ n8n workflows, WhatsApp Business integration, AI chatbot / lead qualification, voice AI
 - ⏳ Admin MFA, self-service password reset, image uploads to Supabase Storage (currently https URLs)
-- ⏳ Edge caching of whole public pages (Astro 7 Cloudflare cache provider is experimental). The catalogue data behind them is cached at the edge since 13 Oct 2026.
+- ⏳ Edge caching of whole public pages (Astro 7 Cloudflare cache provider is experimental). The catalogue and portfolio data behind them are cached at the edge since 13 Oct 2026.

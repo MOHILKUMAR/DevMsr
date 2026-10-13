@@ -22,14 +22,18 @@ function publicClientOrNull() {
 }
 
 /**
- * Edge cache for the catalogue: every page needs it, and fetching it from the
- * database on each request was most of the server response time. Cloudflare's
- * Cache API keeps it per data centre for CATALOGUE_CACHE_SECONDS; admin saves
- * clear it (see invalidateCatalogueCache). Only successful database results
- * are cached, never the bundled fallback. Absent in Node (tests): no caching.
+ * Edge cache for public data every visitor sees (the catalogue on every page,
+ * the portfolio on the home page). Fetching them from the database on each
+ * request was most of the server response time. Cloudflare's Cache API keeps
+ * each for PUBLIC_CACHE_SECONDS per data centre; admin saves clear them (see
+ * invalidatePublicCache). Only successful database results are cached, never
+ * bundled fallbacks. Absent in Node (tests): no caching.
  */
-const CATALOGUE_CACHE_KEY = 'https://devmsr.in/__cache/public-catalogue/v1';
-export const CATALOGUE_CACHE_SECONDS = 300;
+const CACHE_KEYS = {
+  catalogue: 'https://devmsr.in/__cache/public-catalogue/v1',
+  portfolio: 'https://devmsr.in/__cache/public-portfolio/v1',
+} as const;
+export const PUBLIC_CACHE_SECONDS = 300;
 
 interface EdgeCache {
   match(key: string): Promise<Response | undefined>;
@@ -41,24 +45,37 @@ function edgeCache(): EdgeCache | null {
   return (globalThis as { caches?: { default?: EdgeCache } }).caches?.default ?? null;
 }
 
-async function readCachedCatalogue(cache: EdgeCache, requestId: string): Promise<Catalogue | null> {
+/** Cached JSON for `key`, passed through `parse`; null on a miss or anything unexpected. */
+async function readCache<T>(key: string, parse: (json: unknown) => T | null, requestId: string): Promise<T | null> {
+  const cache = edgeCache();
+  if (!cache) return null;
   try {
-    const hit = await cache.match(CATALOGUE_CACHE_KEY);
-    if (!hit) return null;
-    const parsed = catalogueResponseSchema.safeParse(await hit.json());
-    return parsed.success ? parsed.data : null;
+    const hit = await cache.match(key);
+    return hit ? parse(await hit.json()) : null;
   } catch (error) {
-    log.warn('catalogue.cache_read_failed', { requestId, error });
+    log.warn('cache.read_failed', { requestId, key, error });
     return null;
   }
+}
+
+/** Stores raw JSON under `key`, after the response when the platform allows it. */
+async function writeCache(locals: App.Locals, key: string, json: unknown): Promise<void> {
+  const cache = edgeCache();
+  if (!cache) return;
+  const response = new Response(JSON.stringify(json), {
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${PUBLIC_CACHE_SECONDS}` },
+  });
+  const write = cache.put(key, response).catch((error: unknown) => log.warn('cache.write_failed', { requestId: locals.requestId, key, error }));
+  const waitUntil = locals.cfContext?.waitUntil?.bind(locals.cfContext);
+  if (waitUntil) waitUntil(write);
+  else await write;
 }
 
 async function fetchCatalogue(locals: App.Locals): Promise<Catalogue> {
   const client = publicClientOrNull();
   if (!client) return buildBundledCatalogue();
 
-  const cache = edgeCache();
-  const cached = cache ? await readCachedCatalogue(cache, locals.requestId) : null;
+  const cached = await readCache(CACHE_KEYS.catalogue, (json) => catalogueResponseSchema.safeParse(json).data ?? null, locals.requestId);
   if (cached) return cached;
 
   try {
@@ -68,16 +85,7 @@ async function fetchCatalogue(locals: App.Locals): Promise<Catalogue> {
     if (!parsed.success) {
       throw new Error(`catalogue shape mismatch: ${parsed.error.issues.slice(0, 3).map((i) => i.path.join('.')).join(', ')}`);
     }
-    if (cache) {
-      const response = new Response(JSON.stringify(data), {
-        headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${CATALOGUE_CACHE_SECONDS}` },
-      });
-      const write = cache.put(CATALOGUE_CACHE_KEY, response).catch((error: unknown) => log.warn('catalogue.cache_write_failed', { requestId: locals.requestId, error }));
-      // Store after responding when the platform allows it.
-      const waitUntil = locals.cfContext?.waitUntil?.bind(locals.cfContext);
-      if (waitUntil) waitUntil(write);
-      else await write;
-    }
+    await writeCache(locals, CACHE_KEYS.catalogue, data);
     return parsed.data;
   } catch (error) {
     log.error('catalogue.fallback', { requestId: locals.requestId, error });
@@ -92,14 +100,18 @@ export function loadCatalogue(locals: App.Locals): Promise<Catalogue> {
 }
 
 /**
- * Clears the cached catalogue in this data centre after an admin change.
- * Other data centres refresh within CATALOGUE_CACHE_SECONDS.
+ * Clears the cached public data in this data centre after an admin change.
+ * Other data centres refresh within PUBLIC_CACHE_SECONDS.
  */
-export async function invalidateCatalogueCache(): Promise<void> {
-  try {
-    await edgeCache()?.delete(CATALOGUE_CACHE_KEY);
-  } catch (error) {
-    log.warn('catalogue.cache_clear_failed', { error });
+export async function invalidatePublicCache(): Promise<void> {
+  const cache = edgeCache();
+  if (!cache) return;
+  for (const key of Object.values(CACHE_KEYS)) {
+    try {
+      await cache.delete(key);
+    } catch (error) {
+      log.warn('cache.clear_failed', { key, error });
+    }
   }
 }
 
@@ -146,16 +158,26 @@ export async function loadCatalogueFreshness(locals: App.Locals): Promise<Catalo
 const PORTFOLIO_COLUMNS =
   'id, slug, title, summary, description, project_type, technology_stack, image_urls, demo_url, repository_url, seo_title, seo_description, published_at, industry_slugs';
 
+const parsePortfolio = (json: unknown): PortfolioProject[] | null => {
+  if (!Array.isArray(json)) return null;
+  const projects = json.map((row) => portfolioRowSchema.safeParse(row));
+  return projects.every((project) => project.success) ? projects.map((project) => project.data!) : null;
+};
+
 export async function loadPortfolio(locals: App.Locals): Promise<PortfolioProject[]> {
   const client = publicClientOrNull();
   if (!client) return buildBundledPortfolio();
+  const cached = await readCache(CACHE_KEYS.portfolio, parsePortfolio, locals.requestId);
+  if (cached) return cached;
   try {
     const { data, error } = await client
       .from('public_portfolio')
       .select(PORTFOLIO_COLUMNS)
       .order('published_at', { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((row) => portfolioRowSchema.parse(row));
+    const projects = (data ?? []).map((row) => portfolioRowSchema.parse(row));
+    await writeCache(locals, CACHE_KEYS.portfolio, data ?? []);
+    return projects;
   } catch (error) {
     log.error('portfolio.fallback', { requestId: locals.requestId, error });
     return buildBundledPortfolio();
