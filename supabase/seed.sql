@@ -233,218 +233,218 @@ insert into public.service_industries (service_id, industry_id) select s.id, i.i
 insert into public.service_industries (service_id, industry_id) select s.id, i.id from public.services s, public.industries i where s.slug = 'crm-systems' and i.slug = 'restaurants' on conflict do nothing;
 
 -- Indicative pricing (amounts are exact numerics)
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Landing page', 'websites', 'range', 3000::numeric, 8000::numeric, false, 'one_time', null, array['Single-page design and build', 'Enquiry form to your email', 'Mobile-responsive layout', 'Basic SEO and social preview']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 10
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Landing page', 'websites', 'range', 3000::numeric, 8000::numeric, false, 'one_time', null, array['Single-page design and build', 'Enquiry form to your email', 'Mobile-responsive layout', 'Basic SEO and social preview']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Page complexity', 'Custom design', 'Copywriting', 'Animations', 'Integrations', 'Form requirements']::text[], 10
 from public.services s
 where s.slug = 'landing-page'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Landing page');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Portfolio website', 'websites', 'range', 5000::numeric, 15000::numeric, false, 'one_time', null, array['Up to 5 pages', 'Project or gallery section', 'Contact form', 'Basic SEO']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 20
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Portfolio website', 'websites', 'range', 5000::numeric, 15000::numeric, false, 'one_time', null, array['Up to 5 pages', 'Project or gallery section', 'Contact form', 'Basic SEO']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Number of pages or projects', 'CMS', 'Case studies', 'Custom interactions']::text[], 20
 from public.services s
 where s.slug = 'portfolio-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Portfolio website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Business website', 'websites', 'range', 8000::numeric, 30000::numeric, false, 'one_time', 'Price depends mainly on page count, content readiness and integrations.', array['5–10 pages', 'Service pages', 'Enquiry form', 'Basic SEO setup', 'Deployment to your domain']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 30
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Business website', 'websites', 'range', 8000::numeric, 30000::numeric, false, 'one_time', 'Price depends mainly on page count, content readiness and integrations.', array['5–10 pages', 'Service pages', 'Enquiry form', 'Basic SEO setup', 'Deployment to your domain']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Page count', 'Content readiness', 'Custom layouts', 'Multilingual support', 'Integrations']::text[], 30
 from public.services s
 where s.slug = 'business-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Business website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Blog website', 'websites', 'range', 8000::numeric, 25000::numeric, false, 'one_time', null, '{}'::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 40
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Blog website', 'websites', 'range', 8000::numeric, 25000::numeric, false, 'one_time', 'The exact CMS and editor scope is confirmed in your quote.', array['Blog structure', 'Article templates', 'Category and tag structure', 'Basic SEO']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['CMS choice', 'Author roles', 'Search', 'Migration', 'Article count', 'Editorial workflows']::text[], 40
 from public.services s
 where s.slug = 'blog-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Blog website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Product showcase', 'websites', 'range', 8000::numeric, 25000::numeric, false, 'one_time', null, '{}'::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 50
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Product showcase', 'websites', 'range', 8000::numeric, 25000::numeric, false, 'one_time', 'Catalogue size is agreed in your quote.', array['Product listing pages', 'Product detail pages', 'Enquiry and contact path']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Product count', 'Variants', 'Filters', 'Search', 'CMS', 'Bulk imports']::text[], 50
 from public.services s
 where s.slug = 'product-showcase-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Product showcase');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Custom footwear/product website', 'websites', 'range', 15000::numeric, 50000::numeric, false, 'one_time', null, '{}'::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 60
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Custom footwear/product website', 'websites', 'range', 15000::numeric, 50000::numeric, false, 'one_time', null, array['Custom product presentation', 'Product catalogue', 'Footwear or product-specific pages as agreed']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Size and colour variants', 'SKU logic', 'Inventory', 'Filters', 'Custom product configurator', 'E-commerce']::text[], 60
 from public.services s
 where s.slug = 'custom-product-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Custom footwear/product website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'E-commerce website', 'websites', 'range', 25000::numeric, 100000::numeric, true, 'one_time', 'Larger catalogues, custom integrations or marketplace features can exceed the upper figure.', array['Store design', 'Catalogue setup for an agreed number of products', 'Cart and checkout', 'Payment gateway integration', 'Order dashboard']::text[], array['Payment gateway transaction fees', 'Shipping provider charges', 'Product photography', 'Hosting and domain', 'GST']::text[], 70
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'E-commerce website', 'websites', 'range', 25000::numeric, 100000::numeric, true, 'one_time', 'Larger catalogues, custom integrations or marketplace features can exceed the upper figure.', array['Store design', 'Catalogue setup for an agreed number of products', 'Cart and checkout', 'Payment gateway integration', 'Order dashboard']::text[], array['Payment gateway transaction fees', 'Shipping provider charges', 'Product photography', 'Hosting and domain', 'GST']::text[], array['Product and variant count', 'Shipping', 'Taxes', 'Discounts', 'Customer accounts', 'Returns', 'Integrations', 'Marketplace requirements']::text[], 70
 from public.services s
 where s.slug = 'ecommerce-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'E-commerce website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Custom web application', 'websites', 'range', 30000::numeric, 150000::numeric, true, 'one_time', 'Quoted after a requirement workshop. Larger systems are delivered in phases.', '{}'::text[], array['Third-party licences and API fees', 'Hosting', 'GST']::text[], 80
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Custom web application', 'websites', 'range', 30000::numeric, 150000::numeric, true, 'one_time', 'Quoted after a requirement workshop. Larger systems are delivered in phases.', array['Requirements workshop to define the scope']::text[], array['Third-party licences and API fees', 'Hosting', 'GST']::text[], array['Roles', 'Workflows', 'Integrations', 'Reporting', 'Data model', 'Security', 'Performance', 'Migration']::text[], 80
 from public.services s
 where s.slug = 'custom-web-application'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Custom web application');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Website redesign', 'websites', 'range', 5000::numeric, 25000::numeric, false, 'one_time', null, '{}'::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 90
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Website redesign', 'websites', 'range', 5000::numeric, 25000::numeric, false, 'one_time', 'Migration and content scope are defined in your quote.', array['Refresh of agreed existing pages and layouts']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Number of pages', 'Legacy framework', 'Content migration', 'Design changes', 'SEO preservation']::text[], 90
 from public.services s
 where s.slug = 'website-redesign'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Website redesign');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'UI/UX design', 'websites', 'range', 5000::numeric, 30000::numeric, false, 'one_time', 'Design only; development is quoted separately.', '{}'::text[], '{}'::text[], 100
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'UI/UX design', 'websites', 'range', 5000::numeric, 30000::numeric, false, 'one_time', 'Design only; development is quoted separately.', '{}'::text[], '{}'::text[], array['Screens', 'Responsive states', 'Prototypes', 'Design system', 'Research and revision rounds']::text[], 100
 from public.services s
 where s.slug = 'ui-ux-design'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'UI/UX design');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Hospital/clinic website', 'healthcare', 'range', 8000::numeric, 20000::numeric, false, 'one_time', null, '{}'::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 110
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Hospital/clinic website', 'healthcare', 'range', 8000::numeric, 20000::numeric, false, 'one_time', 'Final pages are agreed in your quote.', array['Clinic or hospital pages', 'Services and departments', 'Contact and enquiry path']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Doctor profiles', 'Departments', 'Languages', 'Content', 'Appointment integrations']::text[], 110
 from public.services s
 where s.slug = 'hospital-clinic-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Hospital/clinic website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Doctor appointment booking', 'healthcare', 'range', 20000::numeric, 45000::numeric, false, 'one_time', null, array['Slot rules per doctor', 'Online booking page', 'Email confirmations', 'Front-desk view']::text[], array['SMS/WhatsApp message charges', 'Hosting', 'GST']::text[], 120
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Doctor appointment booking', 'healthcare', 'range', 20000::numeric, 45000::numeric, false, 'one_time', null, array['Slot rules per doctor', 'Online booking page', 'Email confirmations', 'Front-desk view']::text[], array['SMS/WhatsApp message charges', 'Hosting', 'GST']::text[], array['Number of doctors or locations', 'Schedule rules', 'Rescheduling', 'Reminders', 'Payments', 'Integrations']::text[], 120
 from public.services s
 where s.slug = 'doctor-appointment-booking'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Doctor appointment booking');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Hospital Management MVP', 'healthcare', 'range', 40000::numeric, 90000::numeric, false, 'one_time', 'MVP scope: registration, OPD, billing and core reports. Further modules are quoted separately.', '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST', 'Regulatory certification']::text[], 130
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Hospital Management MVP', 'healthcare', 'range', 40000::numeric, 90000::numeric, false, 'one_time', 'MVP scope: registration, OPD, billing and core reports. Further modules are quoted separately.', array['Registration', 'OPD', 'Billing', 'Core reports']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST', 'Regulatory certification']::text[], array['Departments', 'Roles', 'Patient workflows', 'Reports', 'Migration', 'Security and audit requirements']::text[], 130
 from public.services s
 where s.slug = 'hospital-management-system'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Hospital Management MVP');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'OPD token management', 'healthcare', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 140
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'OPD token management', 'healthcare', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, array['Token and queue workflow', 'Status views as agreed in scope']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Doctors', 'Counters', 'Live updates', 'Display screens', 'WhatsApp/SMS', 'Multi-location support']::text[], 140
 from public.services s
 where s.slug = 'opd-token-management'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'OPD token management');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Hospital billing system', 'healthcare', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 150
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Hospital billing system', 'healthcare', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, array['Billing workflow', 'Agreed invoice and report features']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Invoice rules', 'Payment modes', 'Discounts', 'Taxes', 'Roles', 'Printer or hardware integration']::text[], 150
 from public.services s
 where s.slug = 'hospital-billing'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Hospital billing system');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Hotel website', 'hospitality', 'range', 8000::numeric, 20000::numeric, false, 'one_time', null, '{}'::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 160
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Hotel website', 'hospitality', 'range', 8000::numeric, 20000::numeric, false, 'one_time', null, array['Hotel pages', 'Room and amenity presentation', 'Enquiry and contact path']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Room categories', 'Galleries', 'Content', 'Languages', 'Booking integrations']::text[], 160
 from public.services s
 where s.slug = 'hotel-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Hotel website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Hotel booking website', 'hospitality', 'range', 20000::numeric, 45000::numeric, false, 'one_time', null, '{}'::text[], array['Payment gateway transaction fees', 'Channel manager subscriptions', 'Hosting and domain', 'GST']::text[], 170
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Hotel booking website', 'hospitality', 'range', 20000::numeric, 45000::numeric, false, 'one_time', null, array['Booking interface', 'Availability and reservation workflow as agreed']::text[], array['Payment gateway transaction fees', 'Channel manager subscriptions', 'Hosting and domain', 'GST']::text[], array['Room types', 'Seasonal rates', 'Payment flow', 'Cancellation rules', 'Channel manager integrations']::text[], 170
 from public.services s
 where s.slug = 'hotel-booking-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Hotel booking website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Hotel Management MVP', 'hospitality', 'range', 40000::numeric, 90000::numeric, false, 'one_time', 'MVP scope: rooms, reservations, check-in/out, billing and reports.', '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 180
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Hotel Management MVP', 'hospitality', 'range', 40000::numeric, 90000::numeric, false, 'one_time', 'MVP scope: rooms, reservations, check-in/out, billing and reports.', array['Rooms', 'Reservations', 'Check-in and check-out', 'Billing', 'Reports']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Room count and workflows', 'Restaurant integration', 'Staff roles', 'Reporting', 'Migration']::text[], 180
 from public.services s
 where s.slug = 'hotel-management-system'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Hotel Management MVP');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Hotel billing system', 'hospitality', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 190
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Hotel billing system', 'hospitality', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, array['Hotel billing', 'Agreed invoice and settlement workflow']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Room and restaurant charges', 'GST invoice needs', 'Split billing', 'Payment modes', 'Hardware']::text[], 190
 from public.services s
 where s.slug = 'hotel-billing-gst-invoices'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Hotel billing system');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Restaurant website/digital menu', 'restaurants', 'range', 5000::numeric, 15000::numeric, false, 'one_time', null, '{}'::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 200
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Restaurant website/digital menu', 'restaurants', 'range', 5000::numeric, 15000::numeric, false, 'one_time', null, array['Restaurant website or mobile-friendly digital menu']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Menu size', 'Categories', 'QR menu', 'Ordering', 'Location pages', 'Content']::text[], 200
 from public.services s
 where s.slug = 'restaurant-website-digital-menu'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Restaurant website/digital menu');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Restaurant POS', 'restaurants', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 210
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Restaurant POS', 'restaurants', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, array['Point-of-sale workflow', 'Agreed billing functions']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Tables', 'Modifiers', 'Kitchen printer or display', 'Inventory', 'Offline needs', 'Hardware']::text[], 210
 from public.services s
 where s.slug = 'restaurant-pos-billing'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Restaurant POS');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Restaurant Management MVP', 'restaurants', 'range', 30000::numeric, 70000::numeric, false, 'one_time', 'MVP scope: POS, kitchen display, menu and basic stock.', '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 220
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Restaurant Management MVP', 'restaurants', 'range', 30000::numeric, 70000::numeric, false, 'one_time', 'MVP scope: POS, kitchen display, menu and basic stock.', array['POS', 'Kitchen display', 'Menu', 'Basic stock']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Multi-branch', 'Recipe costing', 'Delivery', 'Staff roles', 'Supplier management', 'Reports']::text[], 220
 from public.services s
 where s.slug = 'restaurant-management-system'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Restaurant Management MVP');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Retail POS', 'retail', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 230
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Retail POS', 'retail', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, array['Retail billing', 'Agreed sales and stock functions']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Barcode', 'Returns', 'Discounts', 'Inventory', 'Multiple counters or stores', 'Hardware']::text[], 230
 from public.services s
 where s.slug = 'retail-pos-billing'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Retail POS');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Footwear inventory/POS', 'retail', 'range', 25000::numeric, 50000::numeric, false, 'one_time', null, '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 240
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Footwear inventory/POS', 'retail', 'range', 25000::numeric, 50000::numeric, false, 'one_time', null, array['Inventory and POS built around size, colour and SKU variants']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Variant matrix', 'Barcode', 'Purchase orders', 'Stock transfers', 'Multiple stores']::text[], 240
 from public.services s
 where s.slug = 'footwear-inventory'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Footwear inventory/POS');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Jewellery inventory/billing', 'retail', 'range', 30000::numeric, 75000::numeric, false, 'one_time', null, '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 250
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Jewellery inventory/billing', 'retail', 'range', 30000::numeric, 75000::numeric, false, 'one_time', null, array['Jewellery inventory and billing', 'Item attributes agreed in scope']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Weight and purity', 'Making charges', 'Barcode', 'Traceability', 'Purchase and sales', 'Audit reports']::text[], 250
 from public.services s
 where s.slug = 'jewellery-inventory'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Jewellery inventory/billing');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Travel website', 'travel-education', 'range', 8000::numeric, 20000::numeric, false, 'one_time', null, '{}'::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 260
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Travel website', 'travel-education', 'range', 8000::numeric, 20000::numeric, false, 'one_time', null, array['Travel agency website', 'Tour and package presentation']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Packages', 'Itineraries', 'Enquiry forms', 'Destinations', 'Content', 'Languages']::text[], 260
 from public.services s
 where s.slug = 'travel-agency-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Travel website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Travel booking system', 'travel-education', 'range', 30000::numeric, 70000::numeric, false, 'one_time', null, '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 270
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Travel booking system', 'travel-education', 'range', 30000::numeric, 70000::numeric, false, 'one_time', null, array['Booking workflow', 'Reservation management as agreed']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Availability', 'Payments', 'Cancellations', 'Supplier APIs', 'Notifications', 'Dashboards']::text[], 270
 from public.services s
 where s.slug = 'travel-booking-system'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Travel booking system');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Travel CRM', 'travel-education', 'range', 20000::numeric, 45000::numeric, false, 'one_time', null, '{}'::text[], array['Messaging provider charges', 'Hosting', 'GST']::text[], 280
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Travel CRM', 'travel-education', 'range', 20000::numeric, 45000::numeric, false, 'one_time', null, array['Enquiry and customer pipeline', 'Follow-up workflow']::text[], array['Messaging provider charges', 'Hosting', 'GST']::text[], array['Stages', 'Users', 'Reminders', 'Quotation generation', 'Integrations', 'Reporting']::text[], 280
 from public.services s
 where s.slug = 'travel-enquiry-crm'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Travel CRM');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'School website', 'travel-education', 'range', 8000::numeric, 20000::numeric, false, 'one_time', null, '{}'::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], 290
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'School website', 'travel-education', 'range', 8000::numeric, 20000::numeric, false, 'one_time', null, array['School pages', 'Announcements', 'Enquiry and admission contact path']::text[], array['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST']::text[], array['Page count', 'Galleries', 'Calendars', 'Notices', 'Languages', 'Content']::text[], 290
 from public.services s
 where s.slug = 'school-website'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'School website');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'School admission system', 'travel-education', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, '{}'::text[], array['Messaging provider charges', 'Hosting', 'GST']::text[], 300
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'School admission system', 'travel-education', 'range', 15000::numeric, 35000::numeric, false, 'one_time', null, array['Admission enquiry and application workflow', 'Agreed status tracking']::text[], array['Messaging provider charges', 'Hosting', 'GST']::text[], array['Form complexity', 'Document uploads', 'Review stages', 'Notifications', 'Reporting']::text[], 300
 from public.services s
 where s.slug = 'admission-crm'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'School admission system');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'School Management MVP', 'travel-education', 'range', 40000::numeric, 90000::numeric, false, 'one_time', 'MVP scope: students, attendance, fees and receipts.', '{}'::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], 310
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'School Management MVP', 'travel-education', 'range', 40000::numeric, 90000::numeric, false, 'one_time', 'MVP scope: students, attendance, fees and receipts.', array['Students', 'Attendance', 'Fees', 'Receipts']::text[], array['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST']::text[], array['Classes', 'Staff roles', 'Parent access', 'Examinations', 'Messaging', 'Migration']::text[], 310
 from public.services s
 where s.slug = 'school-management-system'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'School Management MVP');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Basic workflow automation', 'ai-integrations-support', 'range', 3000::numeric, 10000::numeric, false, 'one_time', null, '{}'::text[], array['Automation platform plans', 'GST']::text[], 320
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Basic workflow automation', 'ai-integrations-support', 'range', 3000::numeric, 10000::numeric, false, 'one_time', null, array['One simple automation', 'Agreed trigger and actions', 'Failure path']::text[], array['Automation platform plans', 'GST']::text[], array['Number of steps', 'Apps', 'Branching', 'Retries', 'Testing', 'Monitoring']::text[], 320
 from public.services s
 where s.slug = 'workflow-automation'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Basic workflow automation');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Lead automation', 'ai-integrations-support', 'range', 5000::numeric, 20000::numeric, false, 'one_time', null, '{}'::text[], array['Automation platform plans', 'Messaging provider charges', 'GST']::text[], 330
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Lead automation', 'ai-integrations-support', 'range', 5000::numeric, 20000::numeric, false, 'one_time', null, array['Lead capture and routing', 'Agreed notifications or CRM updates']::text[], array['Automation platform plans', 'Messaging provider charges', 'GST']::text[], array['Lead sources', 'Qualification rules', 'Integrations', 'Deduplication', 'Reporting']::text[], 330
 from public.services s
 where s.slug = 'crm-updates-lead-routing'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Lead automation');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'n8n workflow', 'ai-integrations-support', 'range', 5000::numeric, 25000::numeric, false, 'one_time', null, '{}'::text[], array['n8n cloud plan or server hosting', 'GST']::text[], 340
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'n8n workflow', 'ai-integrations-support', 'range', 5000::numeric, 25000::numeric, false, 'one_time', null, array['Workflow built and tested in n8n for an agreed process']::text[], array['n8n cloud plan or server hosting', 'GST']::text[], array['Nodes', 'Branches', 'External APIs', 'Error handling', 'Self-hosting', 'Documentation']::text[], 340
 from public.services s
 where s.slug = 'n8n-workflow-development'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'n8n workflow');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Website FAQ chatbot', 'ai-integrations-support', 'range', 10000::numeric, 30000::numeric, false, 'one_time', null, '{}'::text[], array['AI provider usage charges', 'Messaging provider charges', 'GST']::text[], 350
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Website FAQ chatbot', 'ai-integrations-support', 'range', 10000::numeric, 30000::numeric, false, 'one_time', null, array['FAQ assistant for an agreed knowledge source', 'Agreed handoff path']::text[], array['AI provider usage charges', 'Messaging provider charges', 'GST']::text[], array['Knowledge size', 'Retrieval', 'Admin updates', 'Analytics', 'AI provider and model']::text[], 350
 from public.services s
 where s.slug = 'website-faq-chatbot'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Website FAQ chatbot');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'AI lead qualification', 'ai-integrations-support', 'range', 15000::numeric, 40000::numeric, false, 'one_time', null, '{}'::text[], array['AI provider usage charges', 'Messaging provider charges', 'GST']::text[], 360
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'AI lead qualification', 'ai-integrations-support', 'range', 15000::numeric, 40000::numeric, false, 'one_time', null, array['AI-assisted lead classification or qualification', 'Agreed routing']::text[], array['AI provider usage charges', 'Messaging provider charges', 'GST']::text[], array['Scoring rules', 'CRM integration', 'Evaluation', 'Human review', 'Usage limits']::text[], 360
 from public.services s
 where s.slug = 'lead-qualification-assistant'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'AI lead qualification');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'WhatsApp bot', 'ai-integrations-support', 'range', 10000::numeric, 35000::numeric, false, 'one_time', null, '{}'::text[], array['WhatsApp Business provider and conversation charges', 'AI provider usage charges', 'GST']::text[], 370
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'WhatsApp bot', 'ai-integrations-support', 'range', 10000::numeric, 35000::numeric, false, 'one_time', null, array['WhatsApp workflow or bot for agreed messages and conversation paths']::text[], array['WhatsApp Business provider and conversation charges', 'AI provider usage charges', 'GST']::text[], array['Approved provider', 'Templates', 'Integrations', 'Opt-in', 'Conversation logic']::text[], 370
 from public.services s
 where s.slug = 'whatsapp-business-bot'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'WhatsApp bot');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'AI voice agent', 'ai-integrations-support', 'range', 25000::numeric, 100000::numeric, true, 'one_time', 'Telephony and voice AI usage are billed by the providers and estimated before launch.', '{}'::text[], array['Telephony number rental and per-minute charges', 'Voice AI usage charges', 'GST']::text[], 380
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'AI voice agent', 'ai-integrations-support', 'range', 25000::numeric, 100000::numeric, true, 'one_time', 'Telephony and voice AI usage are billed by the providers and estimated before launch.', array['Voice agent for a defined inbound or outbound use case']::text[], array['Telephony number rental and per-minute charges', 'Voice AI usage charges', 'GST']::text[], array['Call flows', 'Language', 'Telephony', 'Integrations', 'Handoff', 'Testing and compliance']::text[], 380
 from public.services s
 where s.slug = 'inbound-voice-agent'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'AI voice agent');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Payment integration', 'ai-integrations-support', 'range', 5000::numeric, 15000::numeric, false, 'one_time', null, '{}'::text[], array['Gateway account and per-transaction fees', 'GST']::text[], 390
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Payment integration', 'ai-integrations-support', 'range', 5000::numeric, 15000::numeric, false, 'one_time', null, array['Integration with one agreed payment gateway', 'Payment confirmation workflow']::text[], array['Gateway account and per-transaction fees', 'GST']::text[], array['Checkout complexity', 'Refunds', 'Webhooks', 'Subscriptions', 'Reconciliation']::text[], 390
 from public.services s
 where s.slug = 'payment-gateway-integration'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Payment integration');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'API integration', 'ai-integrations-support', 'range', 5000::numeric, 30000::numeric, true, 'one_time', null, '{}'::text[], array['Third-party API fees', 'GST']::text[], 400
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'API integration', 'ai-integrations-support', 'range', 5000::numeric, 30000::numeric, true, 'one_time', null, array['Connection to one agreed external API']::text[], array['Third-party API fees', 'GST']::text[], array['API quality', 'Authentication', 'Rate limits', 'Data mapping', 'Retries', 'Documentation']::text[], 400
 from public.services s
 where s.slug = 'api-webhook-development'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'API integration');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Website maintenance', 'ai-integrations-support', 'range', 1500::numeric, 5000::numeric, false, 'monthly', null, array['Updates and security patches', 'Backups', 'Uptime monitoring', 'Small content changes']::text[], array['Hosting bills', 'New features', 'GST']::text[], 410
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Website maintenance', 'ai-integrations-support', 'range', 1500::numeric, 5000::numeric, false, 'monthly', 'Exact coverage is defined by your plan.', array['Updates and security patches', 'Backups', 'Uptime monitoring', 'Small content changes']::text[], array['Hosting bills', 'New features', 'GST']::text[], array['Response time', 'Update frequency', 'Backup retention', 'Included support hours']::text[], 410
 from public.services s
 where s.slug = 'website-maintenance'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Website maintenance');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Application maintenance', 'ai-integrations-support', 'range', 5000::numeric, 15000::numeric, true, 'monthly', null, '{}'::text[], array['Hosting bills', 'New features beyond plan hours', 'GST']::text[], 420
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Application maintenance', 'ai-integrations-support', 'range', 5000::numeric, 15000::numeric, true, 'monthly', null, array['Ongoing application maintenance', 'Agreed support scope']::text[], array['Hosting bills', 'New features beyond plan hours', 'GST']::text[], array['Application complexity', 'Support hours', 'SLA', 'Monitoring', 'Dependency updates']::text[], 420
 from public.services s
 where s.slug = 'application-maintenance'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Application maintenance');
-insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, 'Hosting/deployment setup', 'ai-integrations-support', 'range', 2000::numeric, 10000::numeric, false, 'one_time', null, '{}'::text[], array['Hosting provider bills', 'Domain renewal', 'GST']::text[], 430
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Hosting/deployment setup', 'ai-integrations-support', 'range', 2000::numeric, 10000::numeric, false, 'one_time', null, array['Deployment setup for an agreed hosting environment', 'Handover']::text[], array['Hosting provider bills', 'Domain renewal', 'GST']::text[], array['Environment count', 'DNS', 'CI/CD', 'Server setup', 'Monitoring', 'Rollback requirements']::text[], 430
 from public.services s
 where s.slug = 'hosting-deployment'
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Hosting/deployment setup');

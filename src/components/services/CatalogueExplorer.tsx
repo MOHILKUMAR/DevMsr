@@ -38,6 +38,7 @@ export interface ExplorerPrice {
   note: string | null;
   included: string[];
   excluded: string[];
+  factors: string[];
   taxInclusive: boolean;
   estimatedDelivery: string | null;
   category: string;
@@ -307,6 +308,21 @@ export default function CatalogueExplorer(props: Props) {
                                 {price.excluded.map((item) => (
                                   <li key={item} className="flex gap-2">
                                     <span aria-hidden="true">–</span>
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {price.factors.length > 0 && (
+                            <div className="sm:col-span-2">
+                              <p className="text-eyebrow mb-2">What can increase the price</p>
+                              <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-ink-muted">
+                                {price.factors.map((item) => (
+                                  <li key={item} className="flex gap-1.5">
+                                    <span aria-hidden="true" className="text-clay-ink">
+                                      ↑
+                                    </span>
                                     {item}
                                   </li>
                                 ))}

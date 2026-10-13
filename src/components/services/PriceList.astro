@@ -4,8 +4,8 @@ import { priceLabel, serviceMap } from '../../lib/catalogue/queries';
 import type { Catalogue, ServicePrice } from '../../types/catalogue';
 
 /**
- * Typeset price list. Each row expands to show inclusions, exclusions and
- * notes when `detailed` is set.
+ * Typeset price list. Each row expands to show inclusions, exclusions, what
+ * can increase the price and notes when `detailed` is set.
  */
 interface Props {
   catalogue: Catalogue;
@@ -24,7 +24,7 @@ const services = serviceMap(catalogue);
       {prices.map((price) => {
         const label = priceLabel(price, services);
         const formatted = formatPrice(price);
-        const hasDetail = detailed && (price.includedFeatures.length > 0 || price.excludedFeatures.length > 0 || price.priceNote || price.estimatedDelivery);
+        const hasDetail = detailed && (price.includedFeatures.length > 0 || price.excludedFeatures.length > 0 || price.priceFactors.length > 0 || price.priceNote || price.estimatedDelivery);
         return (
           <li class="border-b border-line">
             {hasDetail ? (
@@ -50,6 +50,14 @@ const services = serviceMap(catalogue);
                       <p class="text-eyebrow mb-2">Not included</p>
                       <ul class="space-y-1.5 text-ink-muted">
                         {price.excludedFeatures.map((item) => <li class="flex gap-2"><span aria-hidden="true">–</span>{item}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {price.priceFactors.length > 0 && (
+                    <div class="sm:col-span-2">
+                      <p class="text-eyebrow mb-2">What can increase the price</p>
+                      <ul class="flex flex-wrap gap-x-4 gap-y-1.5 text-ink-muted">
+                        {price.priceFactors.map((item) => <li class="flex gap-1.5"><span aria-hidden="true" class="text-clay-ink">↑</span>{item}</li>)}
                       </ul>
                     </div>
                   )}

@@ -233,6 +233,7 @@ export interface PricingRow {
   price_note: string | null;
   included_features: string[];
   excluded_features: string[];
+  price_factors: string[];
   estimated_delivery: string | null;
   tax_inclusive: boolean;
   sort_order: number;
@@ -247,7 +248,7 @@ export async function listPricing(db: SupabaseClient): Promise<PricingRow[]> {
     await db
       .from('service_pricing')
       .select(
-        'id, service_id, label, display_group, pricing_model, minimum_amount::text, maximum_amount::text, max_open_ended, currency, billing_interval, price_note, included_features, excluded_features, estimated_delivery, tax_inclusive, sort_order, is_active, updated_at, services(name, slug, is_active)',
+        'id, service_id, label, display_group, pricing_model, minimum_amount::text, maximum_amount::text, max_open_ended, currency, billing_interval, price_note, included_features, excluded_features, price_factors, estimated_delivery, tax_inclusive, sort_order, is_active, updated_at, services(name, slug, is_active)',
       )
       .order('display_group')
       .order('sort_order'),

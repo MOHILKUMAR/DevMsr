@@ -112,6 +112,7 @@ export const pricingSchema = z
     priceNote: optionalText(500),
     includedFeatures: lines(30, 200),
     excludedFeatures: lines(30, 200),
+    priceFactors: lines(30, 200),
     estimatedDelivery: optionalText(120),
     taxInclusive: checkbox,
     sortOrder: integerField(-10000, 100000),

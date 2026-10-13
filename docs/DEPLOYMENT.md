@@ -32,6 +32,12 @@ Target: **Cloudflare Workers** (static assets + server rendering in one Worker),
    `SEND_LEAD_ACKNOWLEDGEMENT` is a plain variable in `wrangler.jsonc`.
 4. Redeploy (`npm run deploy`) so the new secrets are used.
 
+## Releases that add a migration
+
+When a release adds a file to `supabase/migrations/`, run that file in the Supabase SQL Editor **before** `npm run deploy`. Migrations are written so the site that is already running keeps working with them (new columns have defaults, and the site ignores fields it does not know), and backfills only fill empty values, so they are safe to run more than once. Then deploy, and check the change on the live site.
+
+Example: `20261013000004_pricing_detail.sql` adds “what can increase the price” to every price and fills in the scope and notes from the owner's Service Pricing Master.
+
 ## Preview → verify → approve
 
 1. `npm run deploy:preview` uploads a new version without routing traffic to it and prints a preview URL.

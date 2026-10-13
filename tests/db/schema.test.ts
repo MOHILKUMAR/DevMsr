@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createTestDb, createUser, leadPayload, type TestDb } from './harness';
 import { SERVICE_SEED } from '../../src/data/seed/services';
@@ -78,6 +80,17 @@ describe('public catalogue (anon)', () => {
     expect(catalogue.services).toHaveLength(SERVICE_SEED.length);
     const ecommerce = catalogue.pricing.find((p) => p.service_slug === 'ecommerce-website');
     expect(ecommerce).toMatchObject({ minimum_amount: '25000.00', maximum_amount: '100000.00' });
+  });
+
+  it('returns what can increase each price', async () => {
+    const pricing = await t.as('anon', null, async (tx) => {
+      const { rows } = await tx.query<{ c: { pricing: { service_slug: string; price_factors: string[] }[] } }>('select public.get_public_catalogue() as c');
+      return rows[0]!.c.pricing;
+    });
+    expect(pricing).toHaveLength(PRICING_SEED.length);
+    for (const price of pricing) expect(price.price_factors.length, price.service_slug).toBeGreaterThan(0);
+    const landing = PRICING_SEED.find((row) => row.serviceSlug === 'landing-page')!;
+    expect(pricing.find((p) => p.service_slug === 'landing-page')?.price_factors).toEqual(landing.factors);
   });
 
   it('hides inactive services and their prices', async () => {
@@ -392,5 +405,42 @@ describe('admin helper functions', () => {
         tx.query(`select public.record_notification_event($1, 'owner_new_lead', 'x', 'sent', 1, null, null, null)`, [lead_id]),
       ),
     ).rejects.toThrow(/permission denied/);
+  });
+});
+
+describe('pricing detail migration (20261013000004)', () => {
+  const migration = readFileSync(join(import.meta.dirname, '..', '..', 'supabase/migrations/20261013000004_pricing_detail.sql'), 'utf8');
+  const priceOf = async (slug: string) =>
+    (
+      await t.db.query<{ price_factors: string[]; included_features: string[]; price_note: string | null }>(
+        'select p.price_factors, p.included_features, p.price_note from public.service_pricing p join public.services s on s.id = p.service_id where s.slug = $1',
+        [slug],
+      )
+    ).rows[0]!;
+
+  const setFactors = (slug: string, value: string[]) =>
+    t.db.query('update public.service_pricing p set price_factors = $2 from public.services s where s.id = p.service_id and s.slug = $1', [slug, value]);
+
+  it('fills empty values on an existing database and keeps edited ones', async () => {
+    const blog = PRICING_SEED.find((row) => row.serviceSlug === 'blog-website')!;
+    const landing = PRICING_SEED.find((row) => row.serviceSlug === 'landing-page')!;
+    // As on a database seeded before this change: no factors, no scope, no note.
+    await t.db.query(
+      `update public.service_pricing p set price_factors = '{}', included_features = '{}', price_note = null from public.services s where s.id = p.service_id and s.slug = 'blog-website'`,
+    );
+    // A value the owner already edited in the admin.
+    await setFactors('landing-page', ['Owner wording']);
+
+    await t.db.exec(migration);
+    await t.db.exec(migration); // safe to run twice
+
+    expect(await priceOf('blog-website')).toEqual({ price_factors: blog.factors, included_features: blog.included, price_note: blog.note });
+    expect((await priceOf('landing-page')).price_factors).toEqual(['Owner wording']);
+    await setFactors('landing-page', landing.factors!);
+  });
+
+  it('limits factors to 30 items of up to 200 characters', async () => {
+    await expect(setFactors('blog-website', Array.from({ length: 31 }, (_, i) => `Factor ${i}`))).rejects.toThrow();
+    await expect(setFactors('blog-website', ['x'.repeat(201)])).rejects.toThrow();
   });
 });

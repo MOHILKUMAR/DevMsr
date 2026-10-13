@@ -79,7 +79,7 @@ describe('catalogue integrity', () => {
         id: p.id, service_slug: p.serviceSlug, label: p.label, display_group: p.displayGroup, pricing_model: p.pricingModel,
         minimum_amount: p.minimumAmount, maximum_amount: p.maximumAmount, max_open_ended: p.maxOpenEnded, currency: p.currency,
         billing_interval: p.billingInterval, price_note: p.priceNote, included_features: p.includedFeatures, excluded_features: p.excludedFeatures,
-        estimated_delivery: null, tax_inclusive: false, sort_order: p.sortOrder,
+        price_factors: p.priceFactors, estimated_delivery: null, tax_inclusive: false, sort_order: p.sortOrder,
       })),
       products: [],
       faqs: [],
@@ -88,5 +88,10 @@ describe('catalogue integrity', () => {
     const parsed = catalogueResponseSchema.parse(asDb);
     expect(parsed.pricing).toEqual(bundled.pricing);
     expect(parsed.services).toEqual(bundled.services);
+    expect(parsed.pricing.every((price) => price.priceFactors.length > 0)).toBe(true);
+
+    // A database without the price_factors migration still parses, with no factors.
+    const withoutFactors = { ...asDb, pricing: asDb.pricing.map(({ price_factors: _omit, ...row }) => row) };
+    expect(catalogueResponseSchema.parse(withoutFactors).pricing.every((price) => price.priceFactors.length === 0)).toBe(true);
   });
 });

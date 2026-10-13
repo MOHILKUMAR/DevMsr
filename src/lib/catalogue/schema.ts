@@ -66,6 +66,8 @@ const priceRow = z.object({
   price_note: nullableText,
   included_features: textArray,
   excluded_features: textArray,
+  // Optional: databases without migration 20261013000004 do not return it.
+  price_factors: textArray.optional().transform((value) => value ?? []),
   estimated_delivery: nullableText,
   tax_inclusive: z.boolean(),
   sort_order: z.number().int(),
@@ -158,6 +160,7 @@ export const catalogueResponseSchema = z
         priceNote: row.price_note,
         includedFeatures: row.included_features,
         excludedFeatures: row.excluded_features,
+        priceFactors: row.price_factors,
         estimatedDelivery: row.estimated_delivery,
         taxInclusive: row.tax_inclusive,
         sortOrder: row.sort_order,

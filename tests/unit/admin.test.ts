@@ -16,6 +16,7 @@ describe('admin pricing form', () => {
     minimumAmount: '25,000',
     maximumAmount: '100000',
     includedFeatures: 'A\nB\n\nA',
+    priceFactors: 'Page count\n Integrations \n',
     sortOrder: '10',
     isActive: 'on',
   };
@@ -26,6 +27,7 @@ describe('admin pricing form', () => {
     expect(parsed.maximumAmount).toBe('100000.00');
     expect(parsed.currency).toBe('INR');
     expect(parsed.includedFeatures).toEqual(['A', 'B']);
+    expect(parsed.priceFactors).toEqual(['Page count', 'Integrations']);
     expect(parsed.isActive).toBe(true);
     expect(parsed.taxInclusive).toBe(false);
   });

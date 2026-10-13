@@ -59,8 +59,8 @@ out();
 out('-- Indicative pricing (amounts are exact numerics)');
 PRICING_SEED.forEach((row, index) => {
   out(
-    `insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, sort_order)
-select s.id, ${q(row.label)}, ${q(row.group)}, ${q(row.model ?? 'range')}, ${row.min === null ? 'null' : `${row.min}::numeric`}, ${row.max === null ? 'null' : `${row.max}::numeric`}, ${bool(row.maxOpenEnded ?? false)}, ${q(row.interval ?? 'one_time')}, ${q(row.note)}, ${arr(row.included)}, ${arr(row.excluded)}, ${(index + 1) * 10}
+    `insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, ${q(row.label)}, ${q(row.group)}, ${q(row.model ?? 'range')}, ${row.min === null ? 'null' : `${row.min}::numeric`}, ${row.max === null ? 'null' : `${row.max}::numeric`}, ${bool(row.maxOpenEnded ?? false)}, ${q(row.interval ?? 'one_time')}, ${q(row.note)}, ${arr(row.included)}, ${arr(row.excluded)}, ${arr(row.factors)}, ${(index + 1) * 10}
 from public.services s
 where s.slug = ${q(row.serviceSlug)}
   and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = ${q(row.label)});`,
