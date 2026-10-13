@@ -14,13 +14,16 @@ export const BUSINESS = {
     /** ISO 3166-1 alpha-2. */
     country: 'IN',
     countryName: 'India',
-    /** Not provided yet; omitted from structured data until it is. */
-    postalCode: null as string | null,
+    /** Confirmed by the owner on 13 Oct 2026. */
+    postalCode: '122004' as string | null,
   },
   /** One line for pages that mention where the business is based. */
   basedIn: 'Based in Gurugram, working with businesses across Delhi NCR and India',
 } as const;
 
-export const BUSINESS_ADDRESS_LINE = [BUSINESS.address.street, BUSINESS.address.locality, BUSINESS.address.region, BUSINESS.address.postalCode]
-  .filter(Boolean)
-  .join(', ');
+/** e.g. "Alt.f Coworking – Orchid Business Park, Near Subhash Chowk, Gurugram, Haryana 122004". */
+export const BUSINESS_ADDRESS_LINE = [
+  BUSINESS.address.street,
+  BUSINESS.address.locality,
+  [BUSINESS.address.region, BUSINESS.address.postalCode].filter(Boolean).join(' '),
+].join(', ');

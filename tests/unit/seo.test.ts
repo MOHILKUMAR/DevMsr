@@ -45,7 +45,7 @@ describe('structured data', () => {
       telephone: '+918077108275',
       email: 'hello@example.com',
       priceRange: '₹2,000–₹1,50,000+',
-      address: { '@type': 'PostalAddress', addressLocality: 'Gurugram', addressRegion: 'Haryana', addressCountry: 'IN' },
+      address: { '@type': 'PostalAddress', addressLocality: 'Gurugram', addressRegion: 'Haryana', addressCountry: 'IN', postalCode: '122004' },
       openingHoursSpecification: [{ opens: '10:00', closes: '19:00' }],
     });
     expect(BUSINESS_ADDRESS_LINE).toContain('Orchid Business Park');
