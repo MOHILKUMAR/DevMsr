@@ -10,6 +10,8 @@ import { loadCatalogue } from '../lib/catalogue/repository';
 import { buildExplorerPrices, explorerOptions, readExplorerFilters } from '../lib/catalogue/explorer';
 import { faqsFor } from '../lib/catalogue/queries';
 import { breadcrumbJsonLd, compact, faqJsonLd } from '../lib/seo';
+import { PRICING_LEVELS, QUOTE_STEPS, QUOTE_TRIGGERS } from '../data/pricing-guide';
+import { MILESTONES } from '../data/payment-terms';
 
 const catalogue = await loadCatalogue(Astro.locals);
 const options = explorerOptions(catalogue);
@@ -23,6 +25,8 @@ const SEPARATE_COSTS = [
   { item: 'Payment gateway fees', note: 'A percentage per transaction, charged by the gateway.' },
   { item: 'SMS / WhatsApp charges', note: 'Per message or conversation, charged by the provider.' },
   { item: 'AI usage', note: 'Charged by the AI provider based on usage; estimated before launch.' },
+  { item: 'Hardware', note: 'Printers, scanners, barcode readers, POS terminals, display screens and networking equipment.' },
+  { item: 'Licences and paid assets', note: 'Paid stock photos, premium fonts, commercial templates, third-party licences and API subscriptions.' },
 ];
 ---
 
@@ -48,6 +52,7 @@ const SEPARATE_COSTS = [
           <li>A <strong class="font-medium text-ink">“+”</strong> means larger projects in that category can cost more.</li>
           <li><strong class="font-medium text-ink">/month</strong> prices are recurring; everything else is one-time.</li>
           <li>Third-party charges are billed by those providers, separately.</li>
+          <li>Projects are paid in milestones: <a class="link-olive" href="/payments">see how payments work</a>.</li>
         </ul>
       </aside>
     </div>
@@ -64,6 +69,59 @@ const SEPARATE_COSTS = [
       categories={options.categories}
       initialFilters={initialFilters}
     />
+  </section>
+
+  <section class="border-t border-line" aria-labelledby="levels-title">
+    <div class="page-container section-space">
+      <SectionHeader
+        id="levels-title"
+        eyebrow="Reading the range"
+        title="Where your project sits in the range."
+        intro="Each range covers simple to complex versions of the same service. Your scope decides where your quote lands."
+      />
+      <ol class="mt-10 grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+        {
+          PRICING_LEVELS.map((level) => (
+            <li class="flex flex-col bg-surface p-5">
+              <h3 class="font-medium text-ink">{level.name}</h3>
+              <p class="text-small mt-2 text-ink">{level.situation}</p>
+              <p class="text-small mt-3 font-medium text-olive">{level.position}</p>
+              <p class="text-small mt-auto pt-3 text-ink-muted">For example: {level.examples}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="page-container pb-16" aria-labelledby="quote-title">
+    <div class="grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-6">
+        <SectionHeader id="quote-title" eyebrow="Your quote" title="How we work out your quote." intro="You receive one clear written figure, with the assumptions behind it." />
+        <ol class="mt-8 space-y-4">
+          {
+            QUOTE_STEPS.map((step, index) => (
+              <li class="flex gap-4">
+                <span class="font-mono text-[0.75rem] leading-6 text-clay-ink">{String(index + 1).padStart(2, '0')}</span>
+                <span>
+                  <span class="block font-medium text-ink">{step.title}</span>
+                  <span class="text-small block text-ink-muted">{step.body}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+      <div class="lg:col-span-6">
+        <SectionHeader id="raise-title" eyebrow="Higher quotes" title="What can raise a quote." intro="A quote goes up only when the work, risk, support or delivery cost goes up. We explain why and get your approval before any extra work." />
+        <ul class="mt-8 space-y-2.5 text-ink">
+          {QUOTE_TRIGGERS.map((trigger) => <li class="flex gap-2"><span aria-hidden="true" class="text-clay-ink">↑</span>{trigger}</li>)}
+        </ul>
+        <p class="text-small mt-6 text-ink-muted">
+          Changes requested during a project follow our <a class="link-olive" href="/payments#changes-title">change-request terms</a>.
+        </p>
+      </div>
+    </div>
   </section>
 
   <section class="border-y border-line bg-surface" aria-labelledby="separate-title">
@@ -89,8 +147,30 @@ const SEPARATE_COSTS = [
     </div>
   </section>
 
-  <section class="page-container section-space" aria-labelledby="pricing-faq-title">
+  <section class="page-container section-space" aria-labelledby="paying-title">
     <div class="grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHeader id="paying-title" eyebrow="Payments" title="Paying for a project." />
+        <p class="mt-4 text-ink-muted">
+          Most projects are paid in three milestones. Visit fees, change requests and invoice terms are on the <a class="link-olive" href="/payments">payments page</a>.
+        </p>
+      </div>
+      <ol class="grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-3 lg:col-span-8">
+        {
+          MILESTONES.map((milestone) => (
+            <li class="bg-surface p-5">
+              <span class="tabular block font-display text-[2rem] leading-none text-ink">{milestone.percent}%</span>
+              <span class="mt-2 block font-medium text-ink">{milestone.name}</span>
+              <span class="text-small mt-1 block text-ink-muted">{milestone.due}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="border-t border-line" aria-labelledby="pricing-faq-title">
+    <div class="page-container section-space grid gap-10 lg:grid-cols-12">
       <div class="lg:col-span-4">
         <SectionHeader id="pricing-faq-title" eyebrow="Questions" title="About pricing" />
         <p class="mt-4 text-ink-muted">

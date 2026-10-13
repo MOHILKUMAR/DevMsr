@@ -26,6 +26,7 @@ const ROUTES = [
   '/products',
   '/products/lead-desk',
   '/pricing',
+  '/payments',
   '/portfolio',
   '/portfolio/devmsr-website-and-lead-desk',
   '/about',
@@ -69,7 +70,7 @@ test('unknown pages and slugs return 404 with a helpful page', async ({ page }) 
 });
 
 test('key pages have no serious accessibility violations (axe, WCAG 2.2 AA)', async ({ page }) => {
-  for (const path of ['/', '/industries/healthcare', '/services/pos-billing', '/pricing', '/request-quote', '/blog/what-decides-the-cost-of-business-software']) {
+  for (const path of ['/', '/industries/healthcare', '/services/pos-billing', '/pricing', '/payments', '/request-quote', '/blog/what-decides-the-cost-of-business-software']) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
     const serious = results.violations.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
@@ -79,7 +80,7 @@ test('key pages have no serious accessibility violations (axe, WCAG 2.2 AA)', as
 
 test('dark mode also passes axe colour contrast', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
-  for (const path of ['/', '/pricing', '/request-quote']) {
+  for (const path of ['/', '/pricing', '/payments', '/request-quote']) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
     expect(results.violations.map((violation) => `${path}: ${violation.nodes.length} nodes`)).toEqual([]);
@@ -96,7 +97,7 @@ test('sitemap lists every public route and robots.txt points to it', async ({ re
 });
 
 test('structured data is valid JSON and never claims ratings or reviews', async ({ page }) => {
-  for (const path of ['/', '/industries/healthcare', '/pricing', '/blog/what-decides-the-cost-of-business-software']) {
+  for (const path of ['/', '/industries/healthcare', '/pricing', '/payments', '/blog/what-decides-the-cost-of-business-software']) {
     await page.goto(path);
     const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
     expect(blocks.length).toBeGreaterThan(0);
@@ -106,3 +107,29 @@ test('structured data is valid JSON and never claims ratings or reviews', async 
     }
   }
 });
+
+test('each price explains what can increase it, and pricing links to the payment terms', async ({ page }) => {
+  await page.goto('/pricing');
+  await settle(page);
+  const landing = page.locator('details', { has: page.getByText('Landing page', { exact: true }) }).first();
+  await landing.locator('summary').click();
+  await expect(landing.getByText('What can increase the price')).toBeVisible();
+  await expect(landing.getByText('Page complexity')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Where your project sits in the range.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'What can raise a quote.' })).toBeVisible();
+  await page.getByRole('link', { name: 'payments page' }).click();
+  await expect(page).toHaveURL(/\/payments$/);
+});
+
+test('payments page sets out milestones, visit fees and change requests', async ({ page }) => {
+  await page.goto('/payments');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('How payments work.');
+  for (const name of ['Booking and kickoff', 'Working demo', 'Final handover']) await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+  await expect(page.getByText('₹20,000 to book, ₹12,000 at the working demo, ₹8,000 before handover', { exact: false })).toBeVisible();
+  await expect(page.getByText('₹1,000 per visit', { exact: true })).toBeVisible();
+  await expect(page.getByText('Changes up to ₹5,000', { exact: true })).toBeVisible();
+  const faq = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((block) => JSON.parse(block) as { '@type'?: string; mainEntity?: unknown[] }).find((data) => data['@type'] === 'FAQPage');
+  expect(faq?.mainEntity?.length).toBe(7);
+  await expect(page.getByRole('banner').getByRole('link', { name: 'Payments', exact: true })).toBeVisible();
+});
+
