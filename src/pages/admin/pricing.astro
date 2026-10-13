@@ -43,7 +43,7 @@ const priceText = (row: (typeof prices)[number]) =>
 ---
 
 <AdminLayout title="Pricing">
-  <PageHeader title="Pricing" description="Indicative prices shown on the public website. Changes appear immediately. Amounts are stored as exact decimals.">
+  <PageHeader title="Pricing" description="Indicative prices shown on the public website. Changes appear on the website within about 5 minutes. Amounts are stored as exact decimals.">
     <a href="/admin/pricing?new=1" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-invert px-4 py-2 text-sm font-medium text-invert-ink"><Plus size={15} aria-hidden="true" /> Add price</a>
     <a href="/pricing" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] border border-line-strong px-4 py-2 text-sm text-ink"><ExternalLink size={14} aria-hidden="true" /> View public page</a>
   </PageHeader>

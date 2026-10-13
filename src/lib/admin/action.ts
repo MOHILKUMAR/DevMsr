@@ -4,6 +4,7 @@ import type { z } from 'zod';
 import { can, type AdminContext, type Capability } from '../auth/types';
 import { log } from '../server/logger';
 import { formToObject } from './form';
+import { invalidateCatalogueCache } from '../catalogue/repository';
 
 /**
  * Wrapper for every admin mutation. In order:
@@ -12,6 +13,8 @@ import { formToObject } from './form';
  *   3. Validate — the form is parsed with an explicit Zod schema.
  *   4. Execute — via the admin's own Supabase session, so RLS also applies.
  *   5. Return a typed result; database errors become safe messages.
+ *   6. After a successful change to anything public (all but leads), clear
+ *      the cached public catalogue so the website picks it up.
  */
 
 export type AdminResult =
@@ -47,7 +50,9 @@ export function defineAdminAction<S extends z.ZodType>(options: {
       }
 
       try {
-        return await options.handler(parsed.data, { admin, db, action: context });
+        const result = await options.handler(parsed.data, { admin, db, action: context });
+        if (result.ok && options.capability !== 'leads') await invalidateCatalogueCache();
+        return result;
       } catch (error) {
         log.error('admin.action_failed', { requestId: context.locals.requestId, actor: admin.profileId, error });
         return { ok: false, message: describeDatabaseError(error), values: raw };

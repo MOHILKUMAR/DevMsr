@@ -197,7 +197,7 @@ const pricing = {
       };
       if (input.id) {
         const rows = check(await db.from('service_pricing').update(row).eq('id', input.id).select('id'));
-        return changed(rows) ? { ok: true, message: 'Price saved. The website shows it immediately.', id: input.id } : NOT_FOUND;
+        return changed(rows) ? { ok: true, message: 'Price saved. The website shows it within about 5 minutes.', id: input.id } : NOT_FOUND;
       }
       const created = check(await db.from('service_pricing').insert(row).select('id').single()) as { id: string };
       return { ok: true, message: 'Price created.', id: created.id, notice: 'created' };
