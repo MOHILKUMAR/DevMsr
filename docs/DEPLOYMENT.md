@@ -50,8 +50,8 @@ Target: **Cloudflare Workers** (static assets + server rendering in one Worker),
 1. ✅ Custom domains `devmsr.in` and `www.devmsr.in` added through `routes` in `wrangler.jsonc`; Cloudflare created the DNS records and certificates.
 2. ✅ `www` → apex and http → https redirects (301) handled by the middleware.
 3. **You:** turn on *SSL/TLS → Edge Certificates → Always Use HTTPS* for the zone, so static files are also redirected to https (pages already are).
-4. Update Turnstile hostnames and set Supabase *Authentication → URL Configuration → Site URL* to `https://devmsr.in`.
-5. In GitHub, set variable `SITE_URL=https://devmsr.in` and secret `CRON_SECRET` to enable the daily health ping and notification retries.
+4. ✅ Turnstile widget "devmsr.in lead forms" covers devmsr.in, www.devmsr.in and the workers.dev preview (add any new hostname in *Turnstile → widget → Hostname management*). **You:** set Supabase *Authentication → URL Configuration → Site URL* to `https://devmsr.in`.
+5. ✅ GitHub variable `SITE_URL=https://devmsr.in` and secret `CRON_SECRET` (same value as the Worker secret) are set; `scheduled.yml` runs daily at 09:00 IST.
 6. Submit `https://devmsr.in/sitemap.xml` in Google Search Console.
 
 No existing DNS record needs to be deleted.

@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
+import { settle } from './helpers';
 
 const PAGES = ['/', '/industries/retail-jewellery-footwear', '/services/management-systems', '/pricing', '/request-quote', '/products', '/admin/login'];
 
 for (const path of PAGES) {
   test(`${path} has no horizontal overflow`, async ({ page }) => {
     await page.goto(path);
-    await page.waitForLoadState('networkidle');
+    await settle(page);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
   });
@@ -13,6 +14,7 @@ for (const path of PAGES) {
 
 test('pricing explorer filters instantly and updates the URL', async ({ page }) => {
   await page.goto('/pricing');
+  await settle(page);
   await page.getByLabel('Industry').selectOption('healthcare');
   await expect(page).toHaveURL(/industry=healthcare/);
   await expect(page.getByText('OPD token management', { exact: true })).toBeVisible();
