@@ -13,6 +13,7 @@ import PriceList from '../../components/services/PriceList.astro';
 import ProductList from '../../components/services/ProductList.astro';
 import ProcessSteps from '../../components/home/ProcessSteps.astro';
 import { getIndustryContent } from '../../data/industries';
+import { BUSINESS } from '../../data/business';
 import { loadCatalogue } from '../../lib/catalogue/repository';
 import {
   faqsFor,
@@ -86,6 +87,7 @@ const path = `/industries/${slug}`;
         <p class="text-small mt-6 text-ink-muted">
           {industryServices.length} services · {lowest ? `${formatFromPrice(lowest)}, GST extra` : 'Quoted after a short scoping call'}
         </p>
+        <p class="text-small mt-1 text-ink-muted">{BUSINESS.basedIn}.</p>
       </div>
       <div class="lg:col-span-5">
         <IndustryPreview kind={content.preview} />
@@ -203,7 +205,8 @@ const path = `/industries/${slug}`;
         <h2 class="text-h3 mb-4">Indicative pricing</h2>
         <PriceList catalogue={catalogue} prices={prices} detailed />
         <p class="text-small mt-4 text-ink-muted">
-          Starting estimates, not final quotes. GST extra. <a href="/pricing" class="link-olive">See the full price list</a>.
+          Starting estimates, not final quotes. GST extra. <a href="/pricing" class="link-olive">See the full price list</a> or
+          <a href="/payments" class="link-olive">how payments work</a>.
         </p>
       </div>
     </div>

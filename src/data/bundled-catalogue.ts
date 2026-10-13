@@ -136,5 +136,6 @@ export function buildBundledBlogPosts(): BlogPost[] {
     seoTitle: null,
     seoDescription: null,
     publishedAt: post.publishedAt,
+    updatedAt: post.publishedAt,
   }));
 }

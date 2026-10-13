@@ -91,7 +91,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     caution:
       'Medical-record features are built to your clinical and legal requirements. We do not claim certification or regulatory compliance for any system unless that review has been completed for your deployment.',
     preview: 'opd-token',
-    seoTitle: 'Hospital & Clinic Software, OPD Token and Appointment Systems',
+    seoTitle: 'Hospital & Clinic Software, OPD & Appointments',
     seoDescription:
       'Hospital management systems, clinic software, OPD token queues, appointment booking and hospital websites. Indicative prices in INR.',
   },
@@ -144,7 +144,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     ],
     integrations: ['Payment gateway for advance payments', 'Email and approved WhatsApp booking confirmations', 'Google Maps and Business Profile links', 'Channel manager connection (scoped per provider)', 'Export to accounting software'],
     preview: 'room-board',
-    seoTitle: 'Hotel Websites, Booking Engines and Hotel Management Systems',
+    seoTitle: 'Hotel Management Software & Booking Websites',
     seoDescription:
       'Hotel websites with direct booking, reservation and front-desk software, housekeeping tracking and GST billing. Indicative prices in INR.',
   },
@@ -202,7 +202,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     ],
     integrations: ['UPI and card payment gateways', 'Thermal receipt and KOT printers', 'Approved WhatsApp order updates', 'Delivery partner links (scoped per provider)', 'Export to accounting software'],
     preview: 'kitchen-tickets',
-    seoTitle: 'Restaurant POS, Digital Menu and Online Ordering Systems',
+    seoTitle: 'Restaurant POS & Digital Menu Software',
     seoDescription:
       'Restaurant POS billing, kitchen order display, digital menus, online ordering and ingredient inventory. Indicative prices in INR.',
   },
@@ -260,9 +260,9 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     ],
     integrations: ['Barcode scanners and label printers', 'UPI and card payment gateways', 'Weighing scales (model-dependent)', 'E-commerce payment and shipping providers', 'Export to accounting software'],
     preview: 'stock-grid',
-    seoTitle: 'Retail POS, Footwear Inventory and Jewellery Billing Software',
+    seoTitle: 'Retail POS, Footwear & Jewellery Software',
     seoDescription:
-      'Retail POS and billing, footwear inventory by size and colour, jewellery billing by weight and purity, multi-store stock and e-commerce. Indicative prices in INR.',
+      'Retail POS and billing, footwear inventory by size and colour, jewellery billing by weight and purity, multi-store stock and e-commerce. Prices in INR.',
   },
   {
     slug: 'travel-tourism',
@@ -313,7 +313,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     ],
     integrations: ['Payment gateways for advances and balances', 'Approved WhatsApp Business providers', 'Email and PDF quotes', 'Supplier or inventory APIs (scoped per provider)', 'Export to accounting software'],
     preview: 'itinerary',
-    seoTitle: 'Travel Agency Websites, Itinerary Builders and Travel CRM',
+    seoTitle: 'Travel Agency Websites & Travel CRM',
     seoDescription:
       'Travel and tour package websites, itinerary builders, travel booking systems and enquiry CRM for agencies. Indicative prices in INR.',
   },
@@ -371,7 +371,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     ],
     integrations: ['Online fee payment via a payment gateway', 'SMS and approved WhatsApp providers', 'Email notifications', 'Biometric or RFID attendance devices (model-dependent)', 'Export to Excel / accounting software'],
     preview: 'fee-ledger',
-    seoTitle: 'School Websites, Admission CRM and School Management Systems',
+    seoTitle: 'School Management Software & Admission CRM',
     seoDescription:
       'School and coaching websites, admission CRM, fee management, attendance and exam modules and parent portals. Indicative prices in INR.',
   },
