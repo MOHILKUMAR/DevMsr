@@ -546,8 +546,8 @@ insert into public.faqs (scope, industry_id, service_category, question, answer,
 select 'general', null, null, 'Do you work with clients outside India?', 'Yes. Prices are shown in Indian rupees; for international projects we confirm the currency and payment method in the quote.', 50
 where not exists (select 1 from public.faqs f where f.question = 'Do you work with clients outside India?');
 insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
-select 'general', null, null, 'Can you see a demo before we commit?', 'Use the “Book a demo” form. Products marked Concept or In development are not finished products — we will show you what exists and be clear about what would be built for you.', 60
-where not exists (select 1 from public.faqs f where f.question = 'Can you see a demo before we commit?');
+select 'general', null, null, 'Can I see a demo before we commit?', 'Use the “Book a demo” form. Products marked Concept or In development are not finished products — we will show you what exists and be clear about what would be built for you.', 60
+where not exists (select 1 from public.faqs f where f.question = 'Can I see a demo before we commit?');
 insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
 select 'general', null, null, 'Can AI replace my front-desk or sales staff?', 'AI assistants can handle routine questions and data entry, but their answers can be wrong. We design them with human review and hand-off for anything important, and AI-generated information may need verification.', 70
 where not exists (select 1 from public.faqs f where f.question = 'Can AI replace my front-desk or sales staff?');

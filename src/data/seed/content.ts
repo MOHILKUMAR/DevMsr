@@ -228,7 +228,7 @@ export const FAQ_SEED: FaqSeed[] = [
   },
   {
     scope: 'general', scopeKey: null,
-    question: 'Can you see a demo before we commit?',
+    question: 'Can I see a demo before we commit?',
     answer: 'Use the “Book a demo” form. Products marked Concept or In development are not finished products — we will show you what exists and be clear about what would be built for you.',
   },
   {
