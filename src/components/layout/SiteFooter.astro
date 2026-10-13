@@ -1,6 +1,7 @@
 ---
 import Wordmark from './Wordmark.astro';
 import { SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
+import { BUSINESS_ADDRESS_LINE } from '../../data/business';
 import type { Industry, SiteSettings } from '../../types/catalogue';
 
 interface Props {
@@ -32,10 +33,19 @@ const contactLinks = [
       <p class="text-small mt-4 max-w-sm text-ink-muted">
         Websites, business software and automation for hospitals, hotels, restaurants, retailers, travel companies and schools.
       </p>
-      <p class="text-small mt-4 text-ink-muted">{settings.serviceArea}</p>
+      <address class="text-small mt-4 max-w-sm not-italic text-ink-muted">{BUSINESS_ADDRESS_LINE}</address>
+      {
+        settings.contactPhone && (
+          <p class="text-small mt-2">
+            <a class="link-ink" href={`tel:${settings.contactPhone.replace(/[^\d+]/g, '')}`}>
+              {settings.contactPhone}
+            </a>
+          </p>
+        )
+      }
       {
         settings.contactEmail && (
-          <p class="text-small mt-2">
+          <p class="text-small mt-1">
             <a class="link-ink" href={`mailto:${settings.contactEmail}`}>
               {settings.contactEmail}
             </a>

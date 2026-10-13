@@ -252,6 +252,7 @@ export const blogRowSchema = z
     seo_title: nullableText,
     seo_description: nullableText,
     published_at: nullableText,
+    updated_at: nullableText,
   })
   .transform(
     (row): BlogPost => ({
@@ -265,5 +266,6 @@ export const blogRowSchema = z
       seoTitle: row.seo_title,
       seoDescription: row.seo_description,
       publishedAt: row.published_at,
+      updatedAt: row.updated_at,
     }),
   );

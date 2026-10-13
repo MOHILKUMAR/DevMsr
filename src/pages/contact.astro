@@ -4,16 +4,19 @@ import MarketingLayout from '../layouts/MarketingLayout.astro';
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro';
 import LeadFormSection from '../components/forms/LeadFormSection.astro';
 import { loadCatalogue } from '../lib/catalogue/repository';
-import { breadcrumbJsonLd } from '../lib/seo';
+import { breadcrumbJsonLd, localBusinessJsonLd } from '../lib/seo';
+import { oneTimePriceRange } from '../lib/catalogue/pricing';
+import { BUSINESS_ADDRESS_LINE } from '../data/business';
 
-const { settings } = await loadCatalogue(Astro.locals);
+const catalogue = await loadCatalogue(Astro.locals);
+const { settings } = catalogue;
 const whatsappDigits = settings.whatsappNumber?.replace(/\D/g, '') ?? '';
 ---
 
 <MarketingLayout
-  title="Contact"
-  description="Contact DevMsr.in about a website, business software or automation project."
-  jsonLd={[breadcrumbJsonLd([{ name: 'Contact', path: '/contact' }])]}
+  title="Contact — Software Developers in Gurugram"
+  description="Contact DevMsr.in in Gurugram about a website, business software or automation project. Call, WhatsApp, email or send the form."
+  jsonLd={[breadcrumbJsonLd([{ name: 'Contact', path: '/contact' }]), localBusinessJsonLd(settings, oneTimePriceRange(catalogue.pricing))]}
 >
   <section class="page-container pb-20 pt-8 sm:pt-10">
     <Breadcrumbs items={[{ label: 'Contact' }]} />
@@ -59,7 +62,10 @@ const whatsappDigits = settings.whatsappNumber?.replace(/\D/g, '') ?? '';
           }
           <li class="flex gap-3">
             <MapPin size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />
-            <span class="text-ink">{settings.serviceArea}</span>
+            <span>
+              <address class="not-italic text-ink">{BUSINESS_ADDRESS_LINE}</address>
+              <span class="block text-ink-muted">{settings.serviceArea}</span>
+            </span>
           </li>
         </ul>
       </div>

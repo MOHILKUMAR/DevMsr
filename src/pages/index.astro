@@ -15,7 +15,8 @@ import ProcessSteps from '../components/home/ProcessSteps.astro';
 import { loadCatalogue, loadPortfolio } from '../lib/catalogue/repository';
 import { faqsFor } from '../lib/catalogue/queries';
 import { getIndustryContent } from '../data/industries';
-import { compact, faqJsonLd, organizationJsonLd, websiteJsonLd } from '../lib/seo';
+import { compact, faqJsonLd, localBusinessJsonLd, websiteJsonLd } from '../lib/seo';
+import { oneTimePriceRange } from '../lib/catalogue/pricing';
 
 const catalogue = await loadCatalogue(Astro.locals);
 const portfolio = await loadPortfolio(Astro.locals);
@@ -66,10 +67,10 @@ const APPROACH = [
 ---
 
 <MarketingLayout
-  title="DevMsr.in — Websites, Business Software & AI Automation"
-  description="Websites, custom business software and AI-powered workflows for hospitals, hotels, restaurants, retailers, travel companies and schools. Indicative prices in INR."
+  title="DevMsr.in — Websites, Software & AI Automation in Gurugram"
+  description="Gurugram-based team building websites, business software and AI workflows for hospitals, hotels, restaurants, retailers, travel firms and schools."
   bareTitle
-  jsonLd={compact([organizationJsonLd(catalogue.settings.contactEmail), websiteJsonLd(), faqJsonLd(faqs)])}
+  jsonLd={compact([localBusinessJsonLd(catalogue.settings, oneTimePriceRange(catalogue.pricing)), websiteJsonLd(), faqJsonLd(faqs)])}
 >
   <!-- 1. Hero -->
   <section class="page-container pb-20 pt-12 sm:pt-16 lg:pb-28 lg:pt-20" aria-labelledby="hero-title">
@@ -84,6 +85,7 @@ const APPROACH = [
         </h1>
         <p class="text-lede mt-6 max-w-xl">
           We build websites, custom business software, and AI-powered workflows that help businesses simplify operations and serve customers better.
+          We are based in Gurugram and work with businesses across Delhi NCR and India.
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <Button href="/request-quote" size="lg">
@@ -288,6 +290,9 @@ const APPROACH = [
         ))
       }
     </ul>
+    <p class="mt-10">
+      <a class="link-olive inline-flex items-center gap-1" href="/about">More about how we work <ArrowRight size={15} aria-hidden="true" /></a>
+    </p>
   </section>
 
   <!-- 10. FAQ -->

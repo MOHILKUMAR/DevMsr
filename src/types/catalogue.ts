@@ -146,6 +146,8 @@ export interface BlogPost {
   seoTitle: string | null;
   seoDescription: string | null;
   publishedAt: string | null;
+  /** Last edit, for structured data and the sitemap. */
+  updatedAt: string | null;
 }
 
 export interface Faq {

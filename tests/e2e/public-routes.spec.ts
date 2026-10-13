@@ -51,7 +51,11 @@ for (const route of ROUTES) {
     expect(response?.status()).toBe(200);
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page).toHaveTitle(/DevMsr\.in/);
-    expect(await page.locator('meta[name="description"]').getAttribute('content')).toBeTruthy();
+    // Google shows about 60 characters of a title and 160 of a description.
+    expect((await page.title()).length, 'title length').toBeLessThanOrEqual(60);
+    const description = await page.locator('meta[name="description"]').getAttribute('content');
+    expect(description).toBeTruthy();
+    expect(description!.length, 'description length').toBeLessThanOrEqual(160);
     const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
     expect(canonical).toBe(`https://devmsr.in${route === '/' ? '' : route}`);
     await expect(page.locator('main#main')).toBeVisible();
@@ -131,5 +135,16 @@ test('payments page sets out milestones, visit fees and change requests', async 
   const faq = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((block) => JSON.parse(block) as { '@type'?: string; mainEntity?: unknown[] }).find((data) => data['@type'] === 'FAQPage');
   expect(faq?.mainEntity?.length).toBe(7);
   await expect(page.getByRole('banner').getByRole('link', { name: 'Payments', exact: true })).toBeVisible();
+});
+
+test('home, about and contact describe the business with its address', async ({ page }) => {
+  for (const path of ['/', '/about', '/contact']) {
+    await page.goto(path);
+    const blocks = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((block) => JSON.parse(block) as Record<string, unknown>);
+    const business = blocks.find((data) => data['@type'] === 'ProfessionalService') as { '@id'?: string; address?: Record<string, string> } | undefined;
+    expect(business?.['@id'], path).toBe('https://devmsr.in/#business');
+    expect(business?.address).toMatchObject({ addressLocality: 'Gurugram', addressRegion: 'Haryana', addressCountry: 'IN' });
+  }
+  await expect(page.getByRole('contentinfo').locator('address')).toContainText('Orchid Business Park');
 });
 

@@ -77,7 +77,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'About 1–2 weeks for a landing page and 2–5 weeks for a business website, depending on content readiness. Confirmed in your quote.',
     dependencies: ['Your logo, photos and business details', 'Access to your domain’s DNS settings', 'Timely feedback on drafts'],
     recurringCosts: [DOMAIN_COST, HOSTING_COST, MAINTENANCE_COST],
-    seoTitle: 'Website Development — Landing Pages, Business Sites, Portfolios',
+    seoTitle: 'Website Development Company in Gurugram',
     seoDescription:
       'Landing pages, business websites, portfolios, blogs and redesigns. Responsive, fast and search-ready, with indicative prices in INR.',
   },
@@ -99,7 +99,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'About 4–10 weeks depending on catalogue size, integrations and payment-gateway approval time. Confirmed in your quote.',
     dependencies: ['An approved payment gateway account in your business name', 'Product data, prices and images', 'Shipping and returns policies'],
     recurringCosts: [GATEWAY_COST, HOSTING_COST, DOMAIN_COST, MAINTENANCE_COST],
-    seoTitle: 'E-commerce Website Development with Payments and Inventory',
+    seoTitle: 'E-commerce Website Development with Payments',
     seoDescription:
       'Online stores with variants, payment gateways, order management and stock sync. Built for retail, footwear, jewellery and food businesses.',
   },
@@ -121,7 +121,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'A focused first version usually takes 4–12 weeks. Larger systems are delivered in phases. Confirmed in your quote.',
     dependencies: ['Access to the people who run the process today', 'Sample data and documents', 'A decision-maker for scope questions'],
     recurringCosts: [HOSTING_COST, MAINTENANCE_COST, { item: 'Third-party services', note: 'Any paid APIs or services the application depends on.' }],
-    seoTitle: 'Custom Software and Web Application Development',
+    seoTitle: 'Custom Software Development in Gurugram',
     seoDescription:
       'Custom web applications, internal tools, dashboards and database-driven systems built around your process. Indicative prices in INR.',
   },
@@ -143,7 +143,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'An MVP usually takes 6–12 weeks, including testing with your staff. Confirmed in your quote.',
     dependencies: ['Staff availability for walkthroughs and testing', 'Master data: items, rooms, doctors, classes, prices', 'Hardware decisions for printers and scanners'],
     recurringCosts: [HOSTING_COST, MAINTENANCE_COST, MESSAGING_COST],
-    seoTitle: 'Hospital, Hotel, Restaurant, Retail and School Management Systems',
+    seoTitle: 'Hospital, Hotel & School Management Software',
     seoDescription:
       'Industry management systems for hospitals, hotels, restaurants, retail, travel and schools. MVP-first delivery with indicative prices in INR.',
   },
@@ -165,7 +165,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'About 3–6 weeks depending on integrations and hardware. Confirmed in your quote.',
     dependencies: ['Your GST details and invoice requirements', 'Item and price lists', 'Supported printer and scanner models'],
     recurringCosts: [HOSTING_COST, MAINTENANCE_COST, GATEWAY_COST],
-    seoTitle: 'POS and Billing Software for Restaurants, Retail, Hotels and Clinics',
+    seoTitle: 'POS & Billing Software for Shops & Restaurants',
     seoDescription:
       'POS billing with GST invoices, barcodes, discounts and reports for restaurants, retail, hotels and clinics. Indicative prices in INR.',
   },
@@ -187,7 +187,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'About 3–8 weeks depending on modules and integrations. Confirmed in your quote.',
     dependencies: ['Your current lead sources and stages', 'Existing data in a spreadsheet, if migrating'],
     recurringCosts: [HOSTING_COST, MAINTENANCE_COST, MESSAGING_COST],
-    seoTitle: 'CRM, Lead Management and ERP Modules for Small Businesses',
+    seoTitle: 'CRM & ERP Software for Small Businesses',
     seoDescription:
       'Enquiry CRMs, lead management, customer records and ERP modules for purchases, suppliers and staff. Indicative prices in INR.',
   },
@@ -209,7 +209,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'Simple workflows take days; multi-step automations about 1–4 weeks. Confirmed in your quote.',
     dependencies: ['API access or exports from the tools involved', 'Sample data and edge cases'],
     recurringCosts: [AI_USAGE_COST, MESSAGING_COST, { item: 'Automation platform', note: 'n8n can be self-hosted; managed plans are billed by the provider.' }],
-    seoTitle: 'Workflow Automation, n8n Development and AI Automation',
+    seoTitle: 'Workflow Automation & n8n Development',
     seoDescription:
       'n8n workflows, lead routing, reminders, email and spreadsheet automation and document extraction. Indicative prices in INR.',
   },
@@ -231,7 +231,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'About 2–6 weeks depending on content and channels. Confirmed in your quote.',
     dependencies: ['Approved source content', 'An approved WhatsApp Business provider account for WhatsApp bots'],
     recurringCosts: [AI_USAGE_COST, MESSAGING_COST, HOSTING_COST],
-    seoTitle: 'AI Chatbots, WhatsApp Bots and Lead Qualification Assistants',
+    seoTitle: 'AI Chatbots & WhatsApp Bots for Business',
     seoDescription:
       'Website FAQ chatbots, WhatsApp Business bots, lead qualification and knowledge assistants grounded in your content. Indicative prices in INR.',
   },
@@ -253,7 +253,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'About 3–8 weeks including provider setup and testing. Confirmed in your quote.',
     dependencies: ['A telephony provider account and number', 'Registration and consent processes required by Indian telecom rules for outbound calling'],
     recurringCosts: [AI_USAGE_COST, { item: 'Telephony', note: 'Number rental and per-minute charges from the telephony provider.' }],
-    seoTitle: 'Voice AI Agents and Consent-Based Calling Workflows',
+    seoTitle: 'AI Voice Agents & Calling Workflows',
     seoDescription:
       'Inbound voice agents and consent-based outbound calling workflows with human hand-off. Scoped per project; usage costs disclosed upfront.',
   },
@@ -297,7 +297,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     typicalTimeline: 'Setup in days; maintenance is ongoing.',
     dependencies: ['Access to hosting, domain and code repositories'],
     recurringCosts: [HOSTING_COST, DOMAIN_COST],
-    seoTitle: 'Website Hosting, Maintenance, Backups and Technical Support',
+    seoTitle: 'Website Hosting & Maintenance Services',
     seoDescription:
       'Domain and DNS setup, hosting and deployment, website and application maintenance, backups, security updates and monitoring.',
   },

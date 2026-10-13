@@ -11,6 +11,7 @@ import DynamicIcon from '../../components/ui/DynamicIcon.astro';
 import PriceList from '../../components/services/PriceList.astro';
 import ProductList from '../../components/services/ProductList.astro';
 import { getServiceCategoryContent, SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
+import { BUSINESS } from '../../data/business';
 import { loadCatalogue } from '../../lib/catalogue/repository';
 import { faqsFor, pricesForService, pricesForServices, productsForCategory, serviceMap, servicesForCategory } from '../../lib/catalogue/queries';
 import { formatFromPrice, lowestPrice } from '../../lib/catalogue/pricing';
@@ -81,6 +82,10 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
           <div class="flex items-start gap-3 p-4">
             <dt class="w-20 shrink-0 pt-0.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink-muted">Services</dt>
             <dd class="text-ink">{services.length} listed below</dd>
+          </div>
+          <div class="flex items-start gap-3 p-4">
+            <dt class="w-20 shrink-0 pt-0.5 font-mono text-[0.6875rem] uppercase tracking-[0.08em] text-ink-muted">Based in</dt>
+            <dd class="text-ink">{BUSINESS.address.locality} · working across Delhi NCR and India</dd>
           </div>
         </dl>
       </aside>
@@ -193,6 +198,9 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
       </div>
       <div class="lg:col-span-7">
         <PriceList catalogue={catalogue} prices={prices} detailed />
+        <p class="text-small mt-4 text-ink-muted">
+          Starting estimates, not final quotes. <a href="/payments" class="link-olive">How payments work</a>.
+        </p>
       </div>
     </div>
   </section>

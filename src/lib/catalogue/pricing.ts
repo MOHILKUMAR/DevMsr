@@ -77,6 +77,23 @@ export function lowestPrice<T extends PriceShape>(prices: T[]): T | null {
   return lowest;
 }
 
+/**
+ * Overall one-time price span, e.g. "₹2,000–₹1,50,000+", for the business's
+ * structured data. Null when there are no one-time prices with amounts.
+ */
+export function oneTimePriceRange(prices: PriceShape[]): string | null {
+  const oneTime = prices.filter((price) => price.billingInterval === 'one_time' && price.pricingModel !== 'quote_only' && price.minimumAmount);
+  if (oneTime.length === 0) return null;
+  let low = oneTime[0]!;
+  let high = oneTime[0]!;
+  const top = (price: PriceShape) => price.maximumAmount ?? price.minimumAmount!;
+  for (const price of oneTime) {
+    if (compareAmounts(price.minimumAmount!, low.minimumAmount!) < 0) low = price;
+    if (compareAmounts(top(price), top(high)) > 0) high = price;
+  }
+  return `${formatAmount(low.minimumAmount!, low.currency)}–${formatAmount(top(high), high.currency)}${high.maxOpenEnded ? '+' : ''}`;
+}
+
 /** Budget bands used by the pricing filter, in rupees as decimal strings. */
 export const PRICE_BANDS = [
   { id: 'under-10k', label: 'Under ₹10,000', min: null, max: '10000' },
