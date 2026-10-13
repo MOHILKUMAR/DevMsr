@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pricingSchema, productSchema, portfolioSchema, faqSchema, settingsSchema, leadFollowUpSchema } from '../../src/schemas/admin';
+import { pricingSchema, productSchema, portfolioSchema, faqSchema, settingsSchema, leadFollowUpSchema, leadDeleteSchema } from '../../src/schemas/admin';
 import { formToObject } from '../../src/lib/admin/form';
 import { safeAdminRedirect } from '../../src/lib/auth/redirect';
 import { mergeCsp } from '../../src/lib/security/headers';
@@ -74,6 +74,12 @@ describe('other admin forms', () => {
     expect(settingsSchema.safeParse({ serviceArea: 'India', leadRetentionMonths: '24', contactEmail: 'Hello@DevMsr.in' }).data?.contactEmail).toBe('hello@devmsr.in');
     expect(settingsSchema.safeParse({ serviceArea: 'India', leadRetentionMonths: '0' }).success).toBe(false);
     expect(settingsSchema.safeParse({ serviceArea: 'India', leadRetentionMonths: '12', whatsappNumber: 'call me' }).success).toBe(false);
+  });
+
+  it('requires a deliberate DELETE confirmation, forgiving case and spaces', () => {
+    const id = SERVICE_ID;
+    for (const confirm of ['DELETE', 'delete', ' Delete ']) expect(leadDeleteSchema.safeParse({ id, confirm }).success, confirm).toBe(true);
+    for (const confirm of ['', 'del', 'DELETE IT', 'yes']) expect(leadDeleteSchema.safeParse({ id, confirm }).success, confirm).toBe(false);
   });
 
   it('accepts a date or an empty follow-up only', () => {
