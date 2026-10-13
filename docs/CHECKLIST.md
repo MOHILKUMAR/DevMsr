@@ -48,11 +48,11 @@ Legend: ✅ implemented and verified here · 🟡 implemented, needs verificatio
 - [x] Create Supabase project, run migrations + seed, create owner profile, disable sign-ups (docs/SETUP.md) — `npm run verify:supabase` passes 24/24
 - [x] Verify Resend domain; set email variables
 - [x] Create Turnstile widget — "devmsr.in lead forms" (Managed; devmsr.in, www.devmsr.in, the workers.dev preview); keys stored as Worker secrets; live check: widget loads, tokenless submissions are refused
-- [ ] Set Worker secrets; deploy to workers.dev; run the preview checklist (docs/DEPLOYMENT.md)
+- [x] Set Worker secrets; deploy to workers.dev; run the preview checklist (docs/DEPLOYMENT.md) — done 12 Oct 2026; live checks 22/22 on the preview
 - [ ] Review all copy, especially service timelines, the seeded blog post, product concepts, privacy policy and terms
 - [ ] Add contact email / phone / WhatsApp in `/admin/settings` (left empty rather than invented)
 - [x] Approve and perform the domain cut-over
-- [ ] Turn on *Always Use HTTPS* for the zone; set Supabase Site URL to https://devmsr.in; submit the sitemap in Search Console
+- [x] Turn on *Always Use HTTPS* for the zone; set Supabase Site URL to https://devmsr.in; submit the sitemap in Search Console — done 13 Oct 2026. Auth links use https://devmsr.in. The sitemap lists 39 URLs, all returning 200, indexable, with matching canonicals; `/admin` and `/api/` are disallowed in robots.txt
 
 ## Deferred (Phase 6 and later)
 - ⏳ Quotation builder, package purchasing, Razorpay (server-side orders, signature + webhook verification, idempotency)
