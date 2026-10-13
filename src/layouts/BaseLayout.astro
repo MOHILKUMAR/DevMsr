@@ -2,6 +2,7 @@
 import { Font } from 'astro:assets';
 import '../styles/global.css';
 import themeInit from '../scripts/theme-init.js?raw';
+import { shareImageFor, type ShareImage } from '../lib/share-images';
 
 export interface Props {
   /** Page title without the brand suffix. */
@@ -15,13 +16,16 @@ export interface Props {
   jsonLd?: Record<string, unknown>[];
   /** Use the title as-is (home page). */
   bareTitle?: boolean;
+  /** Share image override (e.g. a blog cover); defaults to the page's generated card. */
+  shareImage?: ShareImage;
 }
 
-const { title, description, canonicalPath, ogType = 'website', noindex = false, jsonLd = [], bareTitle = false } = Astro.props;
+const { title, description, canonicalPath, ogType = 'website', noindex = false, jsonLd = [], bareTitle = false, shareImage } = Astro.props;
 const site = Astro.site ?? new URL('https://devmsr.in');
 const canonical = new URL(canonicalPath ?? Astro.url.pathname, site).toString().replace(/\/$/, '') || site.toString();
 const fullTitle = bareTitle ? title : `${title} · DevMsr.in`;
-const ogImage = new URL('/og-default.png', site).toString();
+const image = shareImage ?? shareImageFor(canonicalPath ?? Astro.url.pathname);
+const ogImage = new URL(image.url, site).toString();
 // `</script>` cannot appear inside JSON-LD; escape "<" defensively.
 const jsonLdBlocks = jsonLd.map((block) => JSON.stringify(block).replace(/</g, '\\u003c'));
 ---
@@ -50,10 +54,13 @@ const jsonLdBlocks = jsonLd.map((block) => JSON.stringify(block).replace(/</g, '
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    {image.width && <meta property="og:image:width" content={String(image.width)} />}
+    {image.height && <meta property="og:image:height" content={String(image.height)} />}
+    <meta property="og:image:alt" content={image.alt} />
     <meta property="og:locale" content="en_IN" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={image.alt} />
 
     <Font cssVariable="--font-geist" preload />
     <Font cssVariable="--font-newsreader" preload />

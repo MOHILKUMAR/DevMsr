@@ -1,5 +1,6 @@
 import type { BlogPost, Faq, ServicePrice, SiteSettings } from '../types/catalogue';
 import { BUSINESS } from '../data/business';
+import { shareImageFor } from './share-images';
 
 /**
  * JSON-LD builders. They only describe facts that exist on the page: no
@@ -149,7 +150,7 @@ export function serviceJsonLd(input: { name: string; description: string; path: 
 
 export function articleJsonLd(post: BlogPost): JsonLd {
   const url = new URL(`/blog/${post.slug}`, SITE_URL).toString();
-  const image = post.coverImage ? new URL(post.coverImage, SITE_URL).toString() : `${SITE_URL}/og-default.png`;
+  const image = new URL(post.coverImage ?? shareImageFor(`/blog/${post.slug}`).url, SITE_URL).toString();
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',

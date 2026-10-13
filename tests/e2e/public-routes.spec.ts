@@ -148,3 +148,20 @@ test('home, about and contact describe the business with its address', async ({ 
   await expect(page.getByRole('contentinfo').locator('address')).toContainText('Orchid Business Park');
 });
 
+
+test('pages share their own preview image, and it loads', async ({ page, request }) => {
+  const seen = new Set<string>();
+  for (const path of ['/', '/pricing', '/industries/healthcare', '/services/web-development', '/products/lead-desk']) {
+    await page.goto(path);
+    const og = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(og, path).toMatch(/^https:\/\/devmsr\.in\/og\/.+\.png$/);
+    expect(await page.locator('meta[name="twitter:image"]').getAttribute('content')).toBe(og);
+    expect(await page.locator('meta[property="og:image:alt"]').getAttribute('content')).toBeTruthy();
+    const image = await request.get(new URL(og!).pathname);
+    expect(image.status(), og!).toBe(200);
+    expect(image.headers()['content-type']).toContain('image/png');
+    seen.add(og!);
+  }
+  // Product pages use the products card; every other page here has its own.
+  expect(seen.size).toBe(5);
+});

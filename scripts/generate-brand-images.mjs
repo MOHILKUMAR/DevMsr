@@ -8,33 +8,13 @@
  *
  * Writes public/og-default.png, apple-touch-icon.png, icon-512.png, favicon.ico.
  */
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from '@playwright/test';
+import { fontFaces as loadFontFaces, mark } from './lib/brand.mjs';
 
 const root = process.cwd();
-const fontsDir = join(root, '.astro', 'fonts');
-const fontFile = (prefix) => {
-  const name = readdirSync(fontsDir).find((file) => file.startsWith(prefix));
-  if (!name) throw new Error(`Font ${prefix} not found — run npm run build first.`);
-  // Inlined as a data URL: pages created with setContent cannot load file:// URLs.
-  return `data:font/woff2;base64,${readFileSync(join(fontsDir, name)).toString('base64')}`;
-};
-
-const fontFaces = `
-@font-face { font-family: Newsreader; src: url(${fontFile('font-newsreader-200-800-normal')}) format('woff2'); font-weight: 200 800; }
-@font-face { font-family: Newsreader; font-style: italic; src: url(${fontFile('font-newsreader-200-800-italic')}) format('woff2'); font-weight: 200 800; }
-@font-face { font-family: Geist; src: url(${fontFile('font-geist-100-900')}) format('woff2'); font-weight: 100 900; }
-@font-face { font-family: GeistMono; src: url(${fontFile('font-geist-mono-100-900')}) format('woff2'); font-weight: 100 900; }
-`;
-
-const mark = (size) => `
-<svg viewBox="0 0 24 24" width="${size}" height="${size}">
-  <rect x="2" y="2" width="9" height="9" rx="1.5" fill="#222522"/>
-  <rect x="13" y="2" width="9" height="9" rx="1.5" fill="#222522" opacity="0.22"/>
-  <rect x="2" y="13" width="9" height="9" rx="1.5" fill="#222522" opacity="0.22"/>
-  <rect x="13" y="13" width="9" height="9" rx="1.5" fill="#B96545"/>
-</svg>`;
+const fontFaces = loadFontFaces(root);
 
 const og = `<!doctype html><html><head><style>${fontFaces}
 * { margin: 0; box-sizing: border-box; }

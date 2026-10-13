@@ -17,6 +17,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "seed:generate": "node --experimental-strip-types scripts/generate-seed.ts",
+    "share-images:generate": "node --experimental-strip-types scripts/generate-share-images.ts",
     "cf-typegen": "wrangler types",
     "deploy": "astro build && node scripts/check-client-secrets.mjs && wrangler deploy --config dist/server/wrangler.json",
     "deploy:preview": "astro build && node scripts/check-client-secrets.mjs && wrangler versions upload --config dist/server/wrangler.json",

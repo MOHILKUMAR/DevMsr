@@ -1,4 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { DEFAULT_SHARE_IMAGE, shareImageFor } from '../../src/lib/share-images';
+import { SHARE_IMAGES } from '../../src/data/share-images';
+import { SHARE_CARDS, fileStem, hashOf } from '../../scripts/lib/share-cards';
 import { articleJsonLd, localBusinessJsonLd, parseBusinessHours, serviceJsonLd } from '../../src/lib/seo';
 import { oneTimePriceRange } from '../../src/lib/catalogue/pricing';
 import { catalogueLastmods } from '../../src/lib/catalogue/freshness';
@@ -72,7 +77,10 @@ describe('structured data', () => {
   it('gives blog posts an image and a modified date', () => {
     const post = buildBundledBlogPosts()[0]!;
     const ld = articleJsonLd({ ...post, updatedAt: '2026-10-20T08:00:00Z' });
-    expect(ld).toMatchObject({ image: 'https://devmsr.in/og-default.png', dateModified: '2026-10-20T08:00:00Z', mainEntityOfPage: `https://devmsr.in/blog/${post.slug}` });
+    expect(ld).toMatchObject({ dateModified: '2026-10-20T08:00:00Z', mainEntityOfPage: `https://devmsr.in/blog/${post.slug}` });
+    // Its generated share card, or an uploaded cover when there is one.
+    expect(ld.image).toMatch(new RegExp(`^https://devmsr\\.in/og/blog-${post.slug}-[0-9a-f]{8}\\.png$`));
+    expect(articleJsonLd({ ...post, coverImage: 'https://images.example.com/cover.jpg' }).image).toBe('https://images.example.com/cover.jpg');
   });
 
   it('spans one-time prices for the price range, ignoring monthly ones', () => {
@@ -110,5 +118,38 @@ describe('titles and descriptions fit search results', () => {
   it.each(pages.map((page) => [page.slug, page] as const))('%s', (_slug, page) => {
     expect(`${page.seoTitle} · DevMsr.in`.length).toBeLessThanOrEqual(60);
     expect(page.seoDescription.length).toBeLessThanOrEqual(160);
+  });
+});
+
+describe('share images', () => {
+  it('gives each page its own card, falls back to its section, then to the site image', () => {
+    expect(shareImageFor('/industries/healthcare').url).toMatch(/^\/og\/industries-healthcare-[0-9a-f]{8}\.png$/);
+    expect(shareImageFor('/pricing/').url).toBe(shareImageFor('/pricing').url);
+    expect(shareImageFor('/products/lead-desk').url).toBe(SHARE_IMAGES['/products']!.url);
+    expect(shareImageFor('/portfolio/some-project').url).toBe(SHARE_IMAGES['/portfolio']!.url);
+    expect(shareImageFor('/blog/a-new-post').url).toBe(SHARE_IMAGES['/blog']!.url);
+    expect(shareImageFor('/does-not-exist')).toEqual(DEFAULT_SHARE_IMAGE);
+    expect(shareImageFor('/industries/healthcare')).toMatchObject({ width: 1200, height: 630, alt: expect.stringContaining('Healthcare') });
+  });
+
+  it('is regenerated whenever card text changes', () => {
+    // Fails when a title or tagline changed without `npm run share-images:generate`.
+    for (const card of SHARE_CARDS) {
+      expect(SHARE_IMAGES[card.path]?.url, card.path).toBe(`/og/${fileStem(card.path)}-${hashOf(card)}.png`);
+    }
+    expect(Object.keys(SHARE_IMAGES).sort()).toEqual(SHARE_CARDS.map((card) => card.path).sort());
+  });
+
+  it('has a card file for every industry, service category and main page', () => {
+    const paths = [
+      '/', '/industries', '/services', '/pricing', '/payments', '/products', '/portfolio', '/about', '/contact', '/request-quote', '/book-a-demo', '/blog', '/privacy', '/terms',
+      ...INDUSTRY_CONTENT.map((industry) => `/industries/${industry.slug}`),
+      ...SERVICE_CATEGORY_CONTENT.map((category) => `/services/${category.slug}`),
+    ];
+    for (const path of paths) {
+      const image = SHARE_IMAGES[path];
+      expect(image, path).toBeDefined();
+      expect(existsSync(join(import.meta.dirname, '..', '..', 'public', image!.url)), image!.url).toBe(true);
+    }
   });
 });

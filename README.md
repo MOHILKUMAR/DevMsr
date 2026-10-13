@@ -40,6 +40,7 @@ Without Supabase configured the public site runs from the bundled seed data in `
 | `npm test` | Unit tests and database tests (migrations + RLS on PGlite) |
 | `npm run test:e2e` | Playwright end-to-end and accessibility tests (needs a build). Read-only when `.dev.vars` has real Supabase keys |
 | `npm run seed:generate` | Regenerate `supabase/seed.sql` from `src/data/` |
+| `npm run share-images:generate` | Regenerate the per-page share images in `public/og/` (after `npm run build`); run it after changing page titles or taglines |
 | `npm run check:secrets` | Scan browser assets for secrets; remove copied `.dev.vars` |
 | `npm run verify:supabase` | Read-only checks of a live Supabase project (schema, seed, RLS) |
 | `npm run deploy:preview` | Build, scan, upload a preview version to Cloudflare |
