@@ -54,7 +54,12 @@ export const leadContactSchema = z.object({
 export const leadIdSchema = z.object({ id: uuidField });
 export const leadDeleteSchema = z.object({
   id: uuidField,
-  confirm: z.literal('DELETE', { error: 'Type DELETE to confirm.' }),
+  // A deliberate confirmation, forgiving about case and stray spaces.
+  confirm: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .pipe(z.literal('DELETE', { error: 'Type DELETE to confirm.' })),
 });
 export const notificationRetrySchema = z.object({
   id: uuidField,

@@ -4,6 +4,8 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import PageHeader from '../../../components/admin/PageHeader.astro';
 import LeadStatusBadge from '../../../components/admin/LeadStatusBadge.astro';
 import EmptyState from '../../../components/admin/EmptyState.astro';
+import Notice from '../../../components/admin/Notice.astro';
+import { noticeText } from '../../../lib/admin/page';
 import { LEADS_PAGE_SIZE, listIndustries, readLeadFilters, searchLeads } from '../../../lib/admin/repository';
 import { LEAD_STATUSES, LEAD_STATUS_META, FORM_TYPE_LABELS } from '../../../lib/leads/status';
 import { formatDate, formatDateTime } from '../../../lib/utils/dates';
@@ -27,6 +29,7 @@ const now = Date.now();
 
 <AdminLayout title="Leads">
   <PageHeader title="Leads" description={`${total} ${active ? 'matching' : 'total'} enquiries.`} />
+  <Notice notice={noticeText(Astro.url)} />
 
   <form method="GET" role="search" aria-label="Filter leads" class="mb-6 grid gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]">
     <div>

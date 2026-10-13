@@ -63,7 +63,7 @@ const ACTIVITY_TONE: Record<string, string> = {
     <LeadStatusBadge status={lead.status} />
   </div>
 
-  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message} />
+  <Notice notice={noticeText(Astro.url)} error={outcome.failure?.message ?? (deleteError ? `Lead not deleted: ${deleteError}` : null)} />
 
   <div class="grid gap-8 xl:grid-cols-3">
     <div class="space-y-8 xl:col-span-2">
@@ -206,10 +206,10 @@ const ACTIVITY_TONE: Record<string, string> = {
 
       {
         admin.role === 'owner' && (
-          <section class="rounded-[var(--radius-card)] border border-danger/30 p-5 text-sm" aria-labelledby="danger-title">
+          <section id="delete-lead" class="scroll-mt-20 rounded-[var(--radius-card)] border border-danger/30 p-5 text-sm" aria-labelledby="danger-title">
             <h2 id="danger-title" class="flex items-center gap-2 font-semibold text-danger"><Trash size={15} aria-hidden="true" /> Delete permanently</h2>
             <p class="mt-1 text-ink-muted">Use for spam or when a person asks for their data to be erased. This cannot be undone.</p>
-            <form method="POST" action={formAction(actions.admin.leads.delete.queryString)} class="mt-3 flex flex-wrap gap-2">
+            <form method="POST" action={`${formAction(actions.admin.leads.delete.queryString)}#delete-lead`} class="mt-3 flex flex-wrap gap-2">
               <input type="hidden" name="id" value={lead.id} />
               <label for="confirm-delete" class="sr-only">Type DELETE to confirm</label>
               <input id="confirm-delete" name="confirm" placeholder="Type DELETE" autocomplete="off" class="field w-auto flex-1" aria-describedby={deleteError ? 'delete-error' : undefined} />
