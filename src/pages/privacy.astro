@@ -10,12 +10,13 @@ const { contactEmail, leadRetentionMonths } = catalogue.settings;
   title="Privacy Policy"
   description="What personal data DevMsr.in collects through this website, why, who processes it, how long it is kept and how to ask for it to be corrected or deleted."
   path="/privacy"
-  updated="2026-10-12"
+  updated="2026-10-13"
 >
   <p>
     This policy explains what information DevMsr.in (“we”) collects when you use this website, why we collect it, and the choices you have. It
     describes how this website actually works; if that changes, we will update this page.
   </p>
+  <p>DevMsr.in is operated by Mohil Kumar, Alt.f Coworking – Orchid Business Park, Near Subhash Chowk, Gurugram, Haryana, India.</p>
 
   <h2>What we collect</h2>
   <p>When you send a contact, quote or demo request, we collect what you type into the form:</p>
@@ -47,7 +48,7 @@ const { contactEmail, leadRetentionMonths } = catalogue.settings;
   <ul>
     <li><strong>Supabase</strong> — database hosting for enquiries and website content</li>
     <li><strong>Cloudflare</strong> — website hosting, security, and the Turnstile check that tells people and bots apart</li>
-    <li><strong>Resend</strong> — delivery of notification and acknowledgement emails</li>
+    <li><strong>Resend</strong> — delivery of enquiry notification emails to us</li>
   </ul>
   <p>These providers may process data on servers outside India.</p>
 
@@ -67,8 +68,12 @@ const { contactEmail, leadRetentionMonths } = catalogue.settings;
   <h2>Your choices and rights</h2>
   <p>
     You can ask us to show you the information we hold about you, correct it, or delete it, and you can withdraw your consent to further contact
-    at any time. Use the <a href="/contact">contact form</a>{contactEmail ? <> or email <a href={`mailto:${contactEmail}`}>{contactEmail}</a></> : null}
+    at any time. Use the <a href="/contact">contact form</a>{contactEmail ? <> or email <a href={`mailto:${contactEmail}`}>{contactEmail}</a></> : null}{' '}
     and mention your enquiry reference number if you have one. We will respond within a reasonable time.
+  </p>
+  <p>
+    Grievance contact: Mohil Kumar, <a href="mailto:mohil4280@gmail.com">mohil4280@gmail.com</a>. We respond to requests about your data within 7
+    days. If you are not satisfied with our response, you can complain to the Data Protection Board of India.
   </p>
 
   <h2>Security</h2>
