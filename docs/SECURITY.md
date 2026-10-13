@@ -16,7 +16,7 @@ The browser never receives a Supabase key: all database access happens in server
 ## Authentication and authorisation
 
 - Admin sign-in uses Supabase Auth (email + password). Auth cookies are `HttpOnly`, `SameSite=Lax`, `Secure` in production.
-- `src/middleware.ts` verifies the session on every `/admin` request, admin action and `/api/admin` call with `auth.getClaims()` (JWT signature check), then loads the **admin profile**. No active profile → redirect to sign-in (pages) or `401` (actions).
+- `src/middleware.ts` verifies the session on every `/admin` request, admin action and `/api/admin` call with `auth.getClaims()` (JWT signature check), then loads the **admin profile**. No active profile → redirect to sign-in (pages) or `401` (actions). A form submitted without a valid session is not applied; the sign-in page says so and returns the admin to the same page without re-submitting it.
 - Every admin mutation goes through `defineAdminAction` (`src/lib/admin/action.ts`): authenticate → check role capability → validate with Zod → write through the admin's own session so **RLS enforces the same rules in the database**.
 - Roles come only from `admin_profiles`, which has no insert/update/delete policies: it can be changed only with SQL in the Supabase dashboard.
 - Sign-in errors are generic; attempts are rate-limited per hashed IP (10/15 min) and per hashed email (10/hour) on top of Supabase's own limits.

@@ -38,7 +38,7 @@ Without Supabase configured the public site runs from the bundled seed data in `
 | `npm run preview` | Serve the production build locally on workerd |
 | `npm run check` | `astro check` — TypeScript and template type checking |
 | `npm test` | Unit tests and database tests (migrations + RLS on PGlite) |
-| `npm run test:e2e` | Playwright end-to-end and accessibility tests (needs a build) |
+| `npm run test:e2e` | Playwright end-to-end and accessibility tests (needs a build). Read-only when `.dev.vars` has real Supabase keys |
 | `npm run seed:generate` | Regenerate `supabase/seed.sql` from `src/data/` |
 | `npm run check:secrets` | Scan browser assets for secrets; remove copied `.dev.vars` |
 | `npm run verify:supabase` | Read-only checks of a live Supabase project (schema, seed, RLS) |

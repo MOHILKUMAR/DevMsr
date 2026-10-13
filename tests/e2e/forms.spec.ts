@@ -8,6 +8,8 @@ import { expect, test } from '@playwright/test';
  *
  * Against a deployed site with a real database, set E2E_READ_ONLY=1: tests
  * that could save a genuine lead (and email the owner) are then skipped.
+ * Local runs set it automatically when .dev.vars has real Supabase keys
+ * (see playwright.config.ts).
  */
 
 const READ_ONLY = process.env.E2E_READ_ONLY === '1';

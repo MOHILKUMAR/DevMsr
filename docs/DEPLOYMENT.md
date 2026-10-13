@@ -72,4 +72,4 @@ Connect the GitHub repository in *Workers & Pages → devmsr → Settings → Bu
 
 - **Supabase Free pauses after 7 days of low activity.** The daily `/api/health` call from `scheduled.yml` counts as activity. If the project does pause, public pages keep working from bundled data, but forms and admin stop until you click *Resume project* in Supabase.
 - **Workers Free allows 10 ms CPU per request.** Pages here are light, but if you see `Error 1102`/CPU-limit errors in Workers logs, upgrade to Workers Paid (USD 5/month).
-- Logs: *Workers & Pages → devmsr → Observability* (enabled in `wrangler.jsonc`). Search for `lead.save_failed`, `lead.notification_failed`, `catalogue.fallback`, `auth.rate_limited`.
+- Logs: *Workers & Pages → devmsr → Observability* (enabled in `wrangler.jsonc`). Search for `lead.save_failed`, `lead.notification_failed`, `catalogue.fallback`, `auth.rate_limited`, and `auth.session_rejected` (an admin was signed out because Supabase Auth rejected their session; `code` says why, e.g. `refresh_token_already_used`).
