@@ -20,6 +20,7 @@ const path = `/blog/${post.slug}`;
   title={post.seoTitle ?? post.title}
   description={post.seoDescription ?? post.excerpt}
   ogType="article"
+  shareImage={post.coverImage ? { url: post.coverImage, alt: post.title } : undefined}
   jsonLd={[breadcrumbJsonLd([{ name: 'Blog', path: '/blog' }, { name: post.title, path }]), articleJsonLd(post)]}
 >
   <article class="narrow-container pb-16 pt-8 sm:pt-10">
