@@ -49,8 +49,8 @@ Legend: ✅ implemented and verified here · 🟡 implemented, needs verificatio
 - [x] Verify Resend domain; set email variables
 - [x] Create Turnstile widget — "devmsr.in lead forms" (Managed; devmsr.in, www.devmsr.in, the workers.dev preview); keys stored as Worker secrets; live check: widget loads, tokenless submissions are refused
 - [x] Set Worker secrets; deploy to workers.dev; run the preview checklist (docs/DEPLOYMENT.md) — done 12 Oct 2026; live checks 22/22 on the preview
-- [ ] Review all copy, especially service timelines, the seeded blog post, product concepts, privacy policy and terms
-- [ ] Add contact email / phone / WhatsApp in `/admin/settings` (left empty rather than invented)
+- [x] Review all copy, especially service timelines, the seeded blog post, product concepts, privacy policy and terms — owner review on 13 Oct 2026; fixes in #9 (copy, FAQ wording, legal owner, address and grievance contact) and #11 (monthly prices in "From" figures)
+- [x] Add contact email / phone / WhatsApp in `/admin/settings` (left empty rather than invented) — done 13 Oct 2026; shown on /contact (email, phone and WhatsApp links, hours, office)
 - [x] Approve and perform the domain cut-over
 - [x] Turn on *Always Use HTTPS* for the zone; set Supabase Site URL to https://devmsr.in; submit the sitemap in Search Console — done 13 Oct 2026. Auth links use https://devmsr.in. The sitemap lists 39 URLs, all returning 200, indexable, with matching canonicals; `/admin` and `/api/` are disallowed in robots.txt
 
