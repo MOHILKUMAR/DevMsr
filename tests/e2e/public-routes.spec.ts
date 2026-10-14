@@ -165,3 +165,13 @@ test('pages share their own preview image, and it loads', async ({ page, request
   // Product pages use the products card; every other page here has its own.
   expect(seen.size).toBe(5);
 });
+
+test('a concept product page explains the problem, labels its illustration and prices a custom build', async ({ page }) => {
+  await page.goto('/products/opd-token-board');
+  await expect(page.getByRole('heading', { name: 'The problem it solves.' })).toBeVisible();
+  await expect(page.getByText('Crowded waiting areas')).toBeVisible();
+  await expect(page.locator('figcaption')).toContainText('not a screenshot of finished software');
+  await expect(page.getByRole('heading', { name: 'Built for you as a custom project.' })).toBeVisible();
+  await expect(page.getByText('₹15,000 – ₹35,000')).toBeVisible();
+  await expect(page.locator('section:has(#build-title)').getByRole('link', { name: 'Request a quote' })).toHaveAttribute('href', '/request-quote?industry=healthcare');
+});
