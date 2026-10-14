@@ -26,6 +26,7 @@ import {
 } from '../../lib/catalogue/queries';
 import { formatFromPrice, lowestPrice } from '../../lib/catalogue/pricing';
 import { SERVICE_STATUS_LABELS } from '../../lib/catalogue/labels';
+import { formLink } from '../../lib/forms/prefill';
 import { breadcrumbJsonLd, compact, faqJsonLd, serviceJsonLd } from '../../lib/seo';
 import { FILL_LAST_2 } from '../../lib/utils/grid';
 
@@ -81,8 +82,8 @@ const path = `/industries/${slug}`;
         <h1 class="text-h1 mt-5">{content.heroTitle}</h1>
         <p class="text-lede mt-5 max-w-2xl">{content.heroIntro}</p>
         <div class="mt-8 flex flex-wrap gap-3">
-          <Button href={`/request-quote?industry=${slug}`} size="lg">Get a quote <ArrowRight size={17} aria-hidden="true" /></Button>
-          <Button href={`/book-a-demo?industry=${slug}`} size="lg" variant="secondary">Book a demo</Button>
+          <Button href={formLink('/request-quote', { industry: slug })} size="lg">Get a quote <ArrowRight size={17} aria-hidden="true" /></Button>
+          <Button href={formLink('/book-a-demo', { industry: slug })} size="lg" variant="secondary">Book a demo</Button>
         </div>
         <p class="text-small mt-6 text-ink-muted">
           {industryServices.length} services · {lowest ? `${formatFromPrice(lowest)}, GST extra` : 'Quoted after a short scoping call'}
@@ -245,7 +246,7 @@ const path = `/industries/${slug}`;
 
   <CtaBand
     title="Tell us how your team works today."
-    primaryHref={`/request-quote?industry=${slug}`}
-    secondaryHref={`/book-a-demo?industry=${slug}`}
+    primaryHref={formLink('/request-quote', { industry: slug })}
+    secondaryHref={formLink('/book-a-demo', { industry: slug })}
   />
 </MarketingLayout>

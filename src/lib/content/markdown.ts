@@ -1,4 +1,5 @@
 import { Marked, type Tokens } from 'marked';
+import { toFormLink } from '../forms/prefill';
 
 /**
  * Markdown → HTML for admin-authored content (blog posts, portfolio and
@@ -42,7 +43,8 @@ const marked = new Marked({
     },
     link({ href, title, tokens }: Tokens.Link) {
       const label = this.parser.parseInline(tokens);
-      const url = safeUrl(href);
+      // "/request-quote?industry=…" written in admin becomes "#industry=…" (see lib/forms/prefill).
+      const url = safeUrl(toFormLink(href));
       if (!url) return label;
       const external = /^https?:\/\//.test(url) && !url.startsWith('https://devmsr.in');
       const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';

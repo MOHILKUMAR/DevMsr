@@ -13,6 +13,7 @@ import {
   type LeadFormType,
 } from '../../schemas/lead';
 import type { SubmitOutcome } from '../../lib/leads/types';
+import { readPrefill, resolvePrefill, type PrefillOptions, type ResolvedPrefill } from '../../lib/forms/prefill';
 
 interface Option {
   value: string;
@@ -23,7 +24,9 @@ export interface LeadFormProps {
   formType: LeadFormType;
   industries: Option[];
   interests: { label: string; options: Option[] }[];
-  defaults: { industry?: string; interest?: string };
+  defaults: { industry?: string; interest?: string; productName?: string | null };
+  /** Lets a "#industry=…&service=…" link fill in the form after hydration. */
+  prefillOptions?: PrefillOptions;
   submissionId: string;
   formToken: string;
   turnstileSiteKey: string | null;
@@ -160,6 +163,7 @@ export default function LeadForm(props: LeadFormProps) {
     register,
     handleSubmit,
     setError,
+    setValue,
     control,
     formState: { errors, isSubmitting, submitCount },
   } = useForm<LeadFieldsInput, unknown, LeadFields>({
@@ -181,6 +185,25 @@ export default function LeadForm(props: LeadFormProps) {
     setHydrated(true);
     setAttribution(readAttribution());
   }, []);
+
+  // Site links put choices after "#", which never reaches the server; apply them here.
+  const [hashPrefill, setHashPrefill] = useState<ResolvedPrefill | null>(null);
+  useEffect(() => {
+    if (!props.prefillOptions || window.location.hash.length < 2) return;
+    const resolved = resolvePrefill(readPrefill(window.location.hash), props.prefillOptions);
+    if (resolved.industry || resolved.interest || resolved.productName) setHashPrefill(resolved);
+  }, [props.prefillOptions]);
+  // Runs after the render that adds the "Selected service" option, so the value exists.
+  useEffect(() => {
+    if (hashPrefill?.industry) setValue('industry', hashPrefill.industry);
+    if (hashPrefill?.interest) setValue('interest', hashPrefill.interest);
+  }, [hashPrefill, setValue]);
+  const hashService = hashPrefill?.service;
+  const interestGroups =
+    hashService && !props.interests.some((group) => group.options.some((option) => option.value === hashService.value))
+      ? [{ label: 'Selected service', options: [hashService] }, ...props.interests]
+      : props.interests;
+  const productName = hashPrefill?.productName ?? props.defaults.productName ?? null;
 
   // Cloudflare Turnstile (only when configured).
   useEffect(() => {
@@ -318,6 +341,12 @@ export default function LeadForm(props: LeadFormProps) {
         </div>
       )}
 
+      {productName && (
+        <p className="text-small rounded-lg border border-line bg-surface px-4 py-3 text-ink">
+          You are asking about <strong>{productName}</strong>. Mention anything specific you would like to see in the description.
+        </p>
+      )}
+
       <p id={id('required-note')} className="text-sm text-ink-muted">
         Fields marked “required” must be filled in. Everything else is optional.
       </p>
@@ -372,7 +401,7 @@ export default function LeadForm(props: LeadFormProps) {
           <div className="relative">
             <select id={id('interest')} required defaultValue={props.defaults.interest ?? ''} className="field appearance-none pr-9" aria-invalid={invalid('interest')} aria-describedby={describedBy('interest', false)} {...register('interest')}>
               <option value="">Choose a service</option>
-              {props.interests.map((group) => (
+              {interestGroups.map((group) => (
                 <optgroup key={group.label} label={group.label}>
                   {group.options.map((option) => (
                     <option key={option.value} value={option.value}>

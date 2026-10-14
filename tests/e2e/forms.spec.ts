@@ -59,6 +59,21 @@ test('preselects industry and service from the URL', async ({ page }) => {
   await expect(page.getByLabel(/Interested in/)).toHaveValue('service:admission-crm');
 });
 
+test('site links preselect choices after "#", including by clicking through', async ({ page }) => {
+  await page.goto('/request-quote#industry=education&service=admission-crm');
+  await expect(page.getByLabel(/Industry/)).toHaveValue('education');
+  await expect(page.getByLabel(/Interested in/)).toHaveValue('service:admission-crm');
+
+  await page.goto('/book-a-demo#product=trip-desk');
+  await expect(page.getByText('You are asking about')).toContainText('Trip Desk');
+  await expect(page.getByLabel(/Industry/)).toHaveValue('travel-tourism');
+
+  await page.goto('/industries/healthcare');
+  await page.getByRole('main').getByRole('link', { name: 'Get a quote' }).first().click();
+  await expect(page).toHaveURL(/\/request-quote#industry=healthcare$/);
+  await expect(page.getByLabel(/Industry/)).toHaveValue('healthcare');
+});
+
 test('ignores unknown preselection values', async ({ page }) => {
   await page.goto('/request-quote?industry=<script>&service=nope');
   await expect(page.getByLabel(/Industry/)).toHaveValue('');

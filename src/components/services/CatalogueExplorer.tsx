@@ -3,6 +3,7 @@ import { Search, X, ChevronDown } from 'lucide-react';
 import { PRICE_BANDS, priceMatchesBand, type PriceBandId } from '../../lib/catalogue/pricing';
 import type { BillingInterval, PricingModel, ServiceStatus } from '../../types/catalogue';
 import { FILL_LAST_2_3 } from '../../lib/utils/grid';
+import { formLink } from '../../lib/forms/prefill';
 
 /**
  * Filterable list of services or prices.
@@ -337,7 +338,7 @@ export default function CatalogueExplorer(props: Props) {
                               {price.estimatedDelivery ? `Typical delivery: ${price.estimatedDelivery}` : 'Timeline confirmed in your quote'}
                             </p>
                             <p>
-                              <a className="link-olive" href={`/request-quote?service=${price.serviceSlug}`}>
+                              <a className="link-olive" href={formLink('/request-quote', { service: price.serviceSlug })}>
                                 Request a quote for this
                               </a>
                             </p>

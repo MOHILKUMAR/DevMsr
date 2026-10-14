@@ -61,6 +61,8 @@ for (const route of ROUTES) {
     const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
     expect(canonical).toBe(`https://devmsr.in${route === '/' ? '' : route}`);
     await expect(page.locator('main#main')).toBeVisible();
+    // Form links carry their choices after "#", so crawlers do not find a URL per industry or service.
+    await expect(page.locator('a[href*="/request-quote?"], a[href*="/book-a-demo?"]')).toHaveCount(0);
     await settle(page);
     // Includes Content-Security-Policy violations, which surface as console errors.
     expect(errors).toEqual([]);
@@ -175,5 +177,5 @@ test('a concept product page explains the problem, labels its illustration and p
   await expect(page.locator('figcaption')).toContainText('not a screenshot of finished software');
   await expect(page.getByRole('heading', { name: 'Built for you as a custom project.' })).toBeVisible();
   await expect(page.getByText('₹15,000 – ₹35,000')).toBeVisible();
-  await expect(page.locator('section:has(#build-title)').getByRole('link', { name: 'Request a quote' })).toHaveAttribute('href', '/request-quote?industry=healthcare');
+  await expect(page.locator('section:has(#build-title)').getByRole('link', { name: 'Request a quote' })).toHaveAttribute('href', '/request-quote#industry=healthcare');
 });
