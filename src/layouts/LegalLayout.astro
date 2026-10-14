@@ -6,14 +6,16 @@ import { breadcrumbJsonLd } from '../lib/seo';
 
 interface Props {
   title: string;
+  /** Search-result title, when the page heading alone is too short (e.g. "Terms of Use"). */
+  seoTitle?: string;
   description: string;
   path: string;
   updated: string;
 }
-const { title, description, path, updated } = Astro.props;
+const { title, seoTitle, description, path, updated } = Astro.props;
 ---
 
-<MarketingLayout title={title} description={description} jsonLd={[breadcrumbJsonLd([{ name: title, path }])]}>
+<MarketingLayout title={seoTitle ?? title} description={description} jsonLd={[breadcrumbJsonLd([{ name: title, path }])]}>
   <article class="narrow-container pb-20 pt-8 sm:pt-10">
     <Breadcrumbs items={[{ label: title }]} />
     <h1 class="text-h1 mt-10">{title}</h1>

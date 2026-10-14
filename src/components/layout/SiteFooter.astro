@@ -53,10 +53,11 @@ const contactLinks = [
         )
       }
     </div>
+    <!-- Column names are labels, not h2s: the same four headings on every page read as duplicates. -->
     <nav aria-label="Footer" class="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-8">
       <div>
-        <h2 class="text-eyebrow">Industries</h2>
-        <ul class="text-small mt-4 space-y-2.5">
+        <p id="footer-industries" class="text-eyebrow">Industries</p>
+        <ul class="text-small mt-4 space-y-2.5" aria-labelledby="footer-industries">
           {
             industries.map((industry) => (
               <li>
@@ -69,8 +70,8 @@ const contactLinks = [
         </ul>
       </div>
       <div>
-        <h2 class="text-eyebrow">Services</h2>
-        <ul class="text-small mt-4 space-y-2.5">
+        <p id="footer-services" class="text-eyebrow">Services</p>
+        <ul class="text-small mt-4 space-y-2.5" aria-labelledby="footer-services">
           {
             SERVICE_CATEGORY_CONTENT.slice(0, 7).map((category) => (
               <li>
@@ -84,8 +85,8 @@ const contactLinks = [
         </ul>
       </div>
       <div>
-        <h2 class="text-eyebrow">Company</h2>
-        <ul class="text-small mt-4 space-y-2.5">
+        <p id="footer-company" class="text-eyebrow">Company</p>
+        <ul class="text-small mt-4 space-y-2.5" aria-labelledby="footer-company">
           {
             companyLinks.map((link) => (
               <li>
@@ -98,8 +99,8 @@ const contactLinks = [
         </ul>
       </div>
       <div>
-        <h2 class="text-eyebrow">Get in touch</h2>
-        <ul class="text-small mt-4 space-y-2.5">
+        <p id="footer-contact" class="text-eyebrow">Get in touch</p>
+        <ul class="text-small mt-4 space-y-2.5" aria-labelledby="footer-contact">
           {
             contactLinks.map((link) => (
               <li>

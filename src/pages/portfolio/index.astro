@@ -4,11 +4,17 @@ import MarketingLayout from '../../layouts/MarketingLayout.astro';
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
 import Badge from '../../components/ui/Badge.astro';
 import CtaBand from '../../components/ui/CtaBand.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
 import { loadPortfolio } from '../../lib/catalogue/repository';
 import { breadcrumbJsonLd } from '../../lib/seo';
 
 const projects = await loadPortfolio(Astro.locals);
 const TYPE_LABEL = { client: 'Client project', internal: 'Internal project', prototype: 'Prototype' } as const;
+const LABELS = [
+  { term: TYPE_LABEL.client, detail: 'Work done for a client, listed only with their permission. The case study says what we built and which technology we used.' },
+  { term: TYPE_LABEL.internal, detail: 'A system we built and run ourselves, such as this website and its lead dashboard.' },
+  { term: TYPE_LABEL.prototype, detail: 'A working experiment, labelled so it is not mistaken for a finished product.' },
+];
 ---
 
 <MarketingLayout
@@ -64,6 +70,34 @@ const TYPE_LABEL = { client: 'Client project', internal: 'Internal project', pro
         </ul>
       )
     }
+  </section>
+
+  <section class="border-t border-line bg-surface" aria-labelledby="labels-title">
+    <div class="page-container section-space grid gap-10 lg:grid-cols-12">
+      <SectionHeader
+        class="lg:col-span-5"
+        id="labels-title"
+        eyebrow="How we list work"
+        title="How projects are labelled."
+        intro="Every entry carries one of three labels, so you can tell client work from our own projects."
+      />
+      <div class="lg:col-span-7">
+        <dl class="space-y-5">
+          {
+            LABELS.map((label) => (
+              <div>
+                <dt class="font-medium text-ink">{label.term}</dt>
+                <dd class="mt-1 text-ink-muted">{label.detail}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <p class="mt-8 text-ink-muted">
+          Why is the list short? We list a project only when it is real and, for client work, the client has agreed. One honest case study is more
+          useful than a page of mock-ups. We do not show client logos, testimonials or results unless the client has agreed and they are real.
+        </p>
+      </div>
+    </div>
   </section>
   <CtaBand />
 </MarketingLayout>

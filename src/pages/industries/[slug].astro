@@ -98,7 +98,7 @@ const path = `/industries/${slug}`;
   <section class="border-y border-line bg-surface" aria-labelledby="problems-title">
     <div class="page-container section-space grid gap-12 lg:grid-cols-12">
       <div class="lg:col-span-4">
-        <SectionHeader id="problems-title" eyebrow="Problems we solve" title="What usually goes wrong." />
+        <SectionHeader id="problems-title" eyebrow="Problems we solve" title={`What usually goes wrong in ${content.audienceLabel}.`} />
         <p class="text-small mt-6 text-ink-muted">Who this is for:</p>
         <ul class="text-small mt-2 space-y-1.5">
           {content.audience.map((item) => <li class="text-ink">{item}</li>)}
@@ -122,7 +122,7 @@ const path = `/industries/${slug}`;
       class="mb-12"
       id="solutions-title"
       eyebrow="Solutions"
-      title="What we build for you."
+      title={`What we build for ${content.audienceLabel}.`}
       intro="Start with the module that hurts most today. Each one can grow into a full system later."
     />
     <div class="space-y-14">

@@ -170,7 +170,7 @@ test('pages share their own preview image, and it loads', async ({ page, request
 
 test('a concept product page explains the problem, labels its illustration and prices a custom build', async ({ page }) => {
   await page.goto('/products/opd-token-board');
-  await expect(page.getByRole('heading', { name: 'The problem it solves.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'The problem OPD Token Board solves.' })).toBeVisible();
   await expect(page.getByText('Crowded waiting areas')).toBeVisible();
   await expect(page.locator('figcaption')).toContainText('not a screenshot of finished software');
   await expect(page.getByRole('heading', { name: 'Built for you as a custom project.' })).toBeVisible();

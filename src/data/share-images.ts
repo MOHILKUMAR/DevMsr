@@ -55,8 +55,8 @@ export const SHARE_IMAGES: Record<string, { url: string; alt: string }> = {
     "alt": "Schools & Education: Admissions, fees and attendance — without the registers."
   },
   "/industries/healthcare": {
-    "url": "/og/industries-healthcare-b1bbc95a.png",
-    "alt": "Healthcare & Hospitals: Shorter OPD queues. Cleaner billing. Fewer phone calls to the front desk."
+    "url": "/og/industries-healthcare-02a30b48.png",
+    "alt": "Healthcare & Hospitals: Shorter OPD queues, cleaner billing, fewer calls to the front desk."
   },
   "/industries/hotels-hospitality": {
     "url": "/og/industries-hotels-hospitality-0f6d67a5.png",
@@ -103,12 +103,12 @@ export const SHARE_IMAGES: Record<string, { url: string; alt: string }> = {
     "alt": "Services: Websites, business software, automation and support."
   },
   "/services/ai-agents-chatbots": {
-    "url": "/og/services-ai-agents-chatbots-900abdb5.png",
-    "alt": "AI Agents & Chatbots: Assistants that answer from your information and hand over to a person when they should."
+    "url": "/og/services-ai-agents-chatbots-f3998040.png",
+    "alt": "AI Agents & Chatbots: Chatbots that answer from your information and hand over to a person."
   },
   "/services/ai-automation": {
-    "url": "/og/services-ai-automation-70adb25d.png",
-    "alt": "AI & Workflow Automation: Take repetitive work off your team’s plate — and keep a person in the loop where it matters."
+    "url": "/og/services-ai-automation-67b25530.png",
+    "alt": "AI & Workflow Automation: Take repetitive work off your team, and keep a person in the loop."
   },
   "/services/crm-erp": {
     "url": "/og/services-crm-erp-adf2a240.png",
@@ -119,32 +119,32 @@ export const SHARE_IMAGES: Record<string, { url: string; alt: string }> = {
     "alt": "Custom Software: Software shaped around your process, not the other way round."
   },
   "/services/ecommerce": {
-    "url": "/og/services-ecommerce-cd20ee91.png",
-    "alt": "E-commerce: An online store you own, with payments, orders and stock that match your shop."
+    "url": "/og/services-ecommerce-6d7a191a.png",
+    "alt": "E-commerce: An online store you own, with payments, orders and stock in sync."
   },
   "/services/hosting-maintenance": {
-    "url": "/og/services-hosting-maintenance-daa46208.png",
-    "alt": "Hosting, Maintenance & Support: Keep your website and software secure, backed up and working after launch."
+    "url": "/og/services-hosting-maintenance-837e3e34.png",
+    "alt": "Hosting, Maintenance & Support: Keep your website and software secure, backed up and working."
   },
   "/services/integrations-payments": {
-    "url": "/og/services-integrations-payments-91359a71.png",
-    "alt": "Integrations & Payments: Connect your website and systems to payments, messaging and the tools you already use."
+    "url": "/og/services-integrations-payments-17a8b921.png",
+    "alt": "Integrations & Payments: Connect your systems to payments, messaging and the tools you use."
   },
   "/services/management-systems": {
-    "url": "/og/services-management-systems-2d2c9f50.png",
-    "alt": "Management Systems: Hospital, hotel, restaurant, retail, travel and school systems — built for how you operate."
+    "url": "/og/services-management-systems-263161fe.png",
+    "alt": "Management Systems: Hospital, hotel, restaurant, retail, travel and school systems."
   },
   "/services/pos-billing": {
     "url": "/og/services-pos-billing-382cc515.png",
     "alt": "POS & Billing: Fast counters, correct GST invoices and day-end totals that match."
   },
   "/services/voice-ai": {
-    "url": "/og/services-voice-ai-ddcba3fc.png",
-    "alt": "Voice AI: Inbound call assistants and consent-based calling workflows, with a human hand-off."
+    "url": "/og/services-voice-ai-ed3c32e8.png",
+    "alt": "Voice AI: Call assistants and consent-based calling, with a human hand-off."
   },
   "/services/web-development": {
-    "url": "/og/services-web-development-eb12dd0f.png",
-    "alt": "Website Development: Websites that load fast, read clearly and turn visitors into enquiries."
+    "url": "/og/services-web-development-98e6be53.png",
+    "alt": "Website Development: Websites that load fast, read clearly and turn visits into enquiries."
   },
   "/terms": {
     "url": "/og/terms-89b09fb1.png",

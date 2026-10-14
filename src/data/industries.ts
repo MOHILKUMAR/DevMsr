@@ -21,6 +21,8 @@ export interface IndustrySeed {
 
 export interface IndustryContent extends IndustrySeed {
   shortName: string;
+  /** Lower-case plural used in section headings, e.g. "What we build for clinics and hospitals." */
+  audienceLabel: string;
   heroTitle: string;
   heroIntro: string;
   audience: string[];
@@ -39,11 +41,12 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     slug: 'healthcare',
     name: 'Healthcare & Hospitals',
     shortName: 'Healthcare',
+    audienceLabel: 'clinics and hospitals',
     icon: 'stethoscope',
     sortOrder: 10,
     description:
       'Websites, appointment booking, OPD token queues, billing and hospital management systems for clinics, doctors and hospitals.',
-    heroTitle: 'Shorter OPD queues. Cleaner billing. Fewer phone calls to the front desk.',
+    heroTitle: 'Shorter OPD queues, cleaner billing, fewer calls to the front desk.',
     heroIntro:
       'We build the software a clinic or hospital uses every day: appointment booking, OPD tokens, patient registration, billing, pharmacy and lab modules, and a website patients can actually find timings on.',
     audience: ['Single-doctor and multi-doctor clinics', 'Nursing homes and small hospitals', 'Diagnostic labs and pharmacies', 'Specialist practices'],
@@ -99,6 +102,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     slug: 'hotels-hospitality',
     name: 'Hotels & Hospitality',
     shortName: 'Hotels',
+    audienceLabel: 'hotels',
     icon: 'bed-double',
     sortOrder: 20,
     description:
@@ -152,6 +156,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     slug: 'restaurants',
     name: 'Restaurants & Food Businesses',
     shortName: 'Restaurants',
+    audienceLabel: 'restaurants',
     icon: 'utensils',
     sortOrder: 30,
     description:
@@ -210,6 +215,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     slug: 'retail-jewellery-footwear',
     name: 'Retail, Footwear & Jewellery',
     shortName: 'Retail',
+    audienceLabel: 'retail stores',
     icon: 'store',
     sortOrder: 40,
     description:
@@ -268,6 +274,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     slug: 'travel-tourism',
     name: 'Travel & Tourism',
     shortName: 'Travel',
+    audienceLabel: 'travel agencies',
     icon: 'plane',
     sortOrder: 50,
     description:
@@ -321,6 +328,7 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
     slug: 'education',
     name: 'Schools & Education',
     shortName: 'Education',
+    audienceLabel: 'schools',
     icon: 'graduation-cap',
     sortOrder: 60,
     description:
