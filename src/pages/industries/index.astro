@@ -2,11 +2,22 @@
 import MarketingLayout from '../../layouts/MarketingLayout.astro';
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
 import CtaBand from '../../components/ui/CtaBand.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
 import IndustryIndex from '../../components/industries/IndustryIndex.astro';
 import { loadCatalogue } from '../../lib/catalogue/repository';
 import { breadcrumbJsonLd } from '../../lib/seo';
 
 const catalogue = await loadCatalogue(Astro.locals);
+// Restates the working principles published on /about.
+const SAME_EVERYWHERE = [
+  { title: 'We start with your process.', body: 'The first conversation is about how your team works today: who does what, which documents exist and where things get stuck.' },
+  {
+    title: 'Prices are published.',
+    body: 'Each industry page lists indicative prices in INR. A written quote separates development from hosting, maintenance and third-party charges such as SMS, WhatsApp or payment gateway fees.',
+  },
+  { title: 'A small first version.', body: 'We build the part your staff will use every day first, then add modules once it works.' },
+  { title: 'People stay in charge.', body: 'Where automation is used, anything involving money, medical, legal or bulk messages keeps a human approval step.' },
+];
 ---
 
 <MarketingLayout
@@ -30,6 +41,28 @@ const catalogue = await loadCatalogue(Astro.locals);
       Not in this list? Most of what we build — websites, CRMs, billing, inventory and automation — applies to any business.
       <a class="link-olive" href="/services">Browse services by type</a>.
     </p>
+  </section>
+
+  <section class="border-t border-line bg-surface" aria-labelledby="same-title">
+    <div class="page-container section-space grid gap-10 lg:grid-cols-12">
+      <SectionHeader
+        class="lg:col-span-5"
+        id="same-title"
+        eyebrow="How we work"
+        title="What stays the same in every industry"
+        intro="The systems differ from one industry to the next. The way we work does not."
+      />
+      <ul class="space-y-6 lg:col-span-7">
+        {
+          SAME_EVERYWHERE.map((item) => (
+            <li>
+              <h3 class="font-medium text-ink">{item.title}</h3>
+              <p class="mt-1 text-ink-muted">{item.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </section>
   <CtaBand />
 </MarketingLayout>
