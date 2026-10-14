@@ -179,9 +179,10 @@ const primaryLinks = [
         Request a Quote
       </a>
       <div class="grid gap-8 sm:grid-cols-2">
-        <section>
-          <h2 class="text-eyebrow mb-3">Industries</h2>
-          <ul class="space-y-1">
+        <div>
+          <!-- Labels, not headings: this menu comes before each page's h1 in the HTML. -->
+          <p id="mobile-nav-industries" class="text-eyebrow mb-3">Industries</p>
+          <ul class="space-y-1" aria-labelledby="mobile-nav-industries">
             {
               industries.map((industry) => (
                 <li>
@@ -196,10 +197,10 @@ const primaryLinks = [
             }
             <li><a href="/industries" class="block py-2 text-sm font-medium text-olive underline">All industries</a></li>
           </ul>
-        </section>
-        <section>
-          <h2 class="text-eyebrow mb-3">Services</h2>
-          <ul class="space-y-1">
+        </div>
+        <div>
+          <p id="mobile-nav-services" class="text-eyebrow mb-3">Services</p>
+          <ul class="space-y-1" aria-labelledby="mobile-nav-services">
             {
               SERVICE_CATEGORY_CONTENT.map((category) => (
                 <li>
@@ -211,7 +212,7 @@ const primaryLinks = [
             }
             <li><a href="/services" class="block py-2 text-sm font-medium text-olive underline">All services</a></li>
           </ul>
-        </section>
+        </div>
       </div>
       <ul class="mt-8 grid grid-cols-2 gap-2 border-t border-line pt-6">
         {

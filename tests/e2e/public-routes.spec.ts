@@ -50,12 +50,14 @@ for (const route of ROUTES) {
     const response = await page.goto(route);
     expect(response?.status()).toBe(200);
     await expect(page.locator('h1')).toHaveCount(1);
+    // The h1 comes first in the HTML, before any menu or section heading.
+    expect(await page.locator('h1, h2, h3, h4, h5, h6').first().evaluate((heading) => heading.tagName)).toBe('H1');
     await expect(page).toHaveTitle(/DevMsr\.in/);
-    // Google shows about 60 characters of a title and 160 of a description.
+    // Google shows about 60 characters of a title; Screaming Frog flags descriptions over 155.
     expect((await page.title()).length, 'title length').toBeLessThanOrEqual(60);
     const description = await page.locator('meta[name="description"]').getAttribute('content');
     expect(description).toBeTruthy();
-    expect(description!.length, 'description length').toBeLessThanOrEqual(160);
+    expect(description!.length, 'description length').toBeLessThanOrEqual(155);
     const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
     expect(canonical).toBe(`https://devmsr.in${route === '/' ? '' : route}`);
     await expect(page.locator('main#main')).toBeVisible();
@@ -74,7 +76,7 @@ test('unknown pages and slugs return 404 with a helpful page', async ({ page }) 
 });
 
 test('key pages have no serious accessibility violations (axe, WCAG 2.2 AA)', async ({ page }) => {
-  for (const path of ['/', '/industries/healthcare', '/services/pos-billing', '/pricing', '/payments', '/request-quote', '/blog/what-decides-the-cost-of-business-software']) {
+  for (const path of ['/', '/industries', '/industries/healthcare', '/services/pos-billing', '/products', '/pricing', '/payments', '/request-quote', '/blog/what-decides-the-cost-of-business-software']) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
     const serious = results.violations.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
