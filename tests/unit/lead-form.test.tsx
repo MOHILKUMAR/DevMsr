@@ -94,3 +94,35 @@ describe('LeadForm focus after a failed submit', () => {
     expect(submit).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('LeadForm pre-fill from a "#" link', () => {
+  afterEach(() => {
+    cleanup();
+    window.location.hash = '';
+  });
+
+  it('applies the choices after hydration, adding the selected service', async () => {
+    window.location.hash = '#industry=restaurants&service=restaurant-pos-billing';
+    const services = [{ slug: 'restaurant-pos-billing', name: 'Restaurant POS and billing', industry: 'restaurants' }];
+    render(<LeadForm {...props} prefillOptions={{ industries: ['restaurants'], categories: ['pos-billing'], services }} />);
+    const interest = screen.getByLabelText(/^Interested in/) as HTMLSelectElement;
+    await waitFor(() => expect(interest.value).toBe('service:restaurant-pos-billing'));
+    expect((screen.getByLabelText(/^Industry/) as HTMLSelectElement).value).toBe('restaurants');
+    expect(screen.getByRole('option', { name: 'Restaurant POS and billing' })).toBeTruthy();
+  });
+
+  it('says which product a demo request is about', async () => {
+    window.location.hash = '#product=trip-desk';
+    const products = [{ slug: 'trip-desk', name: 'Trip Desk', industry: null, category: 'pos-billing' }];
+    render(<LeadForm {...props} formType="demo" prefillOptions={{ industries: ['restaurants'], categories: ['pos-billing'], products }} />);
+    await waitFor(() => expect(screen.getByText('Trip Desk')).toBeTruthy());
+    expect((screen.getByLabelText(/^Interested in/) as HTMLSelectElement).value).toBe('category:pos-billing');
+  });
+
+  it('ignores a fragment that is not a pre-fill, such as a skip link', async () => {
+    window.location.hash = '#main';
+    render(<LeadForm {...props} prefillOptions={{ industries: ['restaurants'], categories: ['pos-billing'] }} />);
+    await waitFor(() => expect(screen.getByLabelText(/^Industry/)).toBeTruthy());
+    expect((screen.getByLabelText(/^Industry/) as HTMLSelectElement).value).toBe('');
+  });
+});

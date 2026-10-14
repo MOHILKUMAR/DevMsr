@@ -16,6 +16,7 @@ import LeadDeskPreview from '../../components/previews/LeadDeskPreview.astro';
 import SectionHeader from '../../components/ui/SectionHeader.astro';
 import { pricesForService, serviceMap } from '../../lib/catalogue/queries';
 import { formatPrice } from '../../lib/catalogue/pricing';
+import { formLink } from '../../lib/forms/prefill';
 import { breadcrumbJsonLd } from '../../lib/seo';
 
 const slug = Astro.params.slug ?? '';
@@ -58,9 +59,9 @@ const BUILD_COPY = {
 } as const;
 const build = BUILD_COPY[product.status];
 const quoteHref = product.industrySlug
-  ? `/request-quote?industry=${product.industrySlug}`
+  ? formLink('/request-quote', { industry: product.industrySlug })
   : product.serviceCategory
-    ? `/request-quote?category=${product.serviceCategory}`
+    ? formLink('/request-quote', { category: product.serviceCategory })
     : '/request-quote';
 ---
 
@@ -110,7 +111,7 @@ const quoteHref = product.industrySlug
             )
           }
           <div class="mt-8 flex flex-wrap gap-3">
-            <Button href={`/book-a-demo?product=${product.slug}`}>Ask about this <ArrowRight size={16} aria-hidden="true" /></Button>
+            <Button href={formLink('/book-a-demo', { product: product.slug })}>Ask about this <ArrowRight size={16} aria-hidden="true" /></Button>
             {
               product.demoUrl && (
                 <Button href={product.demoUrl} variant="secondary" rel="noopener noreferrer" target="_blank">
@@ -192,7 +193,7 @@ const quoteHref = product.industrySlug
             </p>
             <div class="mt-8 flex flex-wrap gap-3">
               <Button href={quoteHref}>Request a quote <ArrowRight size={16} aria-hidden="true" /></Button>
-              <Button href={`/book-a-demo?product=${product.slug}`} variant="secondary">Book a demo</Button>
+              <Button href={formLink('/book-a-demo', { product: product.slug })} variant="secondary">Book a demo</Button>
             </div>
           </div>
         </div>

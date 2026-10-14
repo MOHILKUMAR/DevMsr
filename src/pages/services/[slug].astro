@@ -16,6 +16,7 @@ import { loadCatalogue } from '../../lib/catalogue/repository';
 import { faqsFor, pricesForService, pricesForServices, productsForCategory, serviceMap, servicesForCategory } from '../../lib/catalogue/queries';
 import { formatFromPrice, lowestPrice } from '../../lib/catalogue/pricing';
 import { SERVICE_STATUS_LABELS } from '../../lib/catalogue/labels';
+import { formLink } from '../../lib/forms/prefill';
 import { breadcrumbJsonLd, compact, faqJsonLd, serviceJsonLd } from '../../lib/seo';
 import { FILL_LAST_2_3 } from '../../lib/utils/grid';
 
@@ -65,7 +66,7 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
         <h1 class="text-h1 mt-5">{content.tagline}</h1>
         <p class="text-lede mt-5 max-w-2xl">{content.intro}</p>
         <div class="mt-8 flex flex-wrap gap-3">
-          <Button href={`/request-quote?category=${content.slug}`} size="lg">Request a quote <ArrowRight size={17} aria-hidden="true" /></Button>
+          <Button href={formLink('/request-quote', { category: content.slug })} size="lg">Request a quote <ArrowRight size={17} aria-hidden="true" /></Button>
           <Button href="#pricing" size="lg" variant="secondary">See pricing</Button>
         </div>
       </div>
@@ -257,5 +258,5 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
     </div>
   </section>
 
-  <CtaBand primaryHref={`/request-quote?category=${content.slug}`} />
+  <CtaBand primaryHref={formLink('/request-quote', { category: content.slug })} />
 </MarketingLayout>
