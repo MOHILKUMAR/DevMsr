@@ -9,6 +9,13 @@ import { loadCatalogue } from '../../lib/catalogue/repository';
 import { PRODUCT_STATUS_META } from '../../lib/catalogue/labels';
 import { renderMarkdown } from '../../lib/content/markdown';
 import { getServiceCategoryContent } from '../../data/service-categories';
+import { getIndustryContent } from '../../data/industries';
+import { getProductContent } from '../../data/products';
+import IndustryPreview from '../../components/previews/IndustryPreview.astro';
+import LeadDeskPreview from '../../components/previews/LeadDeskPreview.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
+import { pricesForService, serviceMap } from '../../lib/catalogue/queries';
+import { formatPrice } from '../../lib/catalogue/pricing';
 import { breadcrumbJsonLd } from '../../lib/seo';
 
 const slug = Astro.params.slug ?? '';
@@ -22,6 +29,39 @@ const category = product.serviceCategory ? getServiceCategoryContent(product.ser
 const meta = PRODUCT_STATUS_META[product.status];
 const html = renderMarkdown(product.description);
 const path = `/products/${product.slug}`;
+
+// Fuller page: who it is for, what it fixes, an illustration, and how to get it today.
+const content = getProductContent(product.slug);
+const industryContent = product.industrySlug ? getIndustryContent(product.industrySlug) : undefined;
+const audience = content ? (content.audience ?? industryContent?.audience ?? []) : [];
+const problems = content
+  ? (content.problems ?? (content.problemTitles ?? []).flatMap((title) => industryContent?.problems.filter((problem) => problem.title === title) ?? []))
+  : [];
+const services = serviceMap(catalogue);
+const buildRows = (content?.buildFrom ?? []).flatMap((serviceSlug) => {
+  const service = services.get(serviceSlug);
+  if (!service) return [];
+  const price = pricesForService(catalogue, serviceSlug)[0];
+  return [{ name: service.name, category: service.category, price: price ? formatPrice(price) : null }];
+});
+const BUILD_COPY = {
+  concept: {
+    title: 'Built for you as a custom project.',
+    intro: `${product.name} is a concept: there is no packaged product yet. We can build the same thing for you today as a custom project, from these published services.`,
+  },
+  in_development: {
+    title: 'Available today as a custom build.',
+    intro: `${product.name} is still being turned into a product. We can build similar software for you today as a custom project, from these services.`,
+  },
+  demo: { title: 'Services it is built from.', intro: 'A working demo exists; a production deployment for you is scoped and quoted from these services.' },
+  available: { title: 'Services it is built from.', intro: 'What setting it up for you involves, from these services.' },
+} as const;
+const build = BUILD_COPY[product.status];
+const quoteHref = product.industrySlug
+  ? `/request-quote?industry=${product.industrySlug}`
+  : product.serviceCategory
+    ? `/request-quote?category=${product.serviceCategory}`
+    : '/request-quote';
 ---
 
 <MarketingLayout
@@ -97,5 +137,68 @@ const path = `/products/${product.slug}`;
       </aside>
     </div>
   </article>
+
+  {
+    content && (
+      <section class="border-y border-line bg-surface" aria-labelledby="fit-title">
+        <div class="page-container section-space grid gap-12 lg:grid-cols-12">
+          <div class="lg:col-span-5">
+            <SectionHeader id="fit-title" eyebrow="Who it is for" title="The problem it solves." />
+            {audience.length > 0 && (
+              <ul class="mt-6 flex flex-wrap gap-2">
+                {audience.map((item) => <li class="rounded-full border border-line bg-bg px-3 py-1 text-small text-ink">{item}</li>)}
+              </ul>
+            )}
+            <ul class="mt-8 space-y-5">
+              {problems.map((problem) => (
+                <li>
+                  <h3 class="font-medium text-ink">{problem.title}</h3>
+                  <p class="text-small mt-1 text-ink-muted">{problem.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <figure class="lg:col-span-7">
+            {content.preview === 'lead-desk' ? <LeadDeskPreview extras={false} /> : <IndustryPreview kind={content.preview} />}
+            <figcaption class="text-small mt-4 text-ink-muted">
+              An illustration with sample data, not a screenshot of finished software. {meta.explanation}
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    content && buildRows.length > 0 && (
+      <section class="page-container section-space" aria-labelledby="build-title">
+        <div class="grid gap-12 lg:grid-cols-12">
+          <div class="lg:col-span-5">
+            <SectionHeader id="build-title" eyebrow="Get it today" title={build.title} intro={build.intro} />
+          </div>
+          <div class="lg:col-span-7">
+            <ul class="border-t border-line">
+              {buildRows.map((row) => (
+                <li class="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line py-4">
+                  <a class="font-medium text-ink hover:underline" href={`/services/${row.category}`}>{row.name}</a>
+                  <span aria-hidden="true" class="hidden flex-1 border-b border-dotted border-line-strong sm:block" />
+                  <span class="tabular ml-auto font-mono text-[0.875rem] text-ink">{row.price ?? 'Quoted after scoping'}</span>
+                </li>
+              ))}
+            </ul>
+            <p class="text-small mt-4 text-ink-muted">
+              Indicative prices, one-time unless marked monthly, GST extra. See the <a class="link-olive" href="/pricing">full price list</a> and{' '}
+              <a class="link-olive" href="/payments">how payments work</a>.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <Button href={quoteHref}>Request a quote <ArrowRight size={16} aria-hidden="true" /></Button>
+              <Button href={`/book-a-demo?product=${product.slug}`} variant="secondary">Book a demo</Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   <CtaBand />
 </MarketingLayout>
