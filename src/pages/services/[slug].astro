@@ -95,7 +95,7 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
   <section class="border-y border-line bg-surface" aria-labelledby="what-title">
     <div class="page-container section-space grid gap-12 lg:grid-cols-12">
       <div class="lg:col-span-5">
-        <SectionHeader id="what-title" eyebrow="What it does" title="What you get." />
+        <SectionHeader id="what-title" eyebrow="What it does" title={`What you get with ${content.name}.`} />
         <p class="mt-5 text-ink-muted">{content.whatItDoes}</p>
         <h3 class="mt-10 font-semibold text-ink">Who needs it</h3>
         <ul class="mt-3 space-y-2">

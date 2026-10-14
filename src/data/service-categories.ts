@@ -64,7 +64,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     name: 'Website Development',
     navLabel: 'Websites',
     icon: 'layout-template',
-    tagline: 'Websites that load fast, read clearly and turn visitors into enquiries.',
+    tagline: 'Websites that load fast, read clearly and turn visits into enquiries.',
     intro:
       'Landing pages, business websites, portfolios, blogs, product showcases and booking sites — designed around what your visitors need to know and the one thing you want them to do next.',
     whatItDoes:
@@ -86,7 +86,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     name: 'E-commerce',
     navLabel: 'E-commerce',
     icon: 'shopping-bag',
-    tagline: 'An online store you own, with payments, orders and stock that match your shop.',
+    tagline: 'An online store you own, with payments, orders and stock in sync.',
     intro:
       'Product catalogues, carts, checkout, payment gateways, order management and shipping workflows — built for your products, whether that means sizes and colours, weights and purity, or simple SKUs.',
     whatItDoes:
@@ -130,7 +130,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     name: 'Management Systems',
     navLabel: 'Management systems',
     icon: 'layout-dashboard',
-    tagline: 'Hospital, hotel, restaurant, retail, travel and school systems — built for how you operate.',
+    tagline: 'Hospital, hotel, restaurant, retail, travel and school systems.',
     intro:
       'Industry management systems that cover the daily work: registrations, bookings, stock, schedules, billing and reports. We start with a focused MVP and extend it as you use it.',
     whatItDoes:
@@ -196,7 +196,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     name: 'AI & Workflow Automation',
     navLabel: 'Automation',
     icon: 'workflow',
-    tagline: 'Take repetitive work off your team’s plate — and keep a person in the loop where it matters.',
+    tagline: 'Take repetitive work off your team, and keep a person in the loop.',
     intro:
       'Workflow automation with n8n and APIs: lead routing, reminders, email and spreadsheet automation, document data extraction and scheduled reports. AI is used only where it actually helps.',
     whatItDoes:
@@ -218,7 +218,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     name: 'AI Agents & Chatbots',
     navLabel: 'AI chatbots',
     icon: 'message-square',
-    tagline: 'Assistants that answer from your information and hand over to a person when they should.',
+    tagline: 'Chatbots that answer from your information and hand over to a person.',
     intro:
       'Website FAQ chatbots, lead qualification assistants, WhatsApp Business bots and internal knowledge assistants grounded in your own content.',
     whatItDoes:
@@ -240,7 +240,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     name: 'Voice AI',
     navLabel: 'Voice AI',
     icon: 'phone-call',
-    tagline: 'Inbound call assistants and consent-based calling workflows, with a human hand-off.',
+    tagline: 'Call assistants and consent-based calling, with a human hand-off.',
     intro:
       'Voice agents that answer routine calls — timings, bookings, order status — and calling workflows for reminders and follow-ups that respect consent and opt-out rules.',
     whatItDoes:
@@ -262,7 +262,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     name: 'Integrations & Payments',
     navLabel: 'Integrations',
     icon: 'plug',
-    tagline: 'Connect your website and systems to payments, messaging and the tools you already use.',
+    tagline: 'Connect your systems to payments, messaging and the tools you use.',
     intro:
       'Payment gateways, email, SMS and approved WhatsApp providers, APIs and webhooks, CRM and accounting integrations, and secure login systems.',
     whatItDoes:
@@ -284,7 +284,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     name: 'Hosting, Maintenance & Support',
     navLabel: 'Hosting & support',
     icon: 'server-cog',
-    tagline: 'Keep your website and software secure, backed up and working after launch.',
+    tagline: 'Keep your website and software secure, backed up and working.',
     intro:
       'Domain and DNS setup, hosting and deployment, monthly maintenance, bug fixes, backups, performance tuning, security updates and monitoring.',
     whatItDoes:
