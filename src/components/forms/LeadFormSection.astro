@@ -31,17 +31,11 @@ const prefillOptions: PrefillOptions = {
 };
 const fromQuery = resolvePrefill(readPrefill(Astro.url.search), prefillOptions);
 
-const interests = [
-  ...(fromQuery.service ? [{ label: 'Selected service', options: [fromQuery.service] }] : []),
-  { label: 'Service type', options: SERVICE_CATEGORY_CONTENT.map((c) => ({ value: `category:${c.slug}`, label: c.name })) },
-];
-// The browser only needs what site links can ask for: services on the quote form, products on the demo form.
-const browserPrefill: PrefillOptions = {
-  industries: prefillOptions.industries,
-  categories: prefillOptions.categories,
-  ...(formType === 'quote' ? { services: prefillOptions.services } : {}),
-  ...(formType === 'demo' ? { products: prefillOptions.products } : {}),
-};
+const interests = [{ label: 'Service type', options: SERVICE_CATEGORY_CONTENT.map((c) => ({ value: `category:${c.slug}`, label: c.name })) }];
+// A "#" link to the quote or demo form (formLink, or an admin "?" link rewritten by toFormLink) can ask for
+// any choice, so the browser resolves it with the same options as the server. Nothing links to the contact form that way.
+const browserPrefill: PrefillOptions =
+  formType === 'contact' ? { industries: prefillOptions.industries, categories: prefillOptions.categories } : prefillOptions;
 
 const actionResult = Astro.getActionResult(actions.leads.submit);
 const initialOutcome = actionResult?.data ?? (actionResult?.error ? { status: 'unavailable' as const, message: 'Something went wrong. Please try again.' } : null);
@@ -54,7 +48,7 @@ const formToken = config.appSecret ? await issueFormToken(config.appSecret) : ''
   formType={formType}
   industries={industries}
   interests={interests}
-  defaults={{ industry: fromQuery.industry, interest: fromQuery.interest, productName: fromQuery.productName }}
+  defaults={{ industry: fromQuery.industry, interest: fromQuery.interest, service: fromQuery.service, productName: fromQuery.productName }}
   prefillOptions={browserPrefill}
   submissionId={crypto.randomUUID()}
   formToken={formToken}

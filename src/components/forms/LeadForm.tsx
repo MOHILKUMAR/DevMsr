@@ -24,7 +24,8 @@ export interface LeadFormProps {
   formType: LeadFormType;
   industries: Option[];
   interests: { label: string; options: Option[] }[];
-  defaults: { industry?: string; interest?: string; productName?: string | null };
+  /** `service` is the extra "Selected service" option a "?service=…" link asked for. */
+  defaults: { industry?: string; interest?: string; service?: Option | null; productName?: string | null };
   /** Lets a "#industry=…&service=…" link fill in the form after hydration. */
   prefillOptions?: PrefillOptions;
   submissionId: string;
@@ -112,7 +113,7 @@ function readAttribution(): Record<string, string> {
   return fields;
 }
 
-function Field(props: { id: string; label: string; required?: boolean; hint?: string; error?: string; children: ReactNode; className?: string }) {
+function Field(props: { id: string; label: string; required?: boolean; hint?: ReactNode; error?: string; children: ReactNode; className?: string }) {
   return (
     <div className={props.className}>
       <label htmlFor={props.id} className="mb-1.5 block text-[0.9375rem] font-medium text-ink">
@@ -198,11 +199,9 @@ export default function LeadForm(props: LeadFormProps) {
     if (hashPrefill?.industry) setValue('industry', hashPrefill.industry);
     if (hashPrefill?.interest) setValue('interest', hashPrefill.interest);
   }, [hashPrefill, setValue]);
-  const hashService = hashPrefill?.service;
-  const interestGroups =
-    hashService && !props.interests.some((group) => group.options.some((option) => option.value === hashService.value))
-      ? [{ label: 'Selected service', options: [hashService] }, ...props.interests]
-      : props.interests;
+  // One "Selected service" option at most: a "#" choice replaces a "?" one.
+  const selectedService = hashPrefill?.service ?? props.defaults.service ?? null;
+  const interestGroups = selectedService ? [{ label: 'Selected service', options: [selectedService] }, ...props.interests] : props.interests;
   const productName = hashPrefill?.productName ?? props.defaults.productName ?? null;
 
   // Cloudflare Turnstile (only when configured).
@@ -341,12 +340,6 @@ export default function LeadForm(props: LeadFormProps) {
         </div>
       )}
 
-      {productName && (
-        <p className="text-small rounded-lg border border-line bg-surface px-4 py-3 text-ink">
-          You are asking about <strong>{productName}</strong>. Mention anything specific you would like to see in the description.
-        </p>
-      )}
-
       <p id={id('required-note')} className="text-sm text-ink-muted">
         Fields marked “required” must be filled in. Everything else is optional.
       </p>
@@ -469,7 +462,22 @@ export default function LeadForm(props: LeadFormProps) {
         </Field>
       </fieldset>
 
-      <Field id={id('projectDescription')} label={copy.description} required hint={copy.descriptionHint} error={errors.projectDescription?.message}>
+      {/* In the hint, not a box above the form: "#product=…" sets it after hydration, and a box would push the fields down. */}
+      <Field
+        id={id('projectDescription')}
+        label={copy.description}
+        required
+        hint={
+          productName ? (
+            <>
+              You are asking about <strong className="text-ink">{productName}</strong>. {copy.descriptionHint}
+            </>
+          ) : (
+            copy.descriptionHint
+          )
+        }
+        error={errors.projectDescription?.message}
+      >
         <textarea
           id={id('projectDescription')}
           rows={6}
