@@ -18,5 +18,6 @@ export const ICON_NAMES = [
   'plug',
   'server-cog',
   'building',
+  'megaphone',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];

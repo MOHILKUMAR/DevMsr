@@ -84,7 +84,8 @@ describe('structured data', () => {
   });
 
   it('spans one-time prices for the price range, ignoring monthly ones', () => {
-    expect(oneTimePriceRange(buildBundledCatalogue().pricing)).toBe('₹2,000–₹1,50,000+');
+    // ₹999: the digital presence audit and an extra social media post.
+    expect(oneTimePriceRange(buildBundledCatalogue().pricing)).toBe('₹999–₹1,50,000+');
     expect(oneTimePriceRange([])).toBeNull();
   });
 });

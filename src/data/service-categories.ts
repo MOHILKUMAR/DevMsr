@@ -1,4 +1,5 @@
 import type { ServiceCategorySlug } from '../types/catalogue.ts';
+import { SOCIAL_MEDIA_DETAILS, type RetainerDetails } from './social-media.ts';
 
 /**
  * Service category pages (/services/[slug]): editorial copy.
@@ -31,6 +32,13 @@ export interface ServiceCategoryContent {
   recurringCosts: RecurringCost[];
   seoTitle: string;
   seoDescription: string;
+  /** Service whose lowest price is the category's "from" figure, when the cheapest item is an add-on rather than the service itself. */
+  fromPriceService?: string;
+  /** Replaces the development-fee wording above the price list, for categories sold as fixed plans. */
+  pricingIntro?: string;
+  nextSteps?: string[];
+  /** Plan table, process and terms for a monthly service (see src/data/social-media.ts). */
+  retainer?: RetainerDetails;
 }
 
 const HOSTING_COST: RecurringCost = {
@@ -300,6 +308,80 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
     seoTitle: 'Website Hosting & Maintenance Services',
     seoDescription:
       'Domain and DNS setup, hosting and deployment, website and application maintenance, backups, security updates and monitoring.',
+  },
+  {
+    slug: 'social-media-management',
+    name: 'Social Media Management',
+    navLabel: 'Social media',
+    icon: 'megaphone',
+    tagline: 'You treat patients. We handle your social media.',
+    intro:
+      'Posts, reels, stories, review replies, blogs and local search for doctors, clinics and hospitals: shot at your hospital, checked against NMC guidelines and published only after you approve on WhatsApp.',
+    whatItDoes:
+      'We plan a monthly calendar with you, shoot at your hospital, design posts and edit reels, publish to Instagram, Facebook, YouTube, LinkedIn and X, reply to comments, messages and Google reviews, and send you a monthly report. Your website is part of every plan.',
+    whoNeedsIt: [
+      'Hospitals and nursing homes with inactive or inconsistent pages',
+      'Clinics and specialist practices building a local reputation',
+      'Doctors who want to educate patients without spending OPD time on content',
+      'Practices unsure what the NMC advertising guidelines allow',
+    ],
+    keyFeatures: [
+      'Posts, reels, carousels and stories on 5 platforms',
+      'A monthly shoot at your hospital, not stock photos or AI',
+      'Health-camp, awareness and festival campaigns',
+      'Replies to comments, messages and every Google review',
+      'Doctor-reviewed blogs and Local SEO on higher plans',
+      'Every post checked against NMC guidelines',
+    ],
+    useCases: [
+      'Announcing a BP and sugar screening camp',
+      'Dengue and heatstroke awareness in season',
+      'A doctor’s introduction reel with qualification and registration number',
+      'Diwali and Doctors’ Day greetings planned a month ahead',
+      'Collecting genuine feedback with a QR code at reception',
+    ],
+    included: [
+      '5 social profiles set up with a brand kit',
+      '12 posts, 4 reels, 5 carousels and 15 stories a month',
+      'One shoot a month at your hospital',
+      'Daily replies to comments and messages',
+      'Google review replies and a feedback QR',
+      'A website, with hosting for year 1',
+      'A monthly report and a dedicated account manager',
+    ],
+    excluded: [
+      'Ad spend, paid directly to the platforms',
+      'Influencer fees',
+      'Paid verification badges',
+      'Outstation travel for shoots (at cost)',
+      'Guaranteed followers, reach or rankings',
+      'Patient testimonials or before-and-after posts',
+    ],
+    typicalTimeline: 'Profiles set up, website live and first shoot in month 1. Plans run for 3 or 12 months.',
+    dependencies: [
+      'Accurate practice details: doctors, qualifications, registration numbers and timings',
+      'Delegated access to your social, Google and website accounts',
+      'Approvals on WhatsApp within 2 working days',
+      'A 2-hour slot at your hospital for the monthly shoot',
+      'Consent from anyone shown on camera',
+    ],
+    recurringCosts: [
+      { item: 'Ad spend (optional)', note: 'Paid by you directly to Meta, Google or other platforms. We never hold ad budgets.' },
+      { item: 'Website renewal from year 2', note: 'Hosting and upkeep: ₹6,999 a year for a static site, ₹11,999 a year for a premium site.' },
+      DOMAIN_COST,
+    ],
+    seoTitle: 'Social Media Management for Doctors & Hospitals',
+    seoDescription:
+      'Posts, reels, review replies, blogs and Local SEO for doctors, clinics and hospitals, shot at your hospital and checked against NMC guidelines.',
+    fromPriceService: 'healthcare-social-media-management',
+    pricingIntro:
+      'Plan prices are fixed, not estimates. GST at 18% is added. Add-ons are priced up front, and your signed proposal confirms your plan, deliverables and start date.',
+    nextSteps: [
+      'Book the audit, or send a quote request with your hospital’s details.',
+      'We send your audit file with a costed 3-month plan.',
+      'You choose a plan, sign the proposal and we start in week one.',
+    ],
+    retainer: SOCIAL_MEDIA_DETAILS,
   },
 ];
 

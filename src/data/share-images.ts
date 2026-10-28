@@ -138,6 +138,10 @@ export const SHARE_IMAGES: Record<string, { url: string; alt: string }> = {
     "url": "/og/services-pos-billing-382cc515.png",
     "alt": "POS & Billing: Fast counters, correct GST invoices and day-end totals that match."
   },
+  "/services/social-media-management": {
+    "url": "/og/services-social-media-management-30648256.png",
+    "alt": "Social Media Management: You treat patients. We handle your social media."
+  },
   "/services/voice-ai": {
     "url": "/og/services-voice-ai-ed3c32e8.png",
     "alt": "Voice AI: Call assistants and consent-based calling, with a human hand-off."

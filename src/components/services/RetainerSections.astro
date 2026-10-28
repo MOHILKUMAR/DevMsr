@@ -1,0 +1,235 @@
+---
+import { ArrowRight, Check, KeyRound, ShieldCheck } from '@lucide/astro';
+import Badge from '../ui/Badge.astro';
+import Button from '../ui/Button.astro';
+import SectionHeader from '../ui/SectionHeader.astro';
+import { BILLING_INTERVAL_LABELS, formatPrice } from '../../lib/catalogue/pricing';
+import { planCellText, priceByLabel } from '../../lib/catalogue/plans';
+import { formLink } from '../../lib/forms/prefill';
+import type { RetainerDetails } from '../../data/social-media';
+import type { Catalogue } from '../../types/catalogue';
+
+/**
+ * Sections for a category sold as monthly plans (social media management):
+ * what is published each month, what it covers, the plan table, the audit,
+ * the first 90 days, NMC compliance, account security and plan terms.
+ * Prices come from the catalogue; everything else from src/data/social-media.ts.
+ */
+interface Props {
+  catalogue: Catalogue;
+  details: RetainerDetails;
+  quoteHref: string;
+}
+const { catalogue, details, quoteHref } = Astro.props;
+const { monthly, coverage, plans, audit, firstMonths, promises, compliance, accountAccess, terms } = details;
+const auditPrice = priceByLabel(catalogue, audit.serviceSlug, audit.priceLabel);
+const platforms = `${monthly.platforms.slice(0, -1).join(', ')} and ${monthly.platforms.at(-1)}`;
+---
+
+<section class="page-container section-space" aria-labelledby="monthly-title">
+  <SectionHeader id="monthly-title" eyebrow="Every month" title="What we publish on all 5 platforms" intro={`Shot at your hospital, approved by you on WhatsApp and published to ${platforms}.`} />
+  <ul class="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-5">
+    {
+      monthly.deliverables.map((item) => (
+        <li class="bg-surface p-5 last:col-span-2 sm:last:col-span-1">
+          <span class="block font-display text-[2.25rem] leading-none text-ink">{item.count}</span>
+          <span class="text-small mt-2 block text-ink-muted">{item.item}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <ol class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+    {
+      monthly.steps.map((step, index) => (
+        <li>
+          <span class="font-mono text-[0.75rem] text-clay-ink">{String(index + 1).padStart(2, '0')}</span>
+          <h3 class="mt-2 font-semibold text-ink">{step.title}</h3>
+          <p class="text-small mt-1 text-ink-muted">{step.detail}</p>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="text-small mt-10 max-w-3xl text-ink-muted">{monthly.effort}</p>
+</section>
+
+<section class="border-y border-line bg-surface" aria-labelledby="coverage-title">
+  <div class="page-container section-space">
+    <SectionHeader id="coverage-title" eyebrow="What we cover" title="Camps, reviews, festivals and blogs" />
+    <div class="mt-10 grid gap-x-12 gap-y-10 sm:grid-cols-2">
+      {
+        coverage.map((area) => (
+          <div>
+            <h3 class="font-semibold text-ink">{area.title}</h3>
+            <p class="text-small mt-1.5 text-ink-muted">{area.detail}</p>
+            <ul class="mt-4 space-y-2 text-ink-muted">
+              {area.points.map((point) => <li class="flex gap-2.5"><Check size={16} aria-hidden="true" class="mt-1 shrink-0 text-olive" />{point}</li>)}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<section id="plans" class="page-container section-space scroll-mt-24" aria-labelledby="plans-title">
+  <SectionHeader
+    id="plans-title"
+    eyebrow="Plans"
+    title="Social media plans and prices"
+    intro="Two ways to work with us: a 3-month plan paid once, or a 12-month partnership billed monthly."
+  />
+  <div class="mt-10 overflow-x-auto rounded-[var(--radius-card)] border border-line" role="region" aria-label="Plan comparison (scrolls sideways on small screens)" tabindex="0">
+    <table class="text-small w-full min-w-[42rem] border-collapse text-left">
+      <caption class="sr-only">What each plan includes, and its price</caption>
+      <thead class="bg-bg-sunken">
+        <tr>
+          <th scope="col" class="p-4 align-bottom font-medium text-ink-muted">Feature</th>
+          {
+            plans.columns.map((column) => (
+              <th scope="col" class="p-4 align-bottom">
+                <span class="flex flex-wrap items-center gap-2 font-semibold text-ink">
+                  {column.name}
+                  {column.recommended && <Badge tone="clay">Recommended</Badge>}
+                </span>
+                <span class="mt-1 block font-normal text-ink-muted">{column.summary}</span>
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-line bg-surface">
+        {
+          plans.features.map((row) => (
+            <tr>
+              <th scope="row" class="p-4 font-normal text-ink">{row.feature}</th>
+              {row.values.map((value) => <td class="p-4 text-ink-muted">{value}</td>)}
+            </tr>
+          ))
+        }
+        {
+          plans.prices.map((row) => (
+            <tr class="bg-bg-sunken">
+              <th scope="row" class="p-4 font-semibold text-ink">{row.label}</th>
+              {row.cells.map((cell) => (
+                <td class:list={['p-4', 'priceLabel' in cell ? 'tabular font-mono text-ink' : 'text-ink-muted']}>{planCellText(catalogue, row.serviceSlug, cell)}</td>
+              ))}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+  <ul class="text-small mt-6 grid gap-x-10 gap-y-2 text-ink-muted sm:grid-cols-2">
+    {plans.notes.map((note) => <li class="flex gap-2.5"><span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-clay" />{note}</li>)}
+  </ul>
+  <div class="mt-8 flex flex-wrap gap-3">
+    <Button href={quoteHref}>Request a quote <ArrowRight size={16} aria-hidden="true" /></Button>
+    <Button href="#pricing" variant="secondary">Every price and add-on</Button>
+  </div>
+</section>
+
+<section class="bg-bg-sunken" aria-labelledby="audit-title">
+  <div class="page-container section-space grid gap-12 lg:grid-cols-12">
+    <div class="lg:col-span-7">
+      <SectionHeader id="audit-title" eyebrow="Start here" title="Start with a digital presence audit" intro={audit.intro} />
+      <h3 class="mt-10 font-semibold text-ink">The audit checks five areas</h3>
+      <dl class="mt-4 space-y-4">
+        {
+          audit.areas.map((area) => (
+            <div>
+              <dt class="font-medium text-ink">{area.title}</dt>
+              <dd class="text-small mt-0.5 text-ink-muted">{area.detail}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+    <div class="lg:col-span-5">
+      <div class="rounded-[var(--radius-card)] border border-line bg-surface p-6">
+        <p class="text-eyebrow">Audit fee</p>
+        <p class="tabular mt-3 font-display text-[2.5rem] leading-none text-ink">{auditPrice ? formatPrice(auditPrice) : 'Quote on request'}</p>
+        {auditPrice && <p class="text-small mt-2 text-ink-muted">{BILLING_INTERVAL_LABELS[auditPrice.billingInterval]} · GST extra</p>}
+        <h3 class="mt-6 font-semibold text-ink">Your audit file shows</h3>
+        <ul class="mt-3 space-y-2 text-ink-muted">
+          {audit.fileShows.map((item) => <li class="flex gap-2.5"><Check size={16} aria-hidden="true" class="mt-1 shrink-0 text-olive" />{item}</li>)}
+        </ul>
+        <p class="text-small mt-6 text-ink-muted">{audit.note}</p>
+        <Button href={formLink('/request-quote', { service: audit.serviceSlug })} class="mt-6">Book the audit <ArrowRight size={16} aria-hidden="true" /></Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page-container section-space" aria-labelledby="first-months-title">
+  <SectionHeader id="first-months-title" eyebrow="After the audit" title="Your first 90 days" />
+  <ol class="mt-10 grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line lg:grid-cols-3">
+    {
+      firstMonths.map((month) => (
+        <li class="bg-surface p-6">
+          <p class="text-eyebrow">{month.month}</p>
+          <h3 class="mt-2 font-display text-[1.375rem] leading-tight text-ink">{month.title}</h3>
+          <ul class="mt-4 space-y-2 text-ink-muted">
+            {month.items.map((item) => <li class="flex gap-2.5"><Check size={16} aria-hidden="true" class="mt-1 shrink-0 text-olive" />{item}</li>)}
+          </ul>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="mt-6 max-w-3xl text-ink">{details.byDay90}</p>
+</section>
+
+<section class="border-y border-line bg-surface" aria-labelledby="compliance-title">
+  <div class="page-container section-space grid gap-10 lg:grid-cols-12">
+    <div class="lg:col-span-5">
+      <SectionHeader id="compliance-title" eyebrow="NMC guidelines" title="Content that follows the advertising rules for doctors" />
+    </div>
+    <div class="lg:col-span-7">
+      <p class="text-ink-muted">{compliance.intro}</p>
+      <ul class="mt-6 space-y-3">
+        {compliance.rules.map((rule) => <li class="flex gap-2.5"><ShieldCheck size={17} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />{rule}</li>)}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="page-container section-space" aria-labelledby="promises-title">
+  <SectionHeader id="promises-title" eyebrow="Why DevMsr" title="What you can count on" />
+  <ul class="mt-10 grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+    {
+      promises.map((promise) => (
+        <li class="bg-surface p-6">
+          <h3 class="font-semibold text-ink">{promise.title}</h3>
+          <p class="text-small mt-1.5 text-ink-muted">{promise.detail}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<section class="bg-bg-sunken" aria-labelledby="access-title">
+  <div class="page-container section-space grid gap-10 lg:grid-cols-12">
+    <div class="lg:col-span-5">
+      <SectionHeader id="access-title" eyebrow="Account security" title="Your accounts stay yours" intro={accountAccess.intro} />
+    </div>
+    <ul class="space-y-3 lg:col-span-7">
+      {accountAccess.points.map((point) => <li class="flex gap-2.5"><KeyRound size={17} aria-hidden="true" class="mt-0.5 shrink-0 text-olive" />{point}</li>)}
+    </ul>
+  </div>
+</section>
+
+<section class="border-b border-line" aria-labelledby="terms-title">
+  <div class="page-container section-space">
+    <SectionHeader id="terms-title" eyebrow="Terms" title="Plan terms in plain words" />
+    <dl class="mt-10 grid gap-x-12 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        terms.map((term) => (
+          <div>
+            <dt class="font-semibold text-ink">{term.title}</dt>
+            <dd class="text-small mt-1.5 text-ink-muted">{term.detail}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <p class="text-small mt-10 max-w-3xl text-ink-muted">{details.termsNote}</p>
+  </div>
+</section>

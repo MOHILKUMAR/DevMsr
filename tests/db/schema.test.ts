@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { createTestDb, createUser, leadPayload, type TestDb } from './harness';
 import { SERVICE_SEED } from '../../src/data/seed/services';
 import { PRICING_SEED } from '../../src/data/seed/pricing';
+import { FAQ_SEED } from '../../src/data/seed/content';
 
 /**
  * Applies the real migrations and seed to an in-process PostgreSQL (PGlite)
@@ -84,11 +85,12 @@ describe('public catalogue (anon)', () => {
 
   it('returns what can increase each price', async () => {
     const pricing = await t.as('anon', null, async (tx) => {
-      const { rows } = await tx.query<{ c: { pricing: { service_slug: string; price_factors: string[] }[] } }>('select public.get_public_catalogue() as c');
+      const { rows } = await tx.query<{ c: { pricing: { service_slug: string; pricing_model: string; price_factors: string[] }[] } }>('select public.get_public_catalogue() as c');
       return rows[0]!.c.pricing;
     });
     expect(pricing).toHaveLength(PRICING_SEED.length);
-    for (const price of pricing) expect(price.price_factors.length, price.service_slug).toBeGreaterThan(0);
+    // A fixed price (a social media plan) has nothing that can increase it.
+    for (const price of pricing) if (price.pricing_model !== 'fixed') expect(price.price_factors.length, price.service_slug).toBeGreaterThan(0);
     const landing = PRICING_SEED.find((row) => row.serviceSlug === 'landing-page')!;
     expect(pricing.find((p) => p.service_slug === 'landing-page')?.price_factors).toEqual(landing.factors);
   });
@@ -442,5 +444,53 @@ describe('pricing detail migration (20261013000004)', () => {
   it('limits factors to 30 items of up to 200 characters', async () => {
     await expect(setFactors('blog-website', Array.from({ length: 31 }, (_, i) => `Factor ${i}`))).rejects.toThrow();
     await expect(setFactors('blog-website', ['x'.repeat(201)])).rejects.toThrow();
+  });
+});
+
+describe('social media category migration (20261028000005)', () => {
+  const migration = readFileSync(join(import.meta.dirname, '..', '..', 'supabase/migrations/20261028000005_social_media_category.sql'), 'utf8');
+
+  it('accepts the new category everywhere a category is stored, and is safe to run twice', async () => {
+    await t.db.exec(migration);
+    await t.db.exec(migration);
+    const { rows } = await t.db.query<{ category: string }>(`select category from public.services where slug = 'healthcare-social-media-management'`);
+    expect(rows[0]!.category).toBe('social-media-management');
+    await t.db.query(`update public.products set service_category = 'social-media-management' where slug = 'lead-desk'`);
+    await t.db.query(`update public.products set service_category = 'crm-erp' where slug = 'lead-desk'`);
+    const faqs = await t.db.query<{ n: number }>(`select count(*)::int as n from public.faqs where service_category = 'social-media-management'`);
+    expect(faqs.rows[0]!.n).toBeGreaterThan(0);
+
+    const lead = await createLeadAsServer({ service_category: 'social-media-management' });
+    const stored = await t.db.query<{ service_category: string }>('select service_category from public.leads where id = $1', [lead.lead_id]);
+    expect(stored.rows[0]!.service_category).toBe('social-media-management');
+  });
+
+  it('adds the category’s services, prices and FAQs to an existing database once (supabase/data file)', async () => {
+    const data = readFileSync(join(import.meta.dirname, '..', '..', 'supabase/data/20261028_social_media_catalogue.sql'), 'utf8');
+    const services = SERVICE_SEED.filter((service) => service.category === 'social-media-management');
+    const slugs = new Set(services.map((service) => service.slug));
+    const count = async (sql: string) => (await t.db.query<{ n: number }>(sql)).rows[0]!.n;
+    // As on the live database before this change.
+    await t.db.query(`delete from public.services where category = 'social-media-management'`);
+    await t.db.query(`delete from public.faqs where service_category = 'social-media-management'`);
+
+    await t.db.exec(data);
+    await t.db.exec(data); // safe to run twice
+
+    expect(await count(`select count(*)::int as n from public.services where category = 'social-media-management'`)).toBe(services.length);
+    expect(await count(`select count(*)::int as n from public.service_pricing p join public.services s on s.id = p.service_id where s.category = 'social-media-management'`)).toBe(
+      PRICING_SEED.filter((row) => slugs.has(row.serviceSlug)).length,
+    );
+    expect(await count(`select count(*)::int as n from public.service_industries si join public.services s on s.id = si.service_id where s.category = 'social-media-management'`)).toBe(
+      services.reduce((sum, service) => sum + service.industries.length, 0),
+    );
+    expect(await count(`select count(*)::int as n from public.faqs where service_category = 'social-media-management'`)).toBe(
+      FAQ_SEED.filter((faq) => faq.scopeKey === 'social-media-management').length,
+    );
+  });
+
+  it('still rejects unknown categories', async () => {
+    await expect(t.db.query(`update public.services set category = 'not-a-category' where slug = 'local-seo'`)).rejects.toThrow(/services_category_check/);
+    await expect(createLeadAsServer({ service_category: 'not-a-category' })).rejects.toThrow(/leads_service_category_check/);
   });
 });

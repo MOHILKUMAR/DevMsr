@@ -10,6 +10,7 @@ import CtaBand from '../../components/ui/CtaBand.astro';
 import DynamicIcon from '../../components/ui/DynamicIcon.astro';
 import PriceList from '../../components/services/PriceList.astro';
 import ProductList from '../../components/services/ProductList.astro';
+import RetainerSections from '../../components/services/RetainerSections.astro';
 import { getServiceCategoryContent, SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
 import { BUSINESS } from '../../data/business';
 import { loadCatalogue } from '../../lib/catalogue/repository';
@@ -30,12 +31,14 @@ const catalogue = await loadCatalogue(Astro.locals);
 const services = servicesForCategory(catalogue, content.slug);
 const allServices = serviceMap(catalogue);
 const prices = pricesForServices(catalogue, services);
-const lowest = lowestPrice(prices);
+const lowest = lowestPrice(content.fromPriceService ? pricesForService(catalogue, content.fromPriceService) : prices);
 const products = productsForCategory(catalogue, content.slug);
 const faqs = faqsFor(catalogue, 'service_category', content.slug);
 const industriesBySlug = new Map(catalogue.industries.map((industry) => [industry.slug, industry]));
 const path = `/services/${content.slug}`;
 const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== content.slug).slice(0, 4);
+const quoteHref = formLink('/request-quote', { category: content.slug });
+const nextSteps = content.nextSteps ?? ['Send a quote request with a rough description.', 'We reply with questions or a short call.', 'You receive a written scope and quote.'];
 ---
 
 <MarketingLayout
@@ -66,8 +69,14 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
         <h1 class="text-h1 mt-5">{content.tagline}</h1>
         <p class="text-lede mt-5 max-w-2xl">{content.intro}</p>
         <div class="mt-8 flex flex-wrap gap-3">
-          <Button href={formLink('/request-quote', { category: content.slug })} size="lg">Request a quote <ArrowRight size={17} aria-hidden="true" /></Button>
-          <Button href="#pricing" size="lg" variant="secondary">See pricing</Button>
+          <Button href={quoteHref} size="lg">Request a quote <ArrowRight size={17} aria-hidden="true" /></Button>
+          {
+            content.retainer ? (
+              <Button href="#plans" size="lg" variant="secondary">See plans</Button>
+            ) : (
+              <Button href="#pricing" size="lg" variant="secondary">See pricing</Button>
+            )
+          }
         </div>
       </div>
       <aside class="self-end lg:col-span-4" aria-label="At a glance">
@@ -132,6 +141,8 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
     </div>
   </section>
 
+  {content.retainer && <RetainerSections catalogue={catalogue} details={content.retainer} quoteHref={quoteHref} />}
+
   <section class="page-container section-space" aria-labelledby="services-title">
     <SectionHeader class="mb-10" id="services-title" eyebrow="Services" title={`${content.name} services`} />
     {
@@ -164,7 +175,7 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
       <div class="lg:col-span-5">
         <SectionHeader id="pricing-title" eyebrow="Indicative cost" title="Pricing and running costs" />
         <p class="mt-5 text-ink-muted">
-          Development fees are one-time unless marked monthly. Final cost depends on scope, integrations, data migration, testing and deployment.
+          {content.pricingIntro ?? 'Development fees are one-time unless marked monthly. Final cost depends on scope, integrations, data migration, testing and deployment.'}
         </p>
         <div class="mt-8 space-y-6">
           <div class="flex gap-3">
@@ -199,9 +210,15 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
       </div>
       <div class="lg:col-span-7">
         <PriceList catalogue={catalogue} prices={prices} detailed />
-        <p class="text-small mt-4 text-ink-muted">
-          Starting estimates, not final quotes. <a href="/payments" class="link-olive">How payments work</a>.
-        </p>
+        {
+          content.retainer ? (
+            <p class="text-small mt-4 text-ink-muted">Open a price to see what it includes. Plan terms are listed above.</p>
+          ) : (
+            <p class="text-small mt-4 text-ink-muted">
+              Starting estimates, not final quotes. <a href="/payments" class="link-olive">How payments work</a>.
+            </p>
+          )
+        }
       </div>
     </div>
   </section>
@@ -235,9 +252,7 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
       <div class="lg:col-span-5">
         <h2 id="next-title" class="text-h2">Next steps</h2>
         <ol class="mt-6 space-y-3 text-ink-muted">
-          <li><span class="mr-2 font-mono text-[0.75rem] text-clay-ink">01</span>Send a quote request with a rough description.</li>
-          <li><span class="mr-2 font-mono text-[0.75rem] text-clay-ink">02</span>We reply with questions or a short call.</li>
-          <li><span class="mr-2 font-mono text-[0.75rem] text-clay-ink">03</span>You receive a written scope and quote.</li>
+          {nextSteps.map((step, index) => <li><span class="mr-2 font-mono text-[0.75rem] text-clay-ink">{String(index + 1).padStart(2, '0')}</span>{step}</li>)}
         </ol>
       </div>
       <div class="lg:col-span-7">
@@ -258,5 +273,5 @@ const related = SERVICE_CATEGORY_CONTENT.filter((category) => category.slug !== 
     </div>
   </section>
 
-  <CtaBand primaryHref={formLink('/request-quote', { category: content.slug })} />
+  <CtaBand primaryHref={quoteHref} />
 </MarketingLayout>

@@ -18,6 +18,7 @@ export const SERVICE_CATEGORY_SLUGS = [
   'voice-ai',
   'integrations-payments',
   'hosting-maintenance',
+  'social-media-management',
 ] as const;
 export type ServiceCategorySlug = (typeof SERVICE_CATEGORY_SLUGS)[number];
 

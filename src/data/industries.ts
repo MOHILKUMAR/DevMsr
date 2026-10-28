@@ -89,6 +89,11 @@ export const INDUSTRY_CONTENT: IndustryContent[] = [
         summary: 'Structured visit records and the daily numbers management asks for.',
         serviceSlugs: ['emr-ehr-modules', 'hospital-reporting-automation'],
       },
+      {
+        title: 'Social media and online presence',
+        summary: 'Posts, reels, reviews and local search, approved by you and checked against NMC guidelines.',
+        serviceSlugs: ['healthcare-social-media-management', 'social-media-3-month-plan', 'digital-presence-audit', 'local-seo', 'health-blog-writing'],
+      },
     ],
     integrations: ['UPI and card payments via a payment gateway', 'SMS and approved WhatsApp Business providers', 'Email notifications', 'Barcode printers and token printers', 'TV displays for queue status', 'Export to Excel / accounting software'],
     caution:
