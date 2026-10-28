@@ -375,7 +375,7 @@ export const SERVICE_CATEGORY_CONTENT: ServiceCategoryContent[] = [
       'Posts, reels, review replies, blogs and Local SEO for doctors, clinics and hospitals, shot at your hospital and checked against NMC guidelines.',
     fromPriceService: 'healthcare-social-media-management',
     pricingIntro:
-      'Plan prices are fixed, not estimates. GST at 18% is added. Add-ons are priced up front, and your signed proposal confirms your plan, deliverables and start date.',
+      'These are our standard rates, before 18% GST. Your final fee is agreed after an initial consultation and confirmed in a written proposal, and may vary with the scope we agree: for example the number of doctors, departments or branches, shoot requirements and any add-ons.',
     nextSteps: [
       'Book the audit, or send a quote request with your hospital’s details.',
       'We send your audit file with a costed 3-month plan.',
