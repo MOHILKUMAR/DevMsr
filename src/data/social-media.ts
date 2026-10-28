@@ -136,6 +136,7 @@ export const SOCIAL_MEDIA_DETAILS: RetainerDetails = {
       'On the Partner Plan the website fee is waived, the price is locked for 12 months, and you get a free re-audit every quarter.',
       'Pro runs only on the Partner Plan, because SEO usually takes 4–12 months to show results.',
       'Every plan includes an NMC check on each post and approval on WhatsApp. GST at 18% is extra.',
+      'Prices shown are standard rates. Your final fee is agreed after an initial consultation and may vary with the scope of your practice.',
     ],
   },
   audit: {

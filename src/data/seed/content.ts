@@ -354,6 +354,11 @@ export const FAQ_SEED: FaqSeed[] = [
   },
   {
     scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Are the listed social media prices final?',
+    answer: 'They are our standard rates, before 18% GST. Your final fee is agreed after an initial consultation and confirmed in a written proposal before any work starts. It may vary with the scope we agree, such as the number of doctors, departments or branches, how often we shoot, outstation travel and any add-ons.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
     question: 'Is the 3-Month Plan refundable?',
     answer: 'Fully, if you cancel in writing before work starts: that is, before the earliest of the kickoff call, the first audit fix, the start of website design, the first content calendar or the first shoot. Once work has started it is not refundable and it cannot be paused, because we reserve team time and shoots for the full 3 months.',
   },

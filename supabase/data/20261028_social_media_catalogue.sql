@@ -1,15 +1,51 @@
 -- =====================================================================
 -- Social media management: services, prices and FAQs for the LIVE database.
 --
--- Run order: 1) migration 20261028000005_social_media_category.sql,
--- 2) deploy the code, 3) this file. Running it before the deploy makes the
--- live site fall back to its bundled catalogue until the deploy.
+-- Run the whole file (nothing selected) in the Supabase SQL Editor of the
+-- live project, AFTER deploying the code that adds the category. It first
+-- repeats migration 20261028000005 (widening the category checks), so it
+-- works even if that migration did not reach the project, then inserts the
+-- rows. Statements are extracted from supabase/seed.sql: only missing rows
+-- are inserted and admin edits are never overwritten. Safe to run twice.
 --
--- Extracted from supabase/seed.sql (same statements), so it only inserts
--- rows that are missing and never overwrites admin edits. Safe to run twice.
+-- The last statement reports what is now in the database. Expect
+-- services 6, prices 17, faqs 11 and category_check_ok true.
 -- =====================================================================
 
 begin;
+
+alter table public.services
+  drop constraint if exists services_category_check,
+  add constraint services_category_check check (category in (
+    'web-development', 'ecommerce', 'custom-software', 'management-systems', 'pos-billing', 'crm-erp',
+    'ai-automation', 'ai-agents-chatbots', 'voice-ai', 'integrations-payments', 'hosting-maintenance',
+    'social-media-management'
+  ));
+
+alter table public.products
+  drop constraint if exists products_service_category_check,
+  add constraint products_service_category_check check (service_category in (
+    'web-development', 'ecommerce', 'custom-software', 'management-systems', 'pos-billing', 'crm-erp',
+    'ai-automation', 'ai-agents-chatbots', 'voice-ai', 'integrations-payments', 'hosting-maintenance',
+    'social-media-management'
+  ));
+
+alter table public.faqs
+  drop constraint if exists faqs_service_category_check,
+  add constraint faqs_service_category_check check (service_category in (
+    'web-development', 'ecommerce', 'custom-software', 'management-systems', 'pos-billing', 'crm-erp',
+    'ai-automation', 'ai-agents-chatbots', 'voice-ai', 'integrations-payments', 'hosting-maintenance',
+    'social-media-management'
+  ));
+
+alter table public.leads
+  drop constraint if exists leads_service_category_check,
+  add constraint leads_service_category_check check (service_category in (
+    'web-development', 'ecommerce', 'custom-software', 'management-systems', 'pos-billing', 'crm-erp',
+    'ai-automation', 'ai-agents-chatbots', 'voice-ai', 'integrations-payments', 'hosting-maintenance',
+    'social-media-management'
+  ));
+
 insert into public.services (slug, name, short_description, category, features, status, sort_order) values ('healthcare-social-media-management', 'Social media management', 'Posts, reels, carousels and stories on Instagram, Facebook, YouTube, LinkedIn and X, shot at your hospital and approved by you on WhatsApp.', 'social-media-management', array['12 posts, 4 reels, 5 carousels and 15 stories a month', 'One shoot a month at your hospital', 'Daily replies to comments and messages', 'Google review replies and a feedback QR', 'Camp, festival and health-awareness posts', 'Monthly report']::text[], 'offered', 1260) on conflict (slug) do nothing;
 
 insert into public.services (slug, name, short_description, category, features, status, sort_order) values ('social-media-3-month-plan', '3-month social media and website plan', 'Your website plus three months of social media management, paid once before work starts.', 'social-media-management', array['Static or premium website', 'Three months of posts, reels, carousels and stories', 'Three shoots at your hospital', 'Upgrade to the Partner Plan at any time']::text[], 'offered', 1270) on conflict (slug) do nothing;
@@ -155,19 +191,29 @@ select 'service_category', null, 'social-media-management', 'Can I pause or stop
 where not exists (select 1 from public.faqs f where f.question = 'Can I pause or stop the Partner Plan?');
 
 insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
-select 'service_category', null, 'social-media-management', 'Is the 3-Month Plan refundable?', 'Fully, if you cancel in writing before work starts: that is, before the earliest of the kickoff call, the first audit fix, the start of website design, the first content calendar or the first shoot. Once work has started it is not refundable and it cannot be paused, because we reserve team time and shoots for the full 3 months.', 300
+select 'service_category', null, 'social-media-management', 'Are the listed social media prices final?', 'They are our standard rates, before 18% GST. Your final fee is agreed after an initial consultation and confirmed in a written proposal before any work starts. It may vary with the scope we agree, such as the number of doctors, departments or branches, how often we shoot, outstation travel and any add-ons.', 300
+where not exists (select 1 from public.faqs f where f.question = 'Are the listed social media prices final?');
+
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Is the 3-Month Plan refundable?', 'Fully, if you cancel in writing before work starts: that is, before the earliest of the kickoff call, the first audit fix, the start of website design, the first content calendar or the first shoot. Once work has started it is not refundable and it cannot be paused, because we reserve team time and shoots for the full 3 months.', 310
 where not exists (select 1 from public.faqs f where f.question = 'Is the 3-Month Plan refundable?');
 
 insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
-select 'service_category', null, 'social-media-management', 'Do you guarantee followers, reach or rankings?', 'No. Results depend on the platforms, competition and other factors outside our control, and we never buy followers, likes or reviews. You get a monthly report on reach, followers, reviews and rankings, so you can see what is changing.', 310
+select 'service_category', null, 'social-media-management', 'Do you guarantee followers, reach or rankings?', 'No. Results depend on the platforms, competition and other factors outside our control, and we never buy followers, likes or reviews. You get a monthly report on reach, followers, reviews and rankings, so you can see what is changing.', 320
 where not exists (select 1 from public.faqs f where f.question = 'Do you guarantee followers, reach or rankings?');
 
 insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
-select 'service_category', null, 'social-media-management', 'Is ad spend included?', 'No. If you run ads, you pay Meta, Google or the other platform directly, and we do not hold or refund ad budgets. Influencer fees and paid verification badges are also not included.', 320
+select 'service_category', null, 'social-media-management', 'Is ad spend included?', 'No. If you run ads, you pay Meta, Google or the other platform directly, and we do not hold or refund ad budgets. Influencer fees and paid verification badges are also not included.', 330
 where not exists (select 1 from public.faqs f where f.question = 'Is ad spend included?');
 
 insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
-select 'service_category', null, 'social-media-management', 'Do you manage social media for businesses outside healthcare?', 'Our published plans are built for doctors, clinics and hospitals. For other businesses, send a quote request with your platforms and goals and we will scope it with you.', 330
+select 'service_category', null, 'social-media-management', 'Do you manage social media for businesses outside healthcare?', 'Our published plans are built for doctors, clinics and hospitals. For other businesses, send a quote request with your platforms and goals and we will scope it with you.', 340
 where not exists (select 1 from public.faqs f where f.question = 'Do you manage social media for businesses outside healthcare?');
 
 commit;
+
+select
+  (select count(*) from public.services where category = 'social-media-management') as services,
+  (select count(*) from public.service_pricing p join public.services s on s.id = p.service_id where s.category = 'social-media-management') as prices,
+  (select count(*) from public.faqs where service_category = 'social-media-management') as faqs,
+  (select pg_get_constraintdef(oid) like '%social-media-management%' from pg_constraint where conname = 'services_category_check') as category_check_ok;

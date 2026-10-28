@@ -470,9 +470,13 @@ describe('social media category migration (20261028000005)', () => {
     const services = SERVICE_SEED.filter((service) => service.category === 'social-media-management');
     const slugs = new Set(services.map((service) => service.slug));
     const count = async (sql: string) => (await t.db.query<{ n: number }>(sql)).rows[0]!.n;
-    // As on the live database before this change.
+    // As on the live database before this change, including the old category checks
+    // (the file repeats the migration, so it works even if that never reached the project).
     await t.db.query(`delete from public.services where category = 'social-media-management'`);
     await t.db.query(`delete from public.faqs where service_category = 'social-media-management'`);
+    const oldCategories = `'web-development', 'ecommerce', 'custom-software', 'management-systems', 'pos-billing', 'crm-erp', 'ai-automation', 'ai-agents-chatbots', 'voice-ai', 'integrations-payments', 'hosting-maintenance'`;
+    await t.db.exec(`alter table public.services drop constraint services_category_check, add constraint services_category_check check (category in (${oldCategories}))`);
+    await t.db.exec(`alter table public.faqs drop constraint faqs_service_category_check, add constraint faqs_service_category_check check (service_category in (${oldCategories}))`);
 
     await t.db.exec(data);
     await t.db.exec(data); // safe to run twice
