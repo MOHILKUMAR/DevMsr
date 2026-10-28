@@ -55,4 +55,17 @@ describe('form pre-fill links', () => {
     // Without the service list (contact form), a service cannot be resolved.
     expect(resolvePrefill({ service: 'admission-crm' }, { industries: OPTIONS.industries, categories: OPTIONS.categories }).interest).toBe('');
   });
+
+  it('only implies an industry or category the form has an option for', () => {
+    const stale: PrefillOptions = {
+      ...OPTIONS,
+      services: [{ slug: 'old-service', name: 'Old service', industry: 'closed-industry' }, ...(OPTIONS.services ?? [])],
+      products: [{ slug: 'old-product', name: 'Old product', industry: 'closed-industry', category: 'retired-category' }],
+    };
+    expect(resolvePrefill({ product: 'old-product' }, stale)).toEqual({ industry: '', interest: '', service: null, productName: 'Old product' });
+    expect(resolvePrefill({ service: 'old-service' }, stale)).toMatchObject({ industry: '', interest: 'service:old-service' });
+    // The next valid source is used instead.
+    expect(resolvePrefill({ product: 'old-product', service: 'admission-crm' }, stale).industry).toBe('education');
+    expect(resolvePrefill({ product: 'old-product', category: 'pos-billing' }, stale).interest).toBe('category:pos-billing');
+  });
 });

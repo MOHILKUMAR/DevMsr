@@ -111,12 +111,42 @@ describe('LeadForm pre-fill from a "#" link', () => {
     expect(screen.getByRole('option', { name: 'Restaurant POS and billing' })).toBeTruthy();
   });
 
-  it('says which product a demo request is about', async () => {
+  it('says which product a demo request is about, in the description hint rather than above the fields', async () => {
     window.location.hash = '#product=trip-desk';
     const products = [{ slug: 'trip-desk', name: 'Trip Desk', industry: null, category: 'pos-billing' }];
     render(<LeadForm {...props} formType="demo" prefillOptions={{ industries: ['restaurants'], categories: ['pos-billing'], products }} />);
     await waitFor(() => expect(screen.getByText('Trip Desk')).toBeTruthy());
     expect((screen.getByLabelText(/^Interested in/) as HTMLSelectElement).value).toBe('category:pos-billing');
+    const description = screen.getByLabelText(/^What would you like to see/);
+    const hint = document.getElementById(description.getAttribute('aria-describedby')!.split(' ')[0]!);
+    expect(hint?.textContent).toBe('You are asking about Trip Desk. Tell us about your business and what you want the demo to cover.');
+  });
+
+  it('shows one "Selected service" group when "#" and "?" ask for different services', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    window.location.hash = '#service=restaurant-pos-billing';
+    const services = [{ slug: 'restaurant-pos-billing', name: 'Restaurant POS and billing', industry: 'restaurants' }];
+    const fromQuery = { value: 'service:admission-crm', label: 'Admission CRM' };
+    render(
+      <LeadForm
+        {...props}
+        defaults={{ interest: fromQuery.value, service: fromQuery }}
+        prefillOptions={{ industries: ['restaurants'], categories: ['pos-billing'], services }}
+      />,
+    );
+    const interest = screen.getByLabelText(/^Interested in/) as HTMLSelectElement;
+    await waitFor(() => expect(interest.value).toBe('service:restaurant-pos-billing'));
+    expect(interest.querySelectorAll('optgroup[label="Selected service"]')).toHaveLength(1);
+    expect(screen.queryByRole('option', { name: 'Admission CRM' })).toBeNull();
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
+  it('keeps the service a "?" link asked for', () => {
+    const fromQuery = { value: 'service:admission-crm', label: 'Admission CRM' };
+    render(<LeadForm {...props} defaults={{ interest: fromQuery.value, service: fromQuery }} />);
+    expect((screen.getByLabelText(/^Interested in/) as HTMLSelectElement).value).toBe('service:admission-crm');
+    expect(screen.getByRole('option', { name: 'Admission CRM' })).toBeTruthy();
   });
 
   it('ignores a fragment that is not a pre-fill, such as a skip link', async () => {
