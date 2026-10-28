@@ -23,6 +23,7 @@ const ROUTES = [
   '/services/voice-ai',
   '/services/integrations-payments',
   '/services/hosting-maintenance',
+  '/services/social-media-management',
   '/products',
   '/products/lead-desk',
   '/pricing',
@@ -78,7 +79,7 @@ test('unknown pages and slugs return 404 with a helpful page', async ({ page }) 
 });
 
 test('key pages have no serious accessibility violations (axe, WCAG 2.2 AA)', async ({ page }) => {
-  for (const path of ['/', '/industries', '/industries/healthcare', '/services/pos-billing', '/products', '/pricing', '/payments', '/request-quote', '/blog/what-decides-the-cost-of-business-software']) {
+  for (const path of ['/', '/industries', '/industries/healthcare', '/services/pos-billing', '/services/social-media-management', '/products', '/pricing', '/payments', '/request-quote', '/blog/what-decides-the-cost-of-business-software']) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
     const serious = results.violations.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
@@ -88,7 +89,7 @@ test('key pages have no serious accessibility violations (axe, WCAG 2.2 AA)', as
 
 test('dark mode also passes axe colour contrast', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
-  for (const path of ['/', '/pricing', '/payments', '/request-quote']) {
+  for (const path of ['/', '/services/social-media-management', '/pricing', '/payments', '/request-quote']) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
     expect(results.violations.map((violation) => `${path}: ${violation.nodes.length} nodes`)).toEqual([]);

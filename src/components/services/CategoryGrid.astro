@@ -2,7 +2,7 @@
 import { ArrowRight, MessageCircleQuestionMark } from '@lucide/astro';
 import DynamicIcon from '../ui/DynamicIcon.astro';
 import { SERVICE_CATEGORY_CONTENT } from '../../data/service-categories';
-import { pricesForServices, servicesForCategory } from '../../lib/catalogue/queries';
+import { pricesForService, pricesForServices, servicesForCategory } from '../../lib/catalogue/queries';
 import { formatFromPrice, lowestPrice } from '../../lib/catalogue/pricing';
 import type { Catalogue } from '../../types/catalogue';
 
@@ -15,7 +15,7 @@ const Heading = headingLevel;
 
 const cells = SERVICE_CATEGORY_CONTENT.map((category) => {
   const services = servicesForCategory(catalogue, category.slug);
-  const lowest = lowestPrice(pricesForServices(catalogue, services));
+  const lowest = lowestPrice(category.fromPriceService ? pricesForService(catalogue, category.fromPriceService) : pricesForServices(catalogue, services));
   return { category, count: services.length, lowest };
 });
 ---

@@ -13,7 +13,7 @@ const serviceSlugs = new Set(SERVICE_SEED.map((s) => s.slug));
 const industrySlugs = new Set(INDUSTRY_CONTENT.map((i) => i.slug));
 
 describe('catalogue integrity', () => {
-  it('has the six required industries and eleven service categories', () => {
+  it('has the six required industries and twelve service categories', () => {
     expect([...industrySlugs].sort()).toEqual(
       ['education', 'healthcare', 'hotels-hospitality', 'restaurants', 'retail-jewellery-footwear', 'travel-tourism'].sort(),
     );
@@ -50,7 +50,8 @@ describe('catalogue integrity', () => {
   });
 
   it('seeds every price from the brief with a valid range', () => {
-    expect(PRICING_SEED).toHaveLength(43);
+    // 43 from the pricing brief, 17 from the social media pitch deck.
+    expect(PRICING_SEED).toHaveLength(60);
     for (const row of PRICING_SEED) {
       expect(Number(row.max)).toBeGreaterThanOrEqual(Number(row.min));
     }
@@ -88,7 +89,7 @@ describe('catalogue integrity', () => {
     const parsed = catalogueResponseSchema.parse(asDb);
     expect(parsed.pricing).toEqual(bundled.pricing);
     expect(parsed.services).toEqual(bundled.services);
-    expect(parsed.pricing.every((price) => price.priceFactors.length > 0)).toBe(true);
+    expect(parsed.pricing.filter((price) => price.pricingModel !== 'fixed').every((price) => price.priceFactors.length > 0)).toBe(true);
 
     // A database without the price_factors migration still parses, with no factors.
     const withoutFactors = { ...asDb, pricing: asDb.pricing.map(({ price_factors: _omit, ...row }) => row) };

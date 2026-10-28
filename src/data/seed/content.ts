@@ -320,6 +320,58 @@ export const FAQ_SEED: FaqSeed[] = [
     question: 'Can we import existing student data?',
     answer: 'Yes, from Excel or CSV. We review a sample first so cleaning effort is reflected in the quote.',
   },
+
+  // Social media management (owner's Terms, Refund Policy and Credential Security Agreement, Oct 2026)
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Which platforms do you manage?',
+    answer: 'Instagram, Facebook, YouTube, LinkedIn and X, in one consistent brand. We also keep your Google Business Profile and listings such as Practo and Justdial accurate.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Does anything get posted without my approval?',
+    answer: 'No. You approve the monthly calendar in week one and every post and reel on WhatsApp before it goes live. Please reply within 2 working days; a late approval moves the publishing date, not the invoice date. One round of changes per post or reel is included; extra rounds cost ₹299 per post and ₹799 per reel.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'How do you keep content within the NMC guidelines?',
+    answer: 'We check every post against the National Medical Commission’s Guidelines on Ethical Advertising and Public Communication before it reaches you. We do not publish patient testimonials, before-and-after photos, guaranteed outcomes, unverifiable “best” or “No. 1” claims, or bought reviews, and every post shows the doctor’s name, qualification and registration number. You stay professionally responsible for the medical accuracy of what you approve.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Do you need my passwords?',
+    answer: 'Usually not. Wherever a platform allows it, you add us as a partner, manager or editor and each team member logs in as themselves. If a password is unavoidable, it is shared through an encrypted password manager, never by WhatsApp or email; two-factor authentication stays on, and recovery details stay yours. Access is removed within 48 hours of the work ending.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Who owns the accounts and the content?',
+    answer: 'You do: your accounts, pages, domain, website and data stay in your name. Once paid for, the designs, reels, photos and articles we make for you are yours, and we hand them over if you leave. We never lock or withhold an account, even in a fee dispute.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Can I pause or stop the Partner Plan?',
+    answer: 'Yes, with one month’s written notice, during which services continue and are billed as usual. You can pause for up to 2 months once a year; the 12-month term extends by the pause. If you leave before 12 months, the website fee we waived (₹11,999 Starter, ₹19,999 Growth and Pro) becomes payable. After 12 months the plan runs month to month.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Is the 3-Month Plan refundable?',
+    answer: 'Fully, if you cancel in writing before work starts: that is, before the earliest of the kickoff call, the first audit fix, the start of website design, the first content calendar or the first shoot. Once work has started it is not refundable and it cannot be paused, because we reserve team time and shoots for the full 3 months.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Do you guarantee followers, reach or rankings?',
+    answer: 'No. Results depend on the platforms, competition and other factors outside our control, and we never buy followers, likes or reviews. You get a monthly report on reach, followers, reviews and rankings, so you can see what is changing.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Is ad spend included?',
+    answer: 'No. If you run ads, you pay Meta, Google or the other platform directly, and we do not hold or refund ad budgets. Influencer fees and paid verification badges are also not included.',
+  },
+  {
+    scope: 'service_category', scopeKey: 'social-media-management',
+    question: 'Do you manage social media for businesses outside healthcare?',
+    answer: 'Our published plans are built for doctors, clinics and hospitals. For other businesses, send a quote request with your platforms and goals and we will scope it with you.',
+  },
 ];
 
 export const SITE_SETTINGS_SEED = {

@@ -955,4 +955,55 @@ export const SERVICE_SEED: ServiceSeed[] = [
     industries: [],
     shortDescription: 'Uptime and error monitoring with a defined support channel.',
   },
+
+  // ── K. Social media management (owner's healthcare pitch deck, Oct 2026) ──
+  // The audit, blogs and add-ons are not linked to Healthcare, so that page's
+  // "from" price stays the price of a project rather than of an add-on.
+  {
+    slug: 'healthcare-social-media-management',
+    name: 'Social media management',
+    category: 'social-media-management',
+    industries: [HC],
+    shortDescription: 'Posts, reels, carousels and stories on Instagram, Facebook, YouTube, LinkedIn and X, shot at your hospital and approved by you on WhatsApp.',
+    features: ['12 posts, 4 reels, 5 carousels and 15 stories a month', 'One shoot a month at your hospital', 'Daily replies to comments and messages', 'Google review replies and a feedback QR', 'Camp, festival and health-awareness posts', 'Monthly report'],
+  },
+  {
+    slug: 'social-media-3-month-plan',
+    name: '3-month social media and website plan',
+    category: 'social-media-management',
+    industries: [HC],
+    shortDescription: 'Your website plus three months of social media management, paid once before work starts.',
+    features: ['Static or premium website', 'Three months of posts, reels, carousels and stories', 'Three shoots at your hospital', 'Upgrade to the Partner Plan at any time'],
+  },
+  {
+    slug: 'digital-presence-audit',
+    name: 'Digital presence audit',
+    category: 'social-media-management',
+    industries: [],
+    shortDescription: 'A written audit of your social profiles, website, Google reviews, Google Business Profile and NMC compliance, with a costed 3-month plan.',
+    features: ['A score out of 10 for each area', 'Screenshots of what patients see today', 'Main problems and why to fix them', 'Free quick wins for this week', 'A 3-month plan with exact costing'],
+  },
+  {
+    slug: 'local-seo',
+    name: 'Local SEO',
+    category: 'social-media-management',
+    industries: [HC],
+    shortDescription: 'Google Business Profile, local keywords, doctor and department pages, listings and real backlinks, so patients find you when they search nearby.',
+    features: ['Google Business Profile management', 'On-page and technical SEO', 'Practo, Justdial and map listings', 'Backlinks from 25+ real sites', 'Monthly ranking report'],
+  },
+  {
+    slug: 'health-blog-writing',
+    name: 'Health blogs and articles',
+    category: 'social-media-management',
+    industries: [],
+    shortDescription: 'Doctor-reviewed health articles on your website, shared on 25+ platforms and reused as carousels and reel scripts.',
+    features: ['4 articles a month', 'Author box with the doctor’s registration number', 'Shared on Medium, LinkedIn, Quora, Practo and more'],
+  },
+  {
+    slug: 'social-media-add-ons',
+    name: 'Plan add-ons',
+    category: 'social-media-management',
+    industries: [],
+    shortDescription: 'Extra posts, reels, shoots and website pages for a busy month such as a camp week or a festival, priced up front.',
+  },
 ];
