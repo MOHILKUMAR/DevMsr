@@ -67,6 +67,17 @@ test('site links preselect choices after "#", including by clicking through', as
   await page.goto('/book-a-demo#product=trip-desk');
   await expect(page.getByText('You are asking about')).toContainText('Trip Desk');
   await expect(page.getByLabel(/Industry/)).toHaveValue('travel-tourism');
+  // The note is the description's hint, so it does not push the fields down when it appears after hydration.
+  await expect(page.getByLabel(/What would you like to see/)).toHaveAccessibleDescription(/^You are asking about Trip Desk\./);
+
+  // Either form resolves every choice, as admin "?" links are rewritten to "#" whatever they ask for.
+  await page.goto('/request-quote#product=trip-desk');
+  await expect(page.getByText('You are asking about')).toContainText('Trip Desk');
+  await expect(page.getByLabel(/Industry/)).toHaveValue('travel-tourism');
+  await expect(page.getByLabel(/Interested in/)).toHaveValue('category:crm-erp');
+  await page.goto('/book-a-demo#service=admission-crm');
+  await expect(page.getByLabel(/Interested in/)).toHaveValue('service:admission-crm');
+  await expect(page.getByLabel(/Industry/)).toHaveValue('education');
 
   await page.goto('/industries/healthcare');
   await page.getByRole('main').getByRole('link', { name: 'Get a quote' }).first().click();

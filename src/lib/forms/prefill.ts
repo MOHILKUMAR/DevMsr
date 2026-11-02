@@ -56,7 +56,7 @@ export interface PrefillOptions {
 export interface ResolvedPrefill {
   industry: string;
   interest: string;
-  /** Extra "Selected service" option when a specific service was asked for. */
+  /** Extra "Selected service" option when a specific service was asked for (LeadForm adds it). */
   service: { value: string; label: string } | null;
   productName: string | null;
 }
@@ -64,9 +64,11 @@ export interface ResolvedPrefill {
 export function resolvePrefill(prefill: Prefill, options: PrefillOptions): ResolvedPrefill {
   const service = options.services?.find((item) => item.slug === prefill.service) ?? null;
   const product = options.products?.find((item) => item.slug === prefill.product) ?? null;
-  const category = prefill.category && options.categories.includes(prefill.category) ? prefill.category : (product?.category ?? null);
-  const industry =
-    prefill.industry && options.industries.includes(prefill.industry) ? prefill.industry : (product?.industry ?? service?.industry ?? '');
+  // Only values the form has an option for: any other would leave the select blank while counting as filled in.
+  const isCategory = (slug: string | null | undefined): slug is string => !!slug && options.categories.includes(slug);
+  const isIndustry = (slug: string | null | undefined): slug is string => !!slug && options.industries.includes(slug);
+  const category = [prefill.category, product?.category].find(isCategory) ?? null;
+  const industry = [prefill.industry, product?.industry, service?.industry].find(isIndustry) ?? '';
   return {
     industry,
     interest: service ? `service:${service.slug}` : category ? `category:${category}` : '',
