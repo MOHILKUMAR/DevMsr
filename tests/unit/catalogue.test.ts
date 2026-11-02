@@ -50,8 +50,8 @@ describe('catalogue integrity', () => {
   });
 
   it('seeds every price from the brief with a valid range', () => {
-    // 43 from the pricing brief, 17 from the social media pitch deck.
-    expect(PRICING_SEED).toHaveLength(60);
+    // 43 from the pricing brief, 18 from the social media pitch deck.
+    expect(PRICING_SEED).toHaveLength(61);
     for (const row of PRICING_SEED) {
       expect(Number(row.max)).toBeGreaterThanOrEqual(Number(row.min));
     }

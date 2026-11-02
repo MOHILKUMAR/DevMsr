@@ -470,9 +470,13 @@ describe('social media category migration (20261028000005)', () => {
     const services = SERVICE_SEED.filter((service) => service.category === 'social-media-management');
     const slugs = new Set(services.map((service) => service.slug));
     const count = async (sql: string) => (await t.db.query<{ n: number }>(sql)).rows[0]!.n;
-    // As on the live database before this change.
+    // As on the live database before this change, including the old category checks
+    // (the file repeats the migration, so it works even if that never reached the project).
     await t.db.query(`delete from public.services where category = 'social-media-management'`);
     await t.db.query(`delete from public.faqs where service_category = 'social-media-management'`);
+    const oldCategories = `'web-development', 'ecommerce', 'custom-software', 'management-systems', 'pos-billing', 'crm-erp', 'ai-automation', 'ai-agents-chatbots', 'voice-ai', 'integrations-payments', 'hosting-maintenance'`;
+    await t.db.exec(`alter table public.services drop constraint services_category_check, add constraint services_category_check check (category in (${oldCategories}))`);
+    await t.db.exec(`alter table public.faqs drop constraint faqs_service_category_check, add constraint faqs_service_category_check check (service_category in (${oldCategories}))`);
 
     await t.db.exec(data);
     await t.db.exec(data); // safe to run twice
@@ -487,6 +491,46 @@ describe('social media category migration (20261028000005)', () => {
     expect(await count(`select count(*)::int as n from public.faqs where service_category = 'social-media-management'`)).toBe(
       FAQ_SEED.filter((faq) => faq.scopeKey === 'social-media-management').length,
     );
+  });
+
+  it('moves a database on the October prices to the revised plans (supabase/data price update)', async () => {
+    const update = readFileSync(join(import.meta.dirname, '..', '..', 'supabase/data/20261102_social_media_pricing_update.sql'), 'utf8');
+    const slugs = SERVICE_SEED.filter((service) => service.category === 'social-media-management').map((service) => service.slug);
+    const priceRows = async () =>
+      (
+        await t.db.query<{ slug: string; label: string; amount: string; interval: string }>(
+          `select s.slug, p.label, p.minimum_amount::text as amount, p.billing_interval as interval
+           from public.service_pricing p join public.services s on s.id = p.service_id
+           where s.category = 'social-media-management' order by s.slug, p.label`,
+        )
+      ).rows;
+    // As on the live database before this change: the October labels and prices.
+    const october: [string, string, number][] = [
+      ['Basic Partner Plan', 'Starter Partner Plan', 18999],
+      ['Professional Partner Plan', 'Growth Partner Plan', 23999],
+      ['Premium Partner Plan, with Local SEO', 'Pro Partner Plan, with Local SEO', 43998],
+      ['Basic 3-Month Plan', 'Starter 3-Month Plan', 68996],
+      ['Professional 3-Month Plan', 'Growth 3-Month Plan', 91996],
+      ['Local SEO, in the Premium Partner Plan', 'Local SEO', 24999],
+    ];
+    for (const [now, before, amount] of october) {
+      await t.db.query('update public.service_pricing set label = $2, minimum_amount = $3, maximum_amount = $3 where label = $1', [now, before, amount]);
+    }
+    await t.db.query(`delete from public.service_pricing where label = 'Premium 3-Month Plan, with Local SEO'`);
+    await t.db.query(`update public.faqs set answer = 'Old answer.' where question = 'Can I pause or stop the Partner Plan?'`);
+    await t.db.query(`update public.services set short_description = 'Old description.' where slug = 'local-seo'`);
+
+    await t.db.exec(update);
+    await t.db.exec(update); // safe to run twice
+
+    const expected = PRICING_SEED.filter((row) => slugs.includes(row.serviceSlug))
+      .map((row) => ({ slug: row.serviceSlug, label: row.label, amount: `${row.min}.00`, interval: row.interval ?? 'one_time' }))
+      .sort((a, b) => a.slug.localeCompare(b.slug) || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0));
+    expect(await priceRows()).toEqual(expected);
+    const faq = await t.db.query<{ answer: string }>(`select answer from public.faqs where question = 'Can I pause or stop the Partner Plan?'`);
+    expect(faq.rows[0]!.answer).toBe(FAQ_SEED.find((f) => f.question === 'Can I pause or stop the Partner Plan?')!.answer);
+    const seo = await t.db.query<{ short_description: string }>(`select short_description from public.services where slug = 'local-seo'`);
+    expect(seo.rows[0]!.short_description).toBe(SERVICE_SEED.find((s) => s.slug === 'local-seo')!.shortDescription);
   });
 
   it('still rejects unknown categories', async () => {

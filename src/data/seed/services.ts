@@ -964,16 +964,16 @@ export const SERVICE_SEED: ServiceSeed[] = [
     name: 'Social media management',
     category: 'social-media-management',
     industries: [HC],
-    shortDescription: 'Posts, reels, carousels and stories on Instagram, Facebook, YouTube, LinkedIn and X, shot at your hospital and approved by you on WhatsApp.',
-    features: ['12 posts, 4 reels, 5 carousels and 15 stories a month', 'One shoot a month at your hospital', 'Daily replies to comments and messages', 'Google review replies and a feedback QR', 'Camp, festival and health-awareness posts', 'Monthly report'],
+    shortDescription: 'Posts, reels, carousels and stories on Instagram, Facebook, YouTube, LinkedIn and X, shot at your hospital and approved by you on WhatsApp. Partner Plan, minimum 6 months.',
+    features: ['Basic, Professional or Premium, with a free website', 'Up to 12 posts, 4 reels, 5 carousels and 15 stories a month', 'Shoots at your hospital: monthly, or every 3 months on Basic', 'Daily replies to comments and messages', 'Google review replies and reports', 'Festival, health-day and camp campaigns'],
   },
   {
     slug: 'social-media-3-month-plan',
     name: '3-month social media and website plan',
     category: 'social-media-management',
     industries: [HC],
-    shortDescription: 'Your website plus three months of social media management, paid once before work starts.',
-    features: ['Static or premium website', 'Three months of posts, reels, carousels and stories', 'Three shoots at your hospital', 'Upgrade to the Partner Plan at any time'],
+    shortDescription: 'We set up your website and social media and run them for three months, then hand every login back to you. Paid once before work starts.',
+    features: ['Basic, Professional or Premium', 'Website live plus 3 months of content', 'All logins, files and admin access handed back at the end', 'Upgrade to the Partner Plan at any time'],
   },
   {
     slug: 'digital-presence-audit',
@@ -988,7 +988,7 @@ export const SERVICE_SEED: ServiceSeed[] = [
     name: 'Local SEO',
     category: 'social-media-management',
     industries: [HC],
-    shortDescription: 'Google Business Profile, local keywords, doctor and department pages, listings and real backlinks, so patients find you when they search nearby.',
+    shortDescription: 'Google Business Profile, local keywords, doctor and department pages, listings and real backlinks, so patients find you when they search nearby. Included in the Premium plan.',
     features: ['Google Business Profile management', 'On-page and technical SEO', 'Practo, Justdial and map listings', 'Backlinks from 25+ real sites', 'Monthly ranking report'],
   },
   {
@@ -997,7 +997,7 @@ export const SERVICE_SEED: ServiceSeed[] = [
     category: 'social-media-management',
     industries: [],
     shortDescription: 'Doctor-reviewed health articles on your website, shared on 25+ platforms and reused as carousels and reel scripts.',
-    features: ['4 articles a month', 'Author box with the doctor’s registration number', 'Shared on Medium, LinkedIn, Quora, Practo and more'],
+    features: ['2 articles a month on Professional, 4 on Premium', 'Author box with the doctor’s registration number', 'Shared on Medium, LinkedIn, Quora, Practo and more on Premium'],
   },
   {
     slug: 'social-media-add-ons',

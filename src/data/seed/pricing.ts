@@ -37,8 +37,10 @@ export const PRICING_GROUP_LABELS: Record<PricingGroup, { label: string; descrip
 const WEBSITE_EXCLUSIONS = ['Domain registration and renewal', 'Hosting fees', 'Paid stock images or fonts', 'GST'];
 const SYSTEM_EXCLUSIONS = ['Hosting and third-party fees', 'Hardware (printers, scanners, displays)', 'Data migration beyond the agreed scope', 'GST'];
 const AI_EXCLUSIONS = ['AI provider usage charges', 'Messaging provider charges', 'GST'];
-const SOCIAL_EXCLUSIONS = ['Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST'];
-const PARTNER_NOTE = '12 months, billed monthly in advance by the 5th, with the price locked for the term. Leaving before 12 months makes the waived website fee payable.';
+const SOCIAL_EXCLUSIONS = ['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST'];
+const PARTNER_NOTE =
+  'Minimum 6 months, then month to month with one month’s notice. Billed monthly in advance by the 5th, with the price locked for 12 months. The website is free; stopping before 6 months makes the website fee payable.';
+const THREE_MONTH_NOTE = 'Paid once before work starts, and fully refundable until work starts. After 3 months, every login, file and admin access is handed back to you.';
 
 export const PRICING_SEED: PricingSeed[] = [
   // Websites
@@ -325,53 +327,59 @@ export const PRICING_SEED: PricingSeed[] = [
     factors: ['Environment count', 'DNS', 'CI/CD', 'Server setup', 'Monitoring', 'Rollback requirements'],
   },
 
-  // Social media management: fixed plan prices from the owner's healthcare pitch deck (Oct 2026).
+  // Social media management: fixed plan prices from the owner's healthcare pitch deck (revised Nov 2026).
   // Labels are referenced by the plan table in src/data/social-media.ts.
   {
-    serviceSlug: 'healthcare-social-media-management', label: 'Starter Partner Plan', group: 'healthcare', model: 'fixed', min: '18999', max: '18999', interval: 'monthly',
-    note: `${PARTNER_NOTE} Website fee of ₹11,999 waived.`,
-    included: ['Static 5-page website, with hosting for year 1', '5 social profiles set up with a brand kit', '12 posts, 4 reels, 5 carousels and 15 stories a month', 'One shoot a month at your hospital', 'Camp, festival and awareness posts', 'Review replies and a feedback QR', 'Monthly report'],
+    serviceSlug: 'healthcare-social-media-management', label: 'Basic Partner Plan', group: 'healthcare', model: 'fixed', min: '6999', max: '6999', interval: 'monthly',
+    note: PARTNER_NOTE,
+    included: ['Free static website', 'Instagram, Facebook and Google', '8 posts, 2 reels and 8 stories a month', 'Festival and health-day posts', 'Review replies and a monthly report', 'One shoot at your hospital every 3 months'],
     excluded: SOCIAL_EXCLUSIONS,
   },
   {
-    serviceSlug: 'healthcare-social-media-management', label: 'Growth Partner Plan', group: 'healthcare', model: 'fixed', min: '23999', max: '23999', interval: 'monthly',
-    note: `${PARTNER_NOTE} Website fee of ₹19,999 waived.`,
-    included: ['Everything in Starter', 'Premium website with an admin panel and blog, with hosting for year 1', '4 doctor-reviewed blogs a month, shared on 25+ sites', 'Monthly report and a 30-minute review call'],
+    serviceSlug: 'healthcare-social-media-management', label: 'Professional Partner Plan', group: 'healthcare', model: 'fixed', min: '11999', max: '11999', interval: 'monthly',
+    note: PARTNER_NOTE,
+    included: ['Free website with an admin dashboard', 'All 5 platforms and Google', '12 posts, 4 reels, 5 carousels and 15 stories a month', 'A shoot at your hospital every month', 'Camp and awareness campaigns', 'Review replies, feedback QR and reputation report', '2 doctor-reviewed blogs a month', 'Monthly report and review call'],
     excluded: SOCIAL_EXCLUSIONS,
   },
   {
-    serviceSlug: 'healthcare-social-media-management', label: 'Pro Partner Plan, with Local SEO', group: 'healthcare', model: 'fixed', min: '43998', max: '43998', interval: 'monthly',
-    note: `${PARTNER_NOTE} Website fee of ₹19,999 waived.`,
-    included: ['Everything in Starter', 'Premium website with an admin panel, with hosting for year 1', 'Local SEO with backlinks from 25+ real sites', 'Monthly report with rankings'],
+    serviceSlug: 'healthcare-social-media-management', label: 'Premium Partner Plan, with Local SEO', group: 'healthcare', model: 'fixed', min: '17999', max: '17999', interval: 'monthly',
+    note: PARTNER_NOTE,
+    included: ['Everything in Professional', 'Free professional website', 'Local SEO with backlinks from 25+ real sites', 'Profile upkeep on 10+ platforms', '4 blogs a month, shared on 25+ sites', 'Monthly ranking report'],
     excluded: SOCIAL_EXCLUSIONS,
   },
   {
-    serviceSlug: 'social-media-3-month-plan', label: 'Starter 3-Month Plan', group: 'healthcare', model: 'fixed', min: '68996', max: '68996',
-    note: 'Static website ₹11,999 + 3 months × ₹18,999. Paid in full before work starts; fully refundable until work starts.',
-    included: ['Static 5-page website, with hosting for year 1', '5 social profiles set up with a brand kit', '12 posts, 4 reels, 5 carousels and 15 stories a month', 'One shoot a month at your hospital', 'Review replies and a monthly report'],
+    serviceSlug: 'social-media-3-month-plan', label: 'Basic 3-Month Plan', group: 'healthcare', model: 'fixed', min: '29999', max: '29999',
+    note: `Same services as the Basic Partner Plan. ${THREE_MONTH_NOTE}`,
+    included: ['Static website, live', 'Instagram, Facebook and Google set up', '8 posts and 2 reels a month', 'One shoot at your hospital', 'Review replies and reports'],
     excluded: SOCIAL_EXCLUSIONS,
   },
   {
-    serviceSlug: 'social-media-3-month-plan', label: 'Growth 3-Month Plan', group: 'healthcare', model: 'fixed', min: '91996', max: '91996',
-    note: 'Premium website ₹19,999 + 3 months × ₹23,999. Paid in full before work starts; fully refundable until work starts.',
-    included: ['Everything in Starter', 'Premium website with an admin panel and blog', '4 doctor-reviewed blogs a month, shared on 25+ sites', 'Monthly report and a review call'],
+    serviceSlug: 'social-media-3-month-plan', label: 'Professional 3-Month Plan', group: 'healthcare', model: 'fixed', min: '44999', max: '44999',
+    note: `Same services as the Professional Partner Plan. ${THREE_MONTH_NOTE}`,
+    included: ['Website with an admin dashboard, live', 'All 5 platforms and Google set up', '12 posts, 4 reels and 5 carousels a month', '3 shoots at your hospital', 'Camp campaigns and 2 blogs a month'],
+    excluded: SOCIAL_EXCLUSIONS,
+  },
+  {
+    serviceSlug: 'social-media-3-month-plan', label: 'Premium 3-Month Plan, with Local SEO', group: 'healthcare', model: 'fixed', min: '59999', max: '59999',
+    note: `Same services as the Premium Partner Plan. ${THREE_MONTH_NOTE}`,
+    included: ['Everything in Professional', 'Professional website, live', 'Local SEO setup with 25+ backlinks', 'Profiles on 10+ platforms', '4 blogs a month, shared on 25+ sites'],
     excluded: SOCIAL_EXCLUSIONS,
   },
   {
     serviceSlug: 'digital-presence-audit', label: 'Digital presence audit', group: 'healthcare', model: 'fixed', min: '999', max: '999',
     note: 'Adjusted against your first invoice if you join a plan within 7 days of receiving the audit.',
-    included: ['Social media profiles: activity, branding and bio', 'Website: mobile view, speed, contact and booking path', 'Google reviews: rating, replies and recent feedback', 'Google Business Profile: address, timings, photos and category', 'NMC compliance of existing posts', 'A 3-month plan with exact costing'],
+    included: ['Social media profiles: activity, branding and bio', 'Website: mobile view, speed, contact and booking path', 'Google reviews: rating, replies and recent feedback', 'Google Business Profile: address, timings, photos and category', 'NMC compliance of existing posts', 'A 90-day roadmap with exact costing'],
     excluded: ['GST'],
   },
   {
-    serviceSlug: 'local-seo', label: 'Local SEO', group: 'healthcare', model: 'fixed', min: '24999', max: '24999', interval: 'monthly',
-    note: 'Minimum 6 months, because SEO usually takes 4–12 months to show results. Available with the Partner Plan and included in Pro. No ranking is guaranteed.',
+    serviceSlug: 'local-seo', label: 'Local SEO, in the Premium Partner Plan', group: 'healthcare', model: 'fixed', min: '17999', max: '17999', interval: 'monthly',
+    note: 'Not sold on its own: Local SEO comes with the Premium plan, together with social media, blogs and a free website. SEO usually takes 4–12 months to show results, and no ranking is guaranteed.',
     included: ['Google Business Profile: categories, timings, photos and weekly posts', 'A reply to every Google review', 'Local keywords, titles, meta tags and schema', 'Doctor and department pages', 'Speed, sitemap, Search Console and broken-link fixes', 'Practo, Justdial and map listings', 'Backlinks from 25+ real sites, none bought', 'Monthly ranking report'],
     excluded: ['Ad spend', 'GST'],
   },
   {
     serviceSlug: 'health-blog-writing', label: 'Blog posting', group: 'healthcare', model: 'fixed', min: '6499', max: '6499', interval: 'monthly',
-    note: 'Included in the Growth plan; an add-on for Starter.',
+    note: 'Included in the Professional plan (2 a month) and the Premium plan (4 a month); an add-on for Basic.',
     included: ['4 doctor-reviewed articles a month', 'Published on your website', 'Shared on 25+ platforms such as Medium, LinkedIn, Quora and Practo', 'Author box with the doctor’s name, qualification and registration number', 'Each article reused as a carousel and a reel script'],
     excluded: ['GST'],
   },

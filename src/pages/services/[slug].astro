@@ -212,7 +212,9 @@ const nextSteps = content.nextSteps ?? ['Send a quote request with a rough descr
         <PriceList catalogue={catalogue} prices={prices} detailed />
         {
           content.retainer ? (
-            <p class="text-small mt-4 text-ink-muted">Open a price to see what it includes. Plan terms are listed above.</p>
+            <p class="text-small mt-4 text-ink-muted">
+              Standard rates. Your written proposal confirms the final fee after an initial consultation. Open a price to see what it includes; plan terms are listed above.
+            </p>
           ) : (
             <p class="text-small mt-4 text-ink-muted">
               Starting estimates, not final quotes. <a href="/payments" class="link-olive">How payments work</a>.
