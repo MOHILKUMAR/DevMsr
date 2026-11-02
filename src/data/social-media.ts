@@ -23,6 +23,8 @@ export interface RetainerDetails {
   monthly: {
     deliverables: { count: string; item: string }[];
     platforms: string[];
+    /** Which plans the deliverables above describe. */
+    note: string;
     steps: { title: string; detail: string }[];
     effort: string;
   };
@@ -51,6 +53,7 @@ export const SOCIAL_MEDIA_DETAILS: RetainerDetails = {
       { count: '1', item: 'shoot at your hospital' },
     ],
     platforms: ['Instagram', 'Facebook', 'YouTube', 'LinkedIn', 'X'],
+    note: 'Shown for the Professional and Premium plans. Basic covers Instagram, Facebook and Google with 8 posts, 2 reels and 8 stories a month, and a shoot every 3 months.',
     steps: [
       { title: 'Plan', detail: 'You approve the month’s calendar in week one.' },
       { title: 'Shoot', detail: 'About 2 hours at your hospital: your facility, team and health talks on camera.' },
@@ -64,7 +67,7 @@ export const SOCIAL_MEDIA_DETAILS: RetainerDetails = {
   coverage: [
     {
       title: 'Health camps and awareness',
-      detail: 'Content that brings people to your camps and answers seasonal questions, reviewed by your doctor and kept factual.',
+      detail: 'On the Professional and Premium plans: content that brings people to your camps and answers seasonal questions, reviewed by your doctor and kept factual.',
       points: [
         'Camp announcement poster, reel and Google post, plus a WhatsApp-ready version',
         'Screening camps (BP, sugar, thyroid, bone, eyes): what is checked and who should come',
@@ -78,8 +81,8 @@ export const SOCIAL_MEDIA_DETAILS: RetainerDetails = {
       points: [
         'Comments and messages answered every working day',
         'A reply to every Google review',
-        'A feedback QR and WhatsApp link at reception, for every patient, not only the happy ones',
-        'A monthly reputation report: rating trend, recurring complaints and what to fix at the front desk',
+        'A feedback QR and WhatsApp link at reception, for every patient, not only the happy ones (Professional and Premium)',
+        'A monthly reputation report: rating trend, recurring complaints and what to fix at the front desk (Professional and Premium)',
       ],
     },
     {
@@ -95,46 +98,49 @@ export const SOCIAL_MEDIA_DETAILS: RetainerDetails = {
       title: 'Blogs and doctor profiles',
       detail: 'Articles that answer patients’ questions, and profiles that show each doctor’s qualifications.',
       points: [
-        '4 doctor-reviewed articles a month on the Growth plan, shared on 25+ platforms',
+        'Doctor-reviewed articles every month: 2 on Professional, 4 on Premium',
+        'On Premium, articles are also shared on 25+ platforms such as Medium, LinkedIn, Quora and Practo',
         'Each article reused as a carousel and a reel script',
         'A profile per doctor: qualification, specialty, registration number and OPD timings',
-        'Google, Practo, Justdial and LinkedIn profiles kept accurate',
+        'Profile upkeep on 10+ platforms, including Google, Practo and Justdial, on Premium',
       ],
     },
   ],
   plans: {
     columns: [
-      { name: 'Starter', summary: 'For a first online presence' },
-      { name: 'Growth', summary: 'Website, social media and blogs', recommended: true },
-      { name: 'Pro', summary: 'Everything in Starter, with Local SEO' },
+      { name: 'Basic', summary: 'Instagram, Facebook and Google' },
+      { name: 'Professional', summary: 'All 5 platforms, campaigns and blogs', recommended: true },
+      { name: 'Premium', summary: 'Everything in Professional, with Local SEO' },
     ],
     features: [
-      { feature: 'Website, with hosting for year 1', values: ['Static, 5 pages', 'Premium, with admin panel', 'Premium, with admin panel'] },
-      { feature: '5 social profiles and a brand kit', values: ['Yes', 'Yes', 'Yes'] },
-      { feature: 'Posts, reels, carousels and stories', values: ['Yes', 'Yes', 'Yes'] },
-      { feature: 'Monthly shoot at your hospital', values: ['Yes', 'Yes', 'Yes'] },
-      { feature: 'Camp, festival and awareness posts', values: ['Yes', 'Yes', 'Yes'] },
-      { feature: 'Review replies and feedback QR', values: ['Yes', 'Yes', 'Yes'] },
-      { feature: 'Blogs a month', values: ['Add-on', '4, shared on 25+ sites', 'Part of Local SEO'] },
-      { feature: 'Local SEO and backlinks', values: ['Add-on', 'Add-on', 'Included'] },
-      { feature: 'Monthly report', values: ['Yes', 'Yes, with a review call', 'Yes, with rankings'] },
+      { feature: 'Platforms', values: ['Instagram, Facebook, Google', '5 platforms + Google', '5 platforms + Google'] },
+      { feature: 'Posts and reels a month', values: ['8 + 2', '12 + 4, plus 5 carousels', '12 + 4, plus 5 carousels'] },
+      { feature: 'Stories a month', values: ['8', '15', '15'] },
+      { feature: 'Shoot at your hospital', values: ['Every 3 months', 'Monthly', 'Monthly'] },
+      { feature: 'Festival and health-day posts', values: ['Yes', 'Yes', 'Yes'] },
+      { feature: 'Camp and awareness campaigns', values: ['Not included', 'Yes', 'Yes'] },
+      { feature: 'Reviews', values: ['Replies', 'Replies, QR, report', 'Replies, QR, report'] },
+      { feature: 'Blogs a month', values: ['Not included', '2', '4, on 25+ sites'] },
+      { feature: 'Website included', values: ['Static', 'Static + admin dashboard', 'Professional website'] },
+      { feature: 'Local SEO, backlinks, profile upkeep', values: ['Not included', 'Not included', 'Included'] },
+      { feature: 'Report', values: ['Monthly', 'Monthly + review call', 'Monthly + rankings'] },
     ],
     prices: [
       {
         label: '3-Month Plan, paid once',
         serviceSlug: THREE_MONTH,
-        cells: [{ priceLabel: 'Starter 3-Month Plan' }, { priceLabel: 'Growth 3-Month Plan' }, { text: 'Partner Plan only' }],
+        cells: [{ priceLabel: 'Basic 3-Month Plan' }, { priceLabel: 'Professional 3-Month Plan' }, { priceLabel: 'Premium 3-Month Plan, with Local SEO' }],
       },
       {
-        label: '12-month Partner Plan',
+        label: 'Partner Plan, monthly (6-month minimum)',
         serviceSlug: SOCIAL,
-        cells: [{ priceLabel: 'Starter Partner Plan' }, { priceLabel: 'Growth Partner Plan' }, { priceLabel: 'Pro Partner Plan, with Local SEO' }],
+        cells: [{ priceLabel: 'Basic Partner Plan' }, { priceLabel: 'Professional Partner Plan' }, { priceLabel: 'Premium Partner Plan, with Local SEO' }],
       },
     ],
     notes: [
-      'The 3-Month Plan covers your website and 3 months of service in one payment, and you can move to the Partner Plan at any time.',
-      'On the Partner Plan the website fee is waived, the price is locked for 12 months, and you get a free re-audit every quarter.',
-      'Pro runs only on the Partner Plan, because SEO usually takes 4–12 months to show results.',
+      'The 3-Month Plan gives the same services as the matching Partner plan, paid once. After 3 months, every login, file and admin access is handed back to you, and you can move to the Partner Plan at any time.',
+      'The Partner Plan runs for a minimum of 6 months, then month to month with one month’s notice. The website is free, the price is locked for 12 months, and you get a free re-audit every quarter.',
+      'Domain and hosting are bought and owned by you; we build the website and connect it.',
       'Every plan includes an NMC check on each post and approval on WhatsApp. GST at 18% is extra.',
       'Prices shown are standard rates. Your final fee is agreed after an initial consultation and may vary with the scope of your practice.',
     ],
@@ -155,7 +161,7 @@ export const SOCIAL_MEDIA_DETAILS: RetainerDetails = {
       'The main problems: inactive pages, few reviews, wrong timings, compliance risks',
       'What each gap costs you: missed searches, lost trust and NMC risk',
       'Free quick wins for this week',
-      'Your 3-month plan, with exact costing',
+      'Your 90-day roadmap, with exact costing',
     ],
     note: 'Join a plan within 7 days of receiving your audit and its fee is adjusted against your first invoice. Just want advice? A 30-minute consultation is free.',
   },
@@ -168,21 +174,22 @@ export const SOCIAL_MEDIA_DETAILS: RetainerDetails = {
     {
       month: 'Month 2',
       title: 'Consistency',
-      items: ['Regular posts, reels and carousels', 'Camp and seasonal campaigns', 'Feedback QR and review replies live', 'Daily replies to comments and messages', 'Blogs start on the Growth plan', 'Second shoot at your hospital'],
+      items: ['Regular posts, reels and carousels', 'Camp and seasonal campaigns', 'Feedback QR and review replies live', 'Daily replies to comments and messages', 'Blogs start (Professional and Premium)', 'Second shoot at your hospital'],
     },
     {
       month: 'Month 3',
       title: 'Momentum',
-      items: ['Content tuned from results', 'More doctor and department pages', 'Third shoot at your hospital', 'Re-audit: your score against day one', 'Quarterly results report', 'Plan for the next quarter'],
+      items: ['Content tuned from results', 'More doctor and department pages', 'Third shoot at your hospital', 'Re-audit: your score against day one', 'Quarterly results report', 'Handover, or plan the next quarter'],
     },
   ],
-  byDay90: 'By day 90: 36 posts, 12 reels, 15 carousels, 45 stories, 3 shoots and your website live. Growth adds 12 blogs; Pro adds Local SEO and a monthly ranking report.',
+  byDay90:
+    'By day 90 on the Professional plan: 36 posts, 12 reels, 15 carousels, 45 stories, 6 blogs, 3 shoots and your website live. Premium adds Local SEO, 12 blogs and a monthly ranking report.',
   promises: [
     { title: 'Real shoots at your hospital', detail: 'Your facility, team and health talks on camera, not stock photos or AI.' },
     { title: 'Scripted, edited reels', detail: 'Hooks, scripts, voice-over and editing on every reel.' },
     { title: 'You approve everything', detail: 'Nothing goes live until you say yes on WhatsApp.' },
-    { title: 'Monthly report', detail: 'Reach, followers, reviews and rankings, every month, with a 30-minute review call.' },
-    { title: 'One point of contact', detail: 'A dedicated account manager and a WhatsApp approval group.' },
+    { title: 'Monthly report', detail: 'Reach, followers and reviews every month, plus rankings on Premium.' },
+    { title: 'One point of contact', detail: 'A dedicated account manager, a WhatsApp approval group and, on Professional and Premium, a monthly 30-minute review call.' },
     { title: 'You own it all', detail: 'Domain, accounts, designs and footage stay yours, and are handed over if you leave.' },
   ],
   compliance: {
@@ -215,10 +222,13 @@ export const SOCIAL_MEDIA_DETAILS: RetainerDetails = {
     {
       title: 'Pause or stop',
       detail:
-        'Give one month’s written notice and pay for that month, during which services continue. Pause the Partner Plan for up to 2 months once a year. Stopping before 12 months makes the waived website fee payable.',
+        'The Partner Plan runs for a minimum of 6 months, then month to month. To pause (up to 2 months a year) or stop, give one month’s written notice and pay for that month. Stopping before 6 months makes the website fee payable.',
     },
     { title: 'Revisions', detail: 'One round of changes per post or reel is included. Extra rounds are ₹299 per post and ₹799 per reel.' },
-    { title: 'Shoots', detail: 'One shoot a month at your hospital, about 2 hours. Outstation travel is charged at cost; rescheduling with less than 24 hours’ notice costs ₹1,500.' },
+    {
+      title: 'Shoots',
+      detail: 'As per your plan (every 3 months on Basic, monthly on Professional and Premium), about 2 hours each. Outstation travel is charged at cost; please give 24 hours’ notice to reschedule.',
+    },
     { title: 'If we fall short', detail: 'If we miss agreed monthly deliverables through our own fault, we make them up the next month or credit their value against your next invoice.' },
   ],
   termsNote: 'Your signed proposal sets out your plan, price and deliverables. Our Terms & Conditions, Refund, Pause & Cancellation Policy and Credential Security Agreement come with it.',

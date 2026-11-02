@@ -28,8 +28,8 @@ describe('social media management page', () => {
 
   it('shows catalogue prices in the plan table', () => {
     const [threeMonth, partner] = plans.prices;
-    expect(threeMonth!.cells.map((cell) => planCellText(catalogue, threeMonth!.serviceSlug, cell))).toEqual(['₹68,996', '₹91,996', 'Partner Plan only']);
-    expect(partner!.cells.map((cell) => planCellText(catalogue, partner!.serviceSlug, cell))).toEqual(['₹18,999/month', '₹23,999/month', '₹43,998/month']);
+    expect(threeMonth!.cells.map((cell) => planCellText(catalogue, threeMonth!.serviceSlug, cell))).toEqual(['₹29,999', '₹44,999', '₹59,999']);
+    expect(partner!.cells.map((cell) => planCellText(catalogue, partner!.serviceSlug, cell))).toEqual(['₹6,999/month', '₹11,999/month', '₹17,999/month']);
     // A label renamed in the admin shows "Quote on request" rather than a stale price.
     expect(planCellText(catalogue, partner!.serviceSlug, { priceLabel: 'Renamed plan' })).toBe('Quote on request');
   });
@@ -37,7 +37,7 @@ describe('social media management page', () => {
   it('quotes the plan, not a ₹999 add-on, as the "from" price', () => {
     const content = getServiceCategoryContent('social-media-management')!;
     const lowest = lowestPrice(pricesForService(catalogue, content.fromPriceService!));
-    expect(formatFromPrice(lowest!)).toBe('From ₹18,999/month');
+    expect(formatFromPrice(lowest!)).toBe('From ₹6,999/month');
   });
 
   it('answers common questions on the page', () => {

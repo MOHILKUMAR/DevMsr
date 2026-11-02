@@ -325,7 +325,7 @@ export const FAQ_SEED: FaqSeed[] = [
   {
     scope: 'service_category', scopeKey: 'social-media-management',
     question: 'Which platforms do you manage?',
-    answer: 'Instagram, Facebook, YouTube, LinkedIn and X, in one consistent brand. We also keep your Google Business Profile and listings such as Practo and Justdial accurate.',
+    answer: 'On the Professional and Premium plans: Instagram, Facebook, YouTube, LinkedIn and X, plus your Google Business Profile, in one consistent brand. The Basic plan covers Instagram, Facebook and Google. Premium also keeps your profiles on 10+ platforms, such as Practo and Justdial, up to date.',
   },
   {
     scope: 'service_category', scopeKey: 'social-media-management',
@@ -350,7 +350,7 @@ export const FAQ_SEED: FaqSeed[] = [
   {
     scope: 'service_category', scopeKey: 'social-media-management',
     question: 'Can I pause or stop the Partner Plan?',
-    answer: 'Yes, with one month’s written notice, during which services continue and are billed as usual. You can pause for up to 2 months once a year; the 12-month term extends by the pause. If you leave before 12 months, the website fee we waived (₹11,999 Starter, ₹19,999 Growth and Pro) becomes payable. After 12 months the plan runs month to month.',
+    answer: 'Yes. The Partner Plan has a 6-month minimum and then runs month to month. To pause (up to 2 months once a year) or stop, give one month’s written notice; services continue during that month and it is billed as usual. If you stop before 6 months, the website fee becomes payable.',
   },
   {
     scope: 'service_category', scopeKey: 'social-media-management',

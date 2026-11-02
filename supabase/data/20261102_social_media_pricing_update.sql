@@ -1,0 +1,230 @@
+-- =====================================================================
+-- Social media management: revised plans and prices (deck revised Nov 2026)
+-- for the LIVE database. GENERATED from src/data/seed/*.ts.
+--
+-- Run the whole file (nothing selected) in the SQL Editor of the live project
+-- vcdlexpjdjhifvhdnjcm:
+--   https://supabase.com/dashboard/project/vcdlexpjdjhifvhdnjcm/sql/new
+-- Works before or after deploying the matching code (the category and its
+-- rows already exist). It removes the old Starter/Growth/Pro and standalone
+-- Local SEO prices, adds missing prices, and sets every social media price,
+-- service description and FAQ to the values in the code. Safe to run twice.
+-- Edits made in the admin to these rows are replaced.
+--
+-- The last statement lists the prices. Expect 18 rows, starting
+-- Basic Partner Plan 6999 monthly.
+-- =====================================================================
+
+begin;
+
+-- 1. Old plan prices
+delete from public.service_pricing p using public.services s
+where s.id = p.service_id and s.category = 'social-media-management'
+  and p.label in ('Starter Partner Plan', 'Growth Partner Plan', 'Pro Partner Plan, with Local SEO', 'Starter 3-Month Plan', 'Growth 3-Month Plan', 'Local SEO');
+
+-- 2. Prices: add missing rows, then set every row to the code values
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Basic Partner Plan', 'healthcare', 'fixed', 6999::numeric, 6999::numeric, false, 'monthly', 'Minimum 6 months, then month to month with one month’s notice. Billed monthly in advance by the 5th, with the price locked for 12 months. The website is free; stopping before 6 months makes the website fee payable.', array['Free static website', 'Instagram, Facebook and Google', '8 posts, 2 reels and 8 stories a month', 'Festival and health-day posts', 'Review replies and a monthly report', 'One shoot at your hospital every 3 months']::text[], array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], '{}'::text[], 440
+from public.services s
+where s.slug = 'healthcare-social-media-management'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Basic Partner Plan');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 6999::numeric, maximum_amount = 6999::numeric, max_open_ended = false, billing_interval = 'monthly', price_note = 'Minimum 6 months, then month to month with one month’s notice. Billed monthly in advance by the 5th, with the price locked for 12 months. The website is free; stopping before 6 months makes the website fee payable.', included_features = array['Free static website', 'Instagram, Facebook and Google', '8 posts, 2 reels and 8 stories a month', 'Festival and health-day posts', 'Review replies and a monthly report', 'One shoot at your hospital every 3 months']::text[], excluded_features = array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], price_factors = '{}'::text[], sort_order = 440, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'healthcare-social-media-management' and p.label = 'Basic Partner Plan';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Professional Partner Plan', 'healthcare', 'fixed', 11999::numeric, 11999::numeric, false, 'monthly', 'Minimum 6 months, then month to month with one month’s notice. Billed monthly in advance by the 5th, with the price locked for 12 months. The website is free; stopping before 6 months makes the website fee payable.', array['Free website with an admin dashboard', 'All 5 platforms and Google', '12 posts, 4 reels, 5 carousels and 15 stories a month', 'A shoot at your hospital every month', 'Camp and awareness campaigns', 'Review replies, feedback QR and reputation report', '2 doctor-reviewed blogs a month', 'Monthly report and review call']::text[], array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], '{}'::text[], 450
+from public.services s
+where s.slug = 'healthcare-social-media-management'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Professional Partner Plan');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 11999::numeric, maximum_amount = 11999::numeric, max_open_ended = false, billing_interval = 'monthly', price_note = 'Minimum 6 months, then month to month with one month’s notice. Billed monthly in advance by the 5th, with the price locked for 12 months. The website is free; stopping before 6 months makes the website fee payable.', included_features = array['Free website with an admin dashboard', 'All 5 platforms and Google', '12 posts, 4 reels, 5 carousels and 15 stories a month', 'A shoot at your hospital every month', 'Camp and awareness campaigns', 'Review replies, feedback QR and reputation report', '2 doctor-reviewed blogs a month', 'Monthly report and review call']::text[], excluded_features = array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], price_factors = '{}'::text[], sort_order = 450, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'healthcare-social-media-management' and p.label = 'Professional Partner Plan';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Premium Partner Plan, with Local SEO', 'healthcare', 'fixed', 17999::numeric, 17999::numeric, false, 'monthly', 'Minimum 6 months, then month to month with one month’s notice. Billed monthly in advance by the 5th, with the price locked for 12 months. The website is free; stopping before 6 months makes the website fee payable.', array['Everything in Professional', 'Free professional website', 'Local SEO with backlinks from 25+ real sites', 'Profile upkeep on 10+ platforms', '4 blogs a month, shared on 25+ sites', 'Monthly ranking report']::text[], array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], '{}'::text[], 460
+from public.services s
+where s.slug = 'healthcare-social-media-management'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Premium Partner Plan, with Local SEO');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 17999::numeric, maximum_amount = 17999::numeric, max_open_ended = false, billing_interval = 'monthly', price_note = 'Minimum 6 months, then month to month with one month’s notice. Billed monthly in advance by the 5th, with the price locked for 12 months. The website is free; stopping before 6 months makes the website fee payable.', included_features = array['Everything in Professional', 'Free professional website', 'Local SEO with backlinks from 25+ real sites', 'Profile upkeep on 10+ platforms', '4 blogs a month, shared on 25+ sites', 'Monthly ranking report']::text[], excluded_features = array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], price_factors = '{}'::text[], sort_order = 460, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'healthcare-social-media-management' and p.label = 'Premium Partner Plan, with Local SEO';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Basic 3-Month Plan', 'healthcare', 'fixed', 29999::numeric, 29999::numeric, false, 'one_time', 'Same services as the Basic Partner Plan. Paid once before work starts, and fully refundable until work starts. After 3 months, every login, file and admin access is handed back to you.', array['Static website, live', 'Instagram, Facebook and Google set up', '8 posts and 2 reels a month', 'One shoot at your hospital', 'Review replies and reports']::text[], array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], '{}'::text[], 470
+from public.services s
+where s.slug = 'social-media-3-month-plan'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Basic 3-Month Plan');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 29999::numeric, maximum_amount = 29999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = 'Same services as the Basic Partner Plan. Paid once before work starts, and fully refundable until work starts. After 3 months, every login, file and admin access is handed back to you.', included_features = array['Static website, live', 'Instagram, Facebook and Google set up', '8 posts and 2 reels a month', 'One shoot at your hospital', 'Review replies and reports']::text[], excluded_features = array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], price_factors = '{}'::text[], sort_order = 470, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-3-month-plan' and p.label = 'Basic 3-Month Plan';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Professional 3-Month Plan', 'healthcare', 'fixed', 44999::numeric, 44999::numeric, false, 'one_time', 'Same services as the Professional Partner Plan. Paid once before work starts, and fully refundable until work starts. After 3 months, every login, file and admin access is handed back to you.', array['Website with an admin dashboard, live', 'All 5 platforms and Google set up', '12 posts, 4 reels and 5 carousels a month', '3 shoots at your hospital', 'Camp campaigns and 2 blogs a month']::text[], array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], '{}'::text[], 480
+from public.services s
+where s.slug = 'social-media-3-month-plan'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Professional 3-Month Plan');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 44999::numeric, maximum_amount = 44999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = 'Same services as the Professional Partner Plan. Paid once before work starts, and fully refundable until work starts. After 3 months, every login, file and admin access is handed back to you.', included_features = array['Website with an admin dashboard, live', 'All 5 platforms and Google set up', '12 posts, 4 reels and 5 carousels a month', '3 shoots at your hospital', 'Camp campaigns and 2 blogs a month']::text[], excluded_features = array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], price_factors = '{}'::text[], sort_order = 480, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-3-month-plan' and p.label = 'Professional 3-Month Plan';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Premium 3-Month Plan, with Local SEO', 'healthcare', 'fixed', 59999::numeric, 59999::numeric, false, 'one_time', 'Same services as the Premium Partner Plan. Paid once before work starts, and fully refundable until work starts. After 3 months, every login, file and admin access is handed back to you.', array['Everything in Professional', 'Professional website, live', 'Local SEO setup with 25+ backlinks', 'Profiles on 10+ platforms', '4 blogs a month, shared on 25+ sites']::text[], array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], '{}'::text[], 490
+from public.services s
+where s.slug = 'social-media-3-month-plan'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Premium 3-Month Plan, with Local SEO');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 59999::numeric, maximum_amount = 59999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = 'Same services as the Premium Partner Plan. Paid once before work starts, and fully refundable until work starts. After 3 months, every login, file and admin access is handed back to you.', included_features = array['Everything in Professional', 'Professional website, live', 'Local SEO setup with 25+ backlinks', 'Profiles on 10+ platforms', '4 blogs a month, shared on 25+ sites']::text[], excluded_features = array['Domain and hosting, bought and owned by you', 'Ad spend, paid by you directly to the platforms', 'Influencer fees', 'Paid verification badges', 'Outstation travel for shoots, at cost', 'GST']::text[], price_factors = '{}'::text[], sort_order = 490, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-3-month-plan' and p.label = 'Premium 3-Month Plan, with Local SEO';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Digital presence audit', 'healthcare', 'fixed', 999::numeric, 999::numeric, false, 'one_time', 'Adjusted against your first invoice if you join a plan within 7 days of receiving the audit.', array['Social media profiles: activity, branding and bio', 'Website: mobile view, speed, contact and booking path', 'Google reviews: rating, replies and recent feedback', 'Google Business Profile: address, timings, photos and category', 'NMC compliance of existing posts', 'A 90-day roadmap with exact costing']::text[], array['GST']::text[], '{}'::text[], 500
+from public.services s
+where s.slug = 'digital-presence-audit'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Digital presence audit');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 999::numeric, maximum_amount = 999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = 'Adjusted against your first invoice if you join a plan within 7 days of receiving the audit.', included_features = array['Social media profiles: activity, branding and bio', 'Website: mobile view, speed, contact and booking path', 'Google reviews: rating, replies and recent feedback', 'Google Business Profile: address, timings, photos and category', 'NMC compliance of existing posts', 'A 90-day roadmap with exact costing']::text[], excluded_features = array['GST']::text[], price_factors = '{}'::text[], sort_order = 500, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'digital-presence-audit' and p.label = 'Digital presence audit';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Local SEO, in the Premium Partner Plan', 'healthcare', 'fixed', 17999::numeric, 17999::numeric, false, 'monthly', 'Not sold on its own: Local SEO comes with the Premium plan, together with social media, blogs and a free website. SEO usually takes 4–12 months to show results, and no ranking is guaranteed.', array['Google Business Profile: categories, timings, photos and weekly posts', 'A reply to every Google review', 'Local keywords, titles, meta tags and schema', 'Doctor and department pages', 'Speed, sitemap, Search Console and broken-link fixes', 'Practo, Justdial and map listings', 'Backlinks from 25+ real sites, none bought', 'Monthly ranking report']::text[], array['Ad spend', 'GST']::text[], '{}'::text[], 510
+from public.services s
+where s.slug = 'local-seo'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Local SEO, in the Premium Partner Plan');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 17999::numeric, maximum_amount = 17999::numeric, max_open_ended = false, billing_interval = 'monthly', price_note = 'Not sold on its own: Local SEO comes with the Premium plan, together with social media, blogs and a free website. SEO usually takes 4–12 months to show results, and no ranking is guaranteed.', included_features = array['Google Business Profile: categories, timings, photos and weekly posts', 'A reply to every Google review', 'Local keywords, titles, meta tags and schema', 'Doctor and department pages', 'Speed, sitemap, Search Console and broken-link fixes', 'Practo, Justdial and map listings', 'Backlinks from 25+ real sites, none bought', 'Monthly ranking report']::text[], excluded_features = array['Ad spend', 'GST']::text[], price_factors = '{}'::text[], sort_order = 510, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'local-seo' and p.label = 'Local SEO, in the Premium Partner Plan';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Blog posting', 'healthcare', 'fixed', 6499::numeric, 6499::numeric, false, 'monthly', 'Included in the Professional plan (2 a month) and the Premium plan (4 a month); an add-on for Basic.', array['4 doctor-reviewed articles a month', 'Published on your website', 'Shared on 25+ platforms such as Medium, LinkedIn, Quora and Practo', 'Author box with the doctor’s name, qualification and registration number', 'Each article reused as a carousel and a reel script']::text[], array['GST']::text[], '{}'::text[], 520
+from public.services s
+where s.slug = 'health-blog-writing'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Blog posting');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 6499::numeric, maximum_amount = 6499::numeric, max_open_ended = false, billing_interval = 'monthly', price_note = 'Included in the Professional plan (2 a month) and the Premium plan (4 a month); an add-on for Basic.', included_features = array['4 doctor-reviewed articles a month', 'Published on your website', 'Shared on 25+ platforms such as Medium, LinkedIn, Quora and Practo', 'Author box with the doctor’s name, qualification and registration number', 'Each article reused as a carousel and a reel script']::text[], excluded_features = array['GST']::text[], price_factors = '{}'::text[], sort_order = 520, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'health-blog-writing' and p.label = 'Blog posting';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Extra post', 'healthcare', 'fixed', 999::numeric, 999::numeric, false, 'one_time', null, '{}'::text[], array['GST']::text[], '{}'::text[], 530
+from public.services s
+where s.slug = 'social-media-add-ons'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Extra post');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 999::numeric, maximum_amount = 999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = null, included_features = '{}'::text[], excluded_features = array['GST']::text[], price_factors = '{}'::text[], sort_order = 530, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-add-ons' and p.label = 'Extra post';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Extra reel', 'healthcare', 'fixed', 3999::numeric, 3999::numeric, false, 'one_time', null, '{}'::text[], array['GST']::text[], '{}'::text[], 540
+from public.services s
+where s.slug = 'social-media-add-ons'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Extra reel');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 3999::numeric, maximum_amount = 3999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = null, included_features = '{}'::text[], excluded_features = array['GST']::text[], price_factors = '{}'::text[], sort_order = 540, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-add-ons' and p.label = 'Extra reel';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Extra half-day shoot', 'healthcare', 'fixed', 7999::numeric, 7999::numeric, false, 'one_time', null, '{}'::text[], array['Outstation travel, at cost', 'GST']::text[], '{}'::text[], 550
+from public.services s
+where s.slug = 'social-media-add-ons'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Extra half-day shoot');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 7999::numeric, maximum_amount = 7999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = null, included_features = '{}'::text[], excluded_features = array['Outstation travel, at cost', 'GST']::text[], price_factors = '{}'::text[], sort_order = 550, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-add-ons' and p.label = 'Extra half-day shoot';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Full-day shoot', 'healthcare', 'fixed', 13999::numeric, 13999::numeric, false, 'one_time', null, '{}'::text[], array['Outstation travel, at cost', 'GST']::text[], '{}'::text[], 560
+from public.services s
+where s.slug = 'social-media-add-ons'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Full-day shoot');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 13999::numeric, maximum_amount = 13999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = null, included_features = '{}'::text[], excluded_features = array['Outstation travel, at cost', 'GST']::text[], price_factors = '{}'::text[], sort_order = 560, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-add-ons' and p.label = 'Full-day shoot';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Profile reconstruction', 'healthcare', 'fixed', 1999::numeric, 1999::numeric, false, 'one_time', null, '{}'::text[], array['GST']::text[], '{}'::text[], 570
+from public.services s
+where s.slug = 'social-media-add-ons'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Profile reconstruction');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 1999::numeric, maximum_amount = 1999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = null, included_features = '{}'::text[], excluded_features = array['GST']::text[], price_factors = '{}'::text[], sort_order = 570, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-add-ons' and p.label = 'Profile reconstruction';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Extra website page', 'healthcare', 'fixed', 1999::numeric, 1999::numeric, false, 'one_time', null, '{}'::text[], array['GST']::text[], '{}'::text[], 580
+from public.services s
+where s.slug = 'social-media-add-ons'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Extra website page');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 1999::numeric, maximum_amount = 1999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = null, included_features = '{}'::text[], excluded_features = array['GST']::text[], price_factors = '{}'::text[], sort_order = 580, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-add-ons' and p.label = 'Extra website page';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Hindi + English website', 'healthcare', 'fixed', 5999::numeric, 5999::numeric, false, 'one_time', null, '{}'::text[], array['GST']::text[], '{}'::text[], 590
+from public.services s
+where s.slug = 'social-media-add-ons'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Hindi + English website');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 5999::numeric, maximum_amount = 5999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = null, included_features = '{}'::text[], excluded_features = array['GST']::text[], price_factors = '{}'::text[], sort_order = 590, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-add-ons' and p.label = 'Hindi + English website';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'M Kit token booking', 'healthcare', 'fixed', 4999::numeric, 4999::numeric, false, 'one_time', 'For the premium website.', '{}'::text[], array['GST']::text[], '{}'::text[], 600
+from public.services s
+where s.slug = 'social-media-add-ons'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'M Kit token booking');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 4999::numeric, maximum_amount = 4999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = 'For the premium website.', included_features = '{}'::text[], excluded_features = array['GST']::text[], price_factors = '{}'::text[], sort_order = 600, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-add-ons' and p.label = 'M Kit token booking';
+insert into public.service_pricing (service_id, label, display_group, pricing_model, minimum_amount, maximum_amount, max_open_ended, billing_interval, price_note, included_features, excluded_features, price_factors, sort_order)
+select s.id, 'Logo design', 'healthcare', 'fixed', 2999::numeric, 2999::numeric, false, 'one_time', null, '{}'::text[], array['GST']::text[], '{}'::text[], 610
+from public.services s
+where s.slug = 'social-media-add-ons'
+  and not exists (select 1 from public.service_pricing p where p.service_id = s.id and p.label = 'Logo design');
+update public.service_pricing p set display_group = 'healthcare', pricing_model = 'fixed', minimum_amount = 2999::numeric, maximum_amount = 2999::numeric, max_open_ended = false, billing_interval = 'one_time', price_note = null, included_features = '{}'::text[], excluded_features = array['GST']::text[], price_factors = '{}'::text[], sort_order = 610, is_active = true
+from public.services s
+where s.id = p.service_id and s.slug = 'social-media-add-ons' and p.label = 'Logo design';
+
+-- 3. Service descriptions
+update public.services set short_description = 'Posts, reels, carousels and stories on Instagram, Facebook, YouTube, LinkedIn and X, shot at your hospital and approved by you on WhatsApp. Partner Plan, minimum 6 months.', features = array['Basic, Professional or Premium, with a free website', 'Up to 12 posts, 4 reels, 5 carousels and 15 stories a month', 'Shoots at your hospital: monthly, or every 3 months on Basic', 'Daily replies to comments and messages', 'Google review replies and reports', 'Festival, health-day and camp campaigns']::text[] where slug = 'healthcare-social-media-management';
+update public.services set short_description = 'We set up your website and social media and run them for three months, then hand every login back to you. Paid once before work starts.', features = array['Basic, Professional or Premium', 'Website live plus 3 months of content', 'All logins, files and admin access handed back at the end', 'Upgrade to the Partner Plan at any time']::text[] where slug = 'social-media-3-month-plan';
+update public.services set short_description = 'A written audit of your social profiles, website, Google reviews, Google Business Profile and NMC compliance, with a costed 3-month plan.', features = array['A score out of 10 for each area', 'Screenshots of what patients see today', 'Main problems and why to fix them', 'Free quick wins for this week', 'A 3-month plan with exact costing']::text[] where slug = 'digital-presence-audit';
+update public.services set short_description = 'Google Business Profile, local keywords, doctor and department pages, listings and real backlinks, so patients find you when they search nearby. Included in the Premium plan.', features = array['Google Business Profile management', 'On-page and technical SEO', 'Practo, Justdial and map listings', 'Backlinks from 25+ real sites', 'Monthly ranking report']::text[] where slug = 'local-seo';
+update public.services set short_description = 'Doctor-reviewed health articles on your website, shared on 25+ platforms and reused as carousels and reel scripts.', features = array['2 articles a month on Professional, 4 on Premium', 'Author box with the doctor’s registration number', 'Shared on Medium, LinkedIn, Quora, Practo and more on Premium']::text[] where slug = 'health-blog-writing';
+update public.services set short_description = 'Extra posts, reels, shoots and website pages for a busy month such as a camp week or a festival, priced up front.', features = '{}'::text[] where slug = 'social-media-add-ons';
+
+-- 4. FAQs: add missing ones, then set every answer to the code values
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Which platforms do you manage?', 'On the Professional and Premium plans: Instagram, Facebook, YouTube, LinkedIn and X, plus your Google Business Profile, in one consistent brand. The Basic plan covers Instagram, Facebook and Google. Premium also keeps your profiles on 10+ platforms, such as Practo and Justdial, up to date.', 240
+where not exists (select 1 from public.faqs f where f.question = 'Which platforms do you manage?');
+update public.faqs set answer = 'On the Professional and Premium plans: Instagram, Facebook, YouTube, LinkedIn and X, plus your Google Business Profile, in one consistent brand. The Basic plan covers Instagram, Facebook and Google. Premium also keeps your profiles on 10+ platforms, such as Practo and Justdial, up to date.' where question = 'Which platforms do you manage?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Does anything get posted without my approval?', 'No. You approve the monthly calendar in week one and every post and reel on WhatsApp before it goes live. Please reply within 2 working days; a late approval moves the publishing date, not the invoice date. One round of changes per post or reel is included; extra rounds cost ₹299 per post and ₹799 per reel.', 250
+where not exists (select 1 from public.faqs f where f.question = 'Does anything get posted without my approval?');
+update public.faqs set answer = 'No. You approve the monthly calendar in week one and every post and reel on WhatsApp before it goes live. Please reply within 2 working days; a late approval moves the publishing date, not the invoice date. One round of changes per post or reel is included; extra rounds cost ₹299 per post and ₹799 per reel.' where question = 'Does anything get posted without my approval?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'How do you keep content within the NMC guidelines?', 'We check every post against the National Medical Commission’s Guidelines on Ethical Advertising and Public Communication before it reaches you. We do not publish patient testimonials, before-and-after photos, guaranteed outcomes, unverifiable “best” or “No. 1” claims, or bought reviews, and every post shows the doctor’s name, qualification and registration number. You stay professionally responsible for the medical accuracy of what you approve.', 260
+where not exists (select 1 from public.faqs f where f.question = 'How do you keep content within the NMC guidelines?');
+update public.faqs set answer = 'We check every post against the National Medical Commission’s Guidelines on Ethical Advertising and Public Communication before it reaches you. We do not publish patient testimonials, before-and-after photos, guaranteed outcomes, unverifiable “best” or “No. 1” claims, or bought reviews, and every post shows the doctor’s name, qualification and registration number. You stay professionally responsible for the medical accuracy of what you approve.' where question = 'How do you keep content within the NMC guidelines?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Do you need my passwords?', 'Usually not. Wherever a platform allows it, you add us as a partner, manager or editor and each team member logs in as themselves. If a password is unavoidable, it is shared through an encrypted password manager, never by WhatsApp or email; two-factor authentication stays on, and recovery details stay yours. Access is removed within 48 hours of the work ending.', 270
+where not exists (select 1 from public.faqs f where f.question = 'Do you need my passwords?');
+update public.faqs set answer = 'Usually not. Wherever a platform allows it, you add us as a partner, manager or editor and each team member logs in as themselves. If a password is unavoidable, it is shared through an encrypted password manager, never by WhatsApp or email; two-factor authentication stays on, and recovery details stay yours. Access is removed within 48 hours of the work ending.' where question = 'Do you need my passwords?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Who owns the accounts and the content?', 'You do: your accounts, pages, domain, website and data stay in your name. Once paid for, the designs, reels, photos and articles we make for you are yours, and we hand them over if you leave. We never lock or withhold an account, even in a fee dispute.', 280
+where not exists (select 1 from public.faqs f where f.question = 'Who owns the accounts and the content?');
+update public.faqs set answer = 'You do: your accounts, pages, domain, website and data stay in your name. Once paid for, the designs, reels, photos and articles we make for you are yours, and we hand them over if you leave. We never lock or withhold an account, even in a fee dispute.' where question = 'Who owns the accounts and the content?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Can I pause or stop the Partner Plan?', 'Yes. The Partner Plan has a 6-month minimum and then runs month to month. To pause (up to 2 months once a year) or stop, give one month’s written notice; services continue during that month and it is billed as usual. If you stop before 6 months, the website fee becomes payable.', 290
+where not exists (select 1 from public.faqs f where f.question = 'Can I pause or stop the Partner Plan?');
+update public.faqs set answer = 'Yes. The Partner Plan has a 6-month minimum and then runs month to month. To pause (up to 2 months once a year) or stop, give one month’s written notice; services continue during that month and it is billed as usual. If you stop before 6 months, the website fee becomes payable.' where question = 'Can I pause or stop the Partner Plan?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Are the listed social media prices final?', 'They are our standard rates, before 18% GST. Your final fee is agreed after an initial consultation and confirmed in a written proposal before any work starts. It may vary with the scope we agree, such as the number of doctors, departments or branches, how often we shoot, outstation travel and any add-ons.', 300
+where not exists (select 1 from public.faqs f where f.question = 'Are the listed social media prices final?');
+update public.faqs set answer = 'They are our standard rates, before 18% GST. Your final fee is agreed after an initial consultation and confirmed in a written proposal before any work starts. It may vary with the scope we agree, such as the number of doctors, departments or branches, how often we shoot, outstation travel and any add-ons.' where question = 'Are the listed social media prices final?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Is the 3-Month Plan refundable?', 'Fully, if you cancel in writing before work starts: that is, before the earliest of the kickoff call, the first audit fix, the start of website design, the first content calendar or the first shoot. Once work has started it is not refundable and it cannot be paused, because we reserve team time and shoots for the full 3 months.', 310
+where not exists (select 1 from public.faqs f where f.question = 'Is the 3-Month Plan refundable?');
+update public.faqs set answer = 'Fully, if you cancel in writing before work starts: that is, before the earliest of the kickoff call, the first audit fix, the start of website design, the first content calendar or the first shoot. Once work has started it is not refundable and it cannot be paused, because we reserve team time and shoots for the full 3 months.' where question = 'Is the 3-Month Plan refundable?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Do you guarantee followers, reach or rankings?', 'No. Results depend on the platforms, competition and other factors outside our control, and we never buy followers, likes or reviews. You get a monthly report on reach, followers, reviews and rankings, so you can see what is changing.', 320
+where not exists (select 1 from public.faqs f where f.question = 'Do you guarantee followers, reach or rankings?');
+update public.faqs set answer = 'No. Results depend on the platforms, competition and other factors outside our control, and we never buy followers, likes or reviews. You get a monthly report on reach, followers, reviews and rankings, so you can see what is changing.' where question = 'Do you guarantee followers, reach or rankings?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Is ad spend included?', 'No. If you run ads, you pay Meta, Google or the other platform directly, and we do not hold or refund ad budgets. Influencer fees and paid verification badges are also not included.', 330
+where not exists (select 1 from public.faqs f where f.question = 'Is ad spend included?');
+update public.faqs set answer = 'No. If you run ads, you pay Meta, Google or the other platform directly, and we do not hold or refund ad budgets. Influencer fees and paid verification badges are also not included.' where question = 'Is ad spend included?';
+insert into public.faqs (scope, industry_id, service_category, question, answer, sort_order)
+select 'service_category', null, 'social-media-management', 'Do you manage social media for businesses outside healthcare?', 'Our published plans are built for doctors, clinics and hospitals. For other businesses, send a quote request with your platforms and goals and we will scope it with you.', 340
+where not exists (select 1 from public.faqs f where f.question = 'Do you manage social media for businesses outside healthcare?');
+update public.faqs set answer = 'Our published plans are built for doctors, clinics and hospitals. For other businesses, send a quote request with your platforms and goals and we will scope it with you.' where question = 'Do you manage social media for businesses outside healthcare?';
+
+commit;
+
+select p.label, p.minimum_amount, p.billing_interval
+from public.service_pricing p join public.services s on s.id = p.service_id
+where s.category = 'social-media-management'
+order by p.sort_order;
